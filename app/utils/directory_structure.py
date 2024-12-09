@@ -43,5 +43,5 @@ def create_directory_structure(base_dir):
     print(f"Directory structure created at: {base_dir}")
 
 if __name__ == "__main__":
-    create_directory_structure("")
+    # create_directory_structure("")
 
