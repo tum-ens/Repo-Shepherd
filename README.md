@@ -92,8 +92,10 @@ IDP's architecture consists of several key components:
     Run the following command to start FastAPI:
 
     ```bash
-    python app.main.py
+    python -m app.main
     ```
+
+    > Note: this bash command correctly handles relative imports.
 
 6. **Access the Application:**  
     Once the application is running, you can access it through `http://127.0.0.1:8000/docs` for a locally running application.
