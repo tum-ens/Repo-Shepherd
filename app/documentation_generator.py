@@ -15,7 +15,7 @@ class DocumentationGenerator:
 
         # Generate README.md
         readme_content = self._generate_readme(response_data)
-        self._write_file('README.md', readme_content)
+        self._write_file('README-TEST.md', readme_content)
 
         # Generate other documentation files as needed
         other_docs = self._generate_other_docs(response_data)
@@ -26,13 +26,7 @@ class DocumentationGenerator:
         """
         Generates the content for README.md based on the parsed data.
         """
-        readme_content = f"# {data['project_name']}\n\n"
-        readme_content += f"{data['description']}\n\n"
-        readme_content += "## Installation\n\n"
-        readme_content += f"{data['installation']}\n\n"
-        readme_content += "## Usage\n\n"
-        readme_content += f"{data['usage']}\n\n"
-        return readme_content
+        return str(data['response'])
 
     def _generate_other_docs(self, data):
         """
@@ -49,12 +43,30 @@ class DocumentationGenerator:
         """
         Writes the content to a file in the output directory.
         """
+
+        def extract_data_from_quotes(data):
+            """
+            Extracts the data within the outermost double quotes, 
+            handling escaped quotes within the string.
+
+            Args:
+                data: The input string.
+
+            Returns:
+                The string without the outermost double quotes, or 
+                the original string if no outer quotes are found.
+            """
+            import re
+            match = re.match(r'^"(.*?)"$', data)
+            if match:
+                return match.group(1)
+            else:
+                return data
+        
+        extracted_data = extract_data_from_quotes(content) 
+
         file_path = os.path.join(self.output_dir, filename)
         with open(file_path, 'w', encoding='utf-8') as f:
-            f.write(content)
+            f.write(extracted_data) 
+        return f"Generated file: {file_path}"
 
-# Example usage
-llm_response = '{"project_name": "My Project", "description": "This is a sample project.", "installation": "pip install my_project", "usage": "import my_project", "other_docs": [{"filename": "CONTRIBUTING.md", "content": "Contribution guidelines."}]}'
-output_dir = './docs'
-generator = DocumentationGenerator(llm_response, output_dir)
-generator.generate_docs()

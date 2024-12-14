@@ -1,11 +1,11 @@
 from fastapi import FastAPI, BackgroundTasks
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
-from .utils.celery_tasks import initiate_documentation_task
+from .proj.tasks import initiate_documentation_task
 
 from .llm_handler import OllamaHandler
-from .documentation_generator import DocumentationGenerator
 from .repository_reader import RepositoryReader
+import json
 
 app = FastAPI()
 
@@ -26,11 +26,10 @@ async def analyze_repository(request: RepositoryRequest, background_tasks: Backg
 
     llm = OllamaHandler()
     llm_response = llm.analyze_code(code)
-
+    
     # Trigger documentation generation as a background task
-    #background_tasks.add_task(initiate_documentation_task, llm_response, repository_path)
-    #return JSONResponse({'message': 'Analysis initiated'}, status_code=202) 
-    return llm_response
+    background_tasks.add_task(initiate_documentation_task, json.dumps(llm_response), repository_path)
+    return JSONResponse({'message': 'Analysis initiated'}, status_code=202) 
 
 
 # Main entry point
