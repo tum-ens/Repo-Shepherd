@@ -108,21 +108,79 @@ IDP's architecture consists of several key components:
     }
     ```
 
-    This will read all the Python files, generate and return a README file.
+    This will read all the Python files, generate and return a JSON file that looks like this:
 
     ```
-    {
-    "model": "llama3.2",
-    "created_at": "2024-12-09T16:19:59.792798Z",
-    "response": "**Code Analysis and Documentation**\n=====================================\n\n### Overview\n\nThis Python code is designed to take two numbers as input from the user, perform basic arithmetic operations on them, and then display the results.\n\n### Code Structure\n\nThe code consists of four main sections:\n\n1.  **User Input**: The code uses the built-in `input()` function to prompt the user to enter two numbers.\n2.  **Arithmetic Operations**: The code performs addition, subtraction, multiplication, and division on the input numbers using the corresponding operators (`+`, `-`, `*`, `/`).\n3.  **Result Display**: The results of the arithmetic operations are displayed to the user using f-strings for formatting.\n\n### Code Quality and Best Practices\n\nThe code is concise and easy to read. However, there are a few areas that can be improved:\n\n*   **Error Handling**: The code does not handle cases where the user enters non-numeric input. Consider adding try-except blocks to handle such scenarios.\n*   **Input Validation**: The code assumes that the user will enter two numbers. Consider adding checks to ensure that the inputs are valid (e.g., non-negative numbers).\n*   **Code Organization**: The code can be organized into a function or class to make it more modular and reusable.\n\n### Code Refactoring\n\nHere's an example of how the code can be refactored to improve its structure, readability, and maintainability:\n\n```python\ndef get_number(prompt):\n    \"\"\"Get a number from the user.\"\"\"\n    while True:\n        try:\n            return float(input(prompt))\n        except ValueError:\n            print(\"Invalid input. Please enter a number.\")\n\ndef calculate(num1, num2):\n    \"\"\"Perform basic arithmetic operations on two numbers.\"\"\"\n    return {\n        \"Sum\": num1 + num2,\n        \"Difference\": num1 - num2,\n        \"Product\": num1 * num2,\n        \"Quotient\": num1 / num2 if num2 != 0 else float('inf')\n    }\n\ndef main():\n    \"\"\"Main function.\"\"\"\n    num1 = get_number(\"Enter first number: \")\n    num2 = get_number(\"Enter second number: \")\n\n    results = calculate(num1, num2)\n\n    for operation, result in results.items():\n        print(f\"{operation}: {result}\")\n\nif __name__ == \"__main__\":\n    main()\n```\n\n### Conclusion\n\nThe refactored code is more modular, readable, and maintainable. It includes input validation, error handling, and a clear separation of concerns. The `get_number()` function ensures that the user enters valid numbers, while the `calculate()` function performs the arithmetic operations. The `main()` function coordinates the entire process.",
-    "done": true,
-    "done_reason": "stop",
-    "context": [...],
-    "total_duration": 19452264209,
-    "load_duration": 817552834,
-    "prompt_eval_count": 118,
-    "prompt_eval_duration": 2381000000,
-    "eval_count": 551,
-    "eval_duration": 16250000000
-    }
+        {
+        "message": "Analysis initiated"
+        }
     ```
+
+    If you inspect the repository path, you will see a file called `README-TEST.md` file, with content similar to this:
+
+    ```markdown
+    **Code Analysis and Documentation**
+    =====================================
+
+    ### Overview
+
+    This Python code is designed to take two numbers as input from the user, perform basic arithmetic operations on them, and then display the results.
+
+    ### Code Structure
+
+    The code consists of four main sections:
+
+    1.  **User Input**: The code uses the built-in `input()` function to prompt the user to enter two numbers.
+    2.  **Arithmetic Operations**: The code performs addition, subtraction, multiplication, and division on the input numbers using the corresponding operators (`+`, `-`, `*`, `/`).
+    3.  **Result Display**: The results of the arithmetic operations are displayed to the user using f-strings for formatting.
+
+    ### Code Quality and Best Practices
+
+    The code is concise and easy to read. However, there are a few areas that can be improved:
+
+    *   **Error Handling**: The code does not handle cases where the user enters non-numeric input. Consider adding try-except blocks to handle such scenarios.
+    *   **Input Validation**: The code assumes that the user will enter two numbers. Consider adding checks to ensure that the inputs are valid (e.g., non-negative numbers).
+    *   **Code Organization**: The code can be organized into a function or class to make it more modular and reusable.
+
+    ### Code Refactoring
+
+    Here's an example of how the code can be refactored to improve its structure, readability, and maintainability:
+
+    ```python
+    def get_number(prompt):
+        """Get a number from the user."""
+        while True:
+            try:
+                return float(input(prompt))
+            except ValueError:
+                print("Invalid input. Please enter a number.")
+
+    def calculate(num1, num2):
+        """Perform basic arithmetic operations on two numbers."""
+        return {
+            "Sum": num1 + num2,
+            "Difference": num1 - num2,
+            "Product": num1 * num2,
+            "Quotient": num1 / num2 if num2 != 0 else float('inf')
+        }
+
+    def main():
+        """Main function."""
+        num1 = get_number("Enter first number: ")
+        num2 = get_number("Enter second number: ")
+
+        results = calculate(num1, num2)
+
+        for operation, result in results.items():
+            print(f"{operation}: {result}")
+
+    if __name__ == "__main__":
+        main()
+    ```
+
+   ### Conclusion
+
+    The refactored code is more modular, readable, and maintainable. It includes input validation, error handling, and a clear separation of concerns. The `get_number()` function ensures that the user enters valid numbers, while the `calculate()` function performs the arithmetic operations. The `main()` function coordinates the entire process.
+
+    ```
+
