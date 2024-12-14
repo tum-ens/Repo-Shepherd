@@ -28,7 +28,7 @@ class OllamaHandler(LLMHandler):
 
         response = requests.post(self.llm_url, json=payload)
         response.raise_for_status()
-
+        
         return response.json()
 
 
