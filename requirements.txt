@@ -4,3 +4,4 @@ requests==2.26.0
 celery[redis]
 ollama
 google-generativeai
+tk
