@@ -14,7 +14,8 @@ root.title("IDP")
 root.geometry("800x600")  # Adjust the window size
 # root.resizable(False, False) # Prevent the window from being resizable
 # Applying the theme
-sv_ttk.use_dark_theme()
+# sv_ttk.use_dark_theme()
+sv_ttk.use_light_theme()
 
 # Shared variable objects
 shared_vars = {

@@ -6,6 +6,7 @@ import threading
 import google.generativeai as genai
 import time
 import os
+import queue
 
 # Function to open URLs in the default browser
 def open_url(url):
@@ -59,7 +60,7 @@ def install_ollama_model(model, progress_var, progress_label, callback):
     threading.Thread(target=run_install).start()
 
 class ConfigTab(tk.Frame):
-    def __init__(self, parent, shared_vars):
+    def __init__(self, parent, shared_vars):        
         super().__init__(parent)
         self.shared_vars = shared_vars
         self.parent = parent
@@ -95,6 +96,10 @@ class ConfigTab(tk.Frame):
         self.local_frame.grid_remove()
 
         self.api_gemini_key = None
+        
+        # Initialize the queue and start the process_queue method
+        self.data_queue = queue.Queue()
+        self.after(100, self.process_queue)
     
     def switch_model(self):
         if self.model_type.get() == "API":
@@ -214,42 +219,49 @@ class ConfigTab(tk.Frame):
             self.api_key_validated = False
             messagebox.showerror("Error", "Gemini API Key is required.")
             return
-        
-        # Replace this with actual API key validation logic
+
         def validate_key():
-            # Simulating a delay for validation
-            self.check_button.config(state='disabled')
-            self.api_key_status.config(text="Checking...", foreground="blue")
-            self.update_idletasks()
+            self.data_queue.put(("status", "Checking...", "blue"))
+            self.data_queue.put(("button", "disabled"))
             
-            # Validate the API key
             try:
-                genai.configure(api_key=api_gemini_key)
-                model = genai.GenerativeModel("gemini-1.5-flash") 
-                response = model.generate_content("Hello, world!") 
-                print(response.text)
-                valid = True  # Connection successful
+                time.sleep(1)  # Simulate network delay
+                # Replace this with actual API key validation logic
+                valid = True  # Simulate successful validation
+                if valid:
+                    self.data_queue.put(("status", "✔️", "green"))
+                    self.data_queue.put(("shared_var", api_gemini_key))  # Add this line to update shared_vars in the main thread
+                    self.api_key_validated = True
+                    self.api_gemini_key = api_gemini_key
+                    print(f"API Key validated: {self.api_gemini_key}")
+                else:
+                    self.data_queue.put(("status", "✖️", "red"))
+                    self.api_key_validated = False
+                    self.data_queue.put(("error", "Invalid Gemini API Key."))  # Add this line to show error message in the main thread
             except Exception as e:
-                print(f"Error connecting to Gemini API: {e}")
-                if "API key not valid" not in str(e):
-                    messagebox.showerror("Error", f"An error occurred: {e}")
-                valid = False
-            
-            # Here you would implement actual validation, e.g., API call
-            time.sleep(1)  # Simulate network delay
-            if valid:
-                self.api_key_status.config(text="✔️", foreground="green")
-                self.api_key_validated = True
-                self.api_gemini_key = self.api_key_entry.get().strip()
-                self.shared_vars['api_gemini_key'].set(self.api_gemini_key)
-                print(f"API Key validated: {self.api_gemini_key}")
-            else:
-                self.api_key_status.config(text="✖️", foreground="red")
+                self.data_queue.put(("status", "✖️", "red"))
                 self.api_key_validated = False
-                messagebox.showerror("Error", "Invalid Gemini API Key.")
-            self.check_button.config(state='normal')
-        
+                self.data_queue.put(("error", f"An error occurred: {e}"))  # Add this line to show error message in the main thread
+            
+            self.data_queue.put(("button", "normal"))
+
         threading.Thread(target=validate_key).start()
+
+    def process_queue(self):
+        try:
+            while True:
+                task = self.data_queue.get_nowait()
+                if task[0] == "status":
+                    self.api_key_status.config(text=task[1], foreground=task[2])
+                elif task[0] == "button":
+                    self.check_button.config(state=task[1])
+                elif task[0] == "shared_var":
+                    self.shared_vars['api_gemini_key'].set(task[1])  # Add this line to update shared_vars in the main thread
+                elif task[0] == "error":
+                    messagebox.showerror("Error", task[1])  # Add this line to show error message in the main thread
+        except queue.Empty:
+            pass
+        self.after(100, self.process_queue)
     
     def save_api_config(self):
         if not self.api_key_validated:
