@@ -31,10 +31,11 @@ class DocumentationGenerator:
         Parses the LLM response and generates documentation files.
         """
         # Parse the LLM response (assuming it's in JSON format)
-        response_data = json.loads(self.llm_response)
-
+        response_data = self.llm_response
+        print("response_data")
+        print(response_data)
         # Generate README.md
-        readme_content = self._generate_readme(response_data)
+        readme_content = response_data['response']
         self._write_file('README-TEST.md', readme_content)
 
         # Generate other documentation files as needed

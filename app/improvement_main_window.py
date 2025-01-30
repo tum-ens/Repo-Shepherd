@@ -118,25 +118,3 @@ class ReadmeImprovement:
     
 if __name__ == "__main__":
     pass
-"""
-if __name__ == "__main__":
-    readme = ReadmeImprovement()
-    file_path = readme.load_original_readme()
-    sections = readme.split_sections(file_path)
-    empty_list, suggestion_dict, ready_dict = readme.check_section_existence(sections)
-
-    # TODO add file tree inside the prompt to help LLM understand the repo
-    # repo_path = toolkit.select_folder()
-    # tree = file_tree.generate_file_tree(root_path=repo_path, max_depth=4, show_files=False)
-
-    default_list = ['title&about', 'description', 'feature', 'requirement', 'installation', 'usage', 'contact', 'license']
-    title = readme.improve_part(default_list[0], ready_dict[default_list[0]])
-    description = readme.improve_part(default_list[1], ready_dict[default_list[1]])
-    feature = readme.improve_part(default_list[2], ready_dict[default_list[2]])
-    installation = readme.improve_part(default_list[4], ready_dict[default_list[4]])
-    contact = readme.improve_part(default_list[6], ready_dict[default_list[6]])
-    license = readme.improve_part(default_list[7], ready_dict[default_list[7]])
-    content = title + description + feature + installation + contact + license
-
-    toolkit.export_markdown(content)
-"""

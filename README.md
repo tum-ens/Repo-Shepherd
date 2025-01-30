@@ -88,7 +88,11 @@ IDP's architecture consists of several key components:
     * You need to install Ollama, follow the instructions in the [official website](https://github.com/ollama/ollama?tab=readme-ov-file#macos).
     * Run `ollama run llama3.2` to download `llama3.2` version.
 
+4.1 **Gemini:**
+    if you are using Gemini API, ensure you have an account and an API key before running the code.
+
 5. **Start the Application:**
+    * **Start the server**
     Run the following command to start FastAPI:
 
     ```bash
@@ -97,90 +101,118 @@ IDP's architecture consists of several key components:
 
     > Note: this bash command correctly handles relative imports.
 
-6. **Access the Application:**  
-    Once the application is running, you can access it through `http://127.0.0.1:8000/docs` for a locally running application.
-
-    Click on the `/analyze` endpoint and provide the folder with your code.
+    * **Start the GUI using TKinter**
+    Run the following command to start the GUI:
 
     ```bash
-    {
-    "repository_path": "/Users/carloslme/Documents/GitHub/calculator"
-    }
+    python3 app/gui/main.py 
     ```
 
-    This will read all the Python files, generate and return a JSON file that looks like this:
+6. **Access the application via GUI**
+    * Open the new window created by Tkinter, fill out the fields and click on the `Generate README` button.
+    * If everything is correct, you will see a message that says `README.md improvement script completed successfully.` in green color. Now you can go to the path you provided and check the `README.md` file created.
+    * You can reset the fields by clicking on the `Reset` button.
 
-    ```
+        <img src="docs/readme-generator.png" alt="Readme Generator" width="400">
+
+7. **Access the application via browser:**  
+    Once the application is running, you can access the REST API through `http://127.0.0.1:8000/docs` for a locally running application.
+
+    * Click on the `/analyze` endpoint and provide the folder with your code.
+
+        ```bash
         {
-        "message": "Analysis initiated"
+        "repository_path": "/Users/carloslme/Documents/GitHub/calculator"
         }
-    ```
+        ```
 
-    If you inspect the repository path, you will see a file called `README-TEST.md` file, with content similar to this:
+        This will read all the Python files, generate and return a JSON file that looks like this:
 
-    ```markdown
-    **Code Analysis and Documentation**
-    =====================================
+        ```
+            {
+            "message": "Analysis initiated"
+            }
+        ```
 
-    ### Overview
+        ```markdown
+        **Code Analysis and Documentation**
+        =====================================
 
-    This Python code is designed to take two numbers as input from the user, perform basic arithmetic operations on them, and then display the results.
+        ### Overview
 
-    ### Code Structure
+        This Python code is designed to take two numbers as input from the user, perform basic arithmetic operations on them, and then display the results.
 
-    The code consists of four main sections:
+        ### Code Structure
 
-    1.  **User Input**: The code uses the built-in `input()` function to prompt the user to enter two numbers.
-    2.  **Arithmetic Operations**: The code performs addition, subtraction, multiplication, and division on the input numbers using the corresponding operators (`+`, `-`, `*`, `/`).
-    3.  **Result Display**: The results of the arithmetic operations are displayed to the user using f-strings for formatting.
+        The code consists of four main sections:
 
-    ### Code Quality and Best Practices
+        1.  **User Input**: The code uses the built-in `input()` function to prompt the user to enter two numbers.
+        2.  **Arithmetic Operations**: The code performs addition, subtraction, multiplication, and division on the input numbers using the corresponding operators (`+`, `-`, `*`, `/`).
+        3.  **Result Display**: The results of the arithmetic operations are displayed to the user using f-strings for formatting.
 
-    The code is concise and easy to read. However, there are a few areas that can be improved:
+        ### Code Quality and Best Practices
 
-    *   **Error Handling**: The code does not handle cases where the user enters non-numeric input. Consider adding try-except blocks to handle such scenarios.
-    *   **Input Validation**: The code assumes that the user will enter two numbers. Consider adding checks to ensure that the inputs are valid (e.g., non-negative numbers).
-    *   **Code Organization**: The code can be organized into a function or class to make it more modular and reusable.
+        The code is concise and easy to read. However, there are a few areas that can be improved:
 
-    ### Code Refactoring
+        *   **Error Handling**: The code does not handle cases where the user enters non-numeric input. Consider adding try-except blocks to handle such scenarios.
+        *   **Input Validation**: The code assumes that the user will enter two numbers. Consider adding checks to ensure that the inputs are valid (e.g., non-negative numbers).
+        *   **Code Organization**: The code can be organized into a function or class to make it more modular and reusable.
 
-    Here's an example of how the code can be refactored to improve its structure, readability, and maintainability:
+        ### Code Refactoring
 
-    ```python
-    def get_number(prompt):
-        """Get a number from the user."""
-        while True:
-            try:
-                return float(input(prompt))
-            except ValueError:
-                print("Invalid input. Please enter a number.")
+        Here's an example of how the code can be refactored to improve its structure, readability, and maintainability:
 
-    def calculate(num1, num2):
-        """Perform basic arithmetic operations on two numbers."""
-        return {
-            "Sum": num1 + num2,
-            "Difference": num1 - num2,
-            "Product": num1 * num2,
-            "Quotient": num1 / num2 if num2 != 0 else float('inf')
+        ```python
+        def get_number(prompt):
+            """Get a number from the user."""
+            while True:
+                try:
+                    return float(input(prompt))
+                except ValueError:
+                    print("Invalid input. Please enter a number.")
+
+        def calculate(num1, num2):
+            """Perform basic arithmetic operations on two numbers."""
+            return {
+                "Sum": num1 + num2,
+                "Difference": num1 - num2,
+                "Product": num1 * num2,
+                "Quotient": num1 / num2 if num2 != 0 else float('inf')
+            }
+
+        def main():
+            """Main function."""
+            num1 = get_number("Enter first number: ")
+            num2 = get_number("Enter second number: ")
+
+            results = calculate(num1, num2)
+
+            for operation, result in results.items():
+                print(f"{operation}: {result}")
+
+        if __name__ == "__main__":
+            main()
+        ```
+
+    * The enpoint `generate-readme` will use Gemini to analyze the repository. Provide the following parameters as input:
+
+        ```bash
+        {
+            "repo_path": "path/to/your/file",
+            "api_key": "your_api_key",
+            "model_name": "gemini-1.5-flash"
         }
+        ```
 
-    def main():
-        """Main function."""
-        num1 = get_number("Enter first number: ")
-        num2 = get_number("Enter second number: ")
+        The output will look like this:
 
-        results = calculate(num1, num2)
-
-        for operation, result in results.items():
-            print(f"{operation}: {result}")
-
-    if __name__ == "__main__":
-        main()
-    ```
+        ```bash
+        {
+            "status": "success",
+            "message": "README.md improvement script completed successfully."
+        }
+        ```
 
    ### Conclusion
 
     The refactored code is more modular, readable, and maintainable. It includes input validation, error handling, and a clear separation of concerns. The `get_number()` function ensures that the user enters valid numbers, while the `calculate()` function performs the arithmetic operations. The `main()` function coordinates the entire process.
-
-    ```
-
