@@ -11,7 +11,7 @@ import json
 app = FastAPI()
 
 class RepositoryRequest(BaseModel):
-    repository_path: str
+    repo_path: str
 
 class MainInput(BaseModel):
     repo_path: str
@@ -36,7 +36,7 @@ async def analyze_repository(request: RepositoryRequest, background_tasks: Backg
     Endpoint to initiate the repository analysis workflow. 
     Expects a JSON payload with the README file in text format.
     """
-    repository_path = request.repository_path
+    repository_path = request.repo_path
 
     # Initiate the workflow 
     reader = RepositoryReader(repository_path)
@@ -46,8 +46,9 @@ async def analyze_repository(request: RepositoryRequest, background_tasks: Backg
     llm_response = llm.analyze_code(code)
     
     # Trigger documentation generation as a background task
-    background_tasks.add_task(initiate_documentation_task, json.dumps(llm_response), repository_path)
-    return JSONResponse({'message': 'Analysis initiated'}, status_code=202) 
+    background_tasks.add_task(initiate_documentation_task, llm_response, repository_path)
+    return JSONResponse({'message': 'Analysis finished. Check the new README file created.', 'status':'success'}, status_code=200) 
+    # return JSONResponse({'message': f'{llm_response}'}, status_code=202) 
 
 
 # Main entry point
