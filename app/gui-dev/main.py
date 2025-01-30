@@ -3,7 +3,7 @@ from tkinter import ttk
 from tkinter import Menu
 import sv_ttk
 from configuration import ConfigTab
-from readme_automatic import ReadmeTab
+from readme_automatic import ReadmeAutomaticTab
 from commit_analyzer import CommitAnalyzerTab
 
 def show_frame(frame):
@@ -33,7 +33,7 @@ notebook.grid(row=0, column=0, sticky='nsew')
 
 # Create frames for tabs
 frame_setup = ConfigTab(notebook, shared_vars)
-frame_readme = ReadmeTab(notebook, shared_vars)
+frame_readme = ReadmeAutomaticTab(notebook, shared_vars)
 frame_commit = CommitAnalyzerTab(notebook, shared_vars)
 
 # Add frames to Notebook

@@ -8,7 +8,7 @@ from app.improvement_main_window import ReadmeImprovement
 from utils import toolkit
 import sv_ttk
 
-class ReadmeTab(tk.Frame):
+class ReadmeAutomaticTab(tk.Frame):
     def __init__(self, master, shared_vars, *args, **kwargs):
         super().__init__(master)
         self.shared_vars = shared_vars
