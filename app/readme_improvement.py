@@ -19,20 +19,22 @@ class ReadmeImprovementTab(tk.Frame):
         
         # Centering the grid content
         self.grid_columnconfigure(0, weight=1)
-        self.grid_rowconfigure(3, weight=1)  # Allow content_frame to expand vertically
+        self.grid_rowconfigure(4, weight=1)  # Allow content_frame to expand vertically
         
-        title_label = ttk.Label(self, text="Select a function", font=("Arial", 16))
-        title_label.grid(row=0, column=0, pady=(20, 20))  
+        title_label = ttk.Label(self, text="This is the Readme Improvement Generator", font=("Arial", 16))
+        title_label.grid(row=0, column=0, pady=(20, 10))  # Reduced pady for title
+
+        description_label = ttk.Label(self, text="\n- Click on ReadMe Improvement button to edit the file section by section. \n- Click on ReadMe Creation button to create every section manually.", font=("Arial", 14))
+        description_label.grid(row=1, column=0, pady=(10, 10))  # Row 1, increased pady for description
 
         self.button1 = ttk.Button(self, text="ReadMe improvement", command=self.open_screen1)
-        self.button1.grid(row=1, column=0, pady=(10, 10))  
+        self.button1.grid(row=2, column=0, pady=(10, 10))
 
-        self.button2 = ttk.Button(self, text="ReadMe creation", command=self.open_screen2)
-        self.button2.grid(row=2, column=0, pady=(10, 10))  
+        self.button2 = ttk.Button(self, text="ReadMe Creation", command=self.open_screen2)
+        self.button2.grid(row=3, column=0, pady=(10, 10)) #changed to 3, to allow content frame to be row 4.
 
-        # Create a frame for the content
         self.content_frame = ttk.Frame(self)
-        self.content_frame.grid(row=3, column=0, sticky='nsew')
+        self.content_frame.grid(row=4, column=0, sticky='nsew') #changed to 4
         self.content_frame.grid_columnconfigure(0, weight=1)
         self.content_frame.grid_rowconfigure(0, weight=1)
 

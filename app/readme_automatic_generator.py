@@ -6,11 +6,11 @@ import yaml
 from utils import toolkit, file_tree
 import utils.llm_api as llm_api
 
-class ReadmeImprovement:
+class ReadmeAutomaticGenerator:
     def __init__(self):
         pass
 
-    @staticmethod
+    
     def load_original_readme(self):
         '''
         To improve readme, an original version of readme must be loaded.
@@ -24,7 +24,7 @@ class ReadmeImprovement:
             raise Exception("Not markdown file")
         return file_path
 
-    @staticmethod
+    
     def split_sections(self, file_path):
         '''
         Readme has a lot of sections. To improve section by section, we need to split it.
@@ -57,7 +57,7 @@ class ReadmeImprovement:
         '''
         pass
 
-    @staticmethod
+    
     def check_section_existence(self, sections):
         '''
         Split the sections into 3 different types: empty, suggestion, ready.
@@ -86,7 +86,7 @@ class ReadmeImprovement:
         empty_list = default_list
         return empty_list, suggestion_dict, ready_dict
 
-    @staticmethod
+    
     def improve_part(self, part_name, content):
         '''
         Improve the given section by gemini.
@@ -95,7 +95,7 @@ class ReadmeImprovement:
         btw, it seems that parameter can be improved. This will be done once UI is designed.
         :return: improved section
         '''
-        with open("prompts/improvements_prompt.yaml", 'r') as file:
+        with open("app/prompts/improvements_prompt.yaml", 'r') as file:
             prompts_repo = yaml.safe_load(file)
 
         meta_prompt = prompts_repo["meta-prompt"]
