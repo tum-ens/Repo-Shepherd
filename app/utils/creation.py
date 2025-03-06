@@ -37,16 +37,14 @@ def create_part(part_name, info):
 
     return result
 
-def create_feature(existed_feature, count):
+def create_feature(existed_feature):
     with open("app/prompts/creation_prompt.yaml", 'r') as file:
         prompts_repo = yaml.safe_load(file)
     features = [entry for entry in existed_feature if entry.strip()]
     meta_prompt = prompts_repo["meta-prompt"]
     feature_prompt = prompts_repo["feature"] + "List 1 feature. It should be different from:" + "\n\n"
     output_format = "You should only return feature and its description without any other sentences."
-    while (len(features) < count):
-        prompt = meta_prompt + feature_prompt + str(features) + "\n\n" + output_format
-        result = llm_api.together_api(prompt)
-        features.append(result)
-    print(features)
-    return features
+
+    prompt = meta_prompt + feature_prompt + str(features) + "\n\n" + output_format
+    result = llm_api.together_api(prompt)
+    return result

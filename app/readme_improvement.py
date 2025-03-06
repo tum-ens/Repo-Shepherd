@@ -174,12 +174,7 @@ class Improvement(tk.Frame):
         popup.grab_set()
 
     def export(self):
-        file_path = filedialog.asksaveasfilename(defaultextension=".md", filetypes=[("Markdown files", "*.md"), ("All files", "*.*")])
-        if file_path:
-            with open(file_path, "w", encoding="utf-8") as file:
-                ordered_text = ''.join(self.saved_text[key] for key in self.sections if key in self.saved_text)
-                file.write(ordered_text)
-            messagebox.showinfo("Success", f"File saved at: {file_path}")
+        ExportWindow(self, self.saved_text)
 
     def select_repo(self):
         repo = filedialog.askdirectory(title="Select Repository Folder")
@@ -231,13 +226,10 @@ class Creation(tk.Frame):
         self.saved_text = {}
         self.title_name = tk.StringVar()
         self.description = tk.StringVar()
-        self.softwares = tk.StringVar()
-        self.ide = tk.StringVar()
-        self.package_manager = tk.StringVar()
-        self.address = tk.StringVar()
+        self.requirement = []
+        self.installation = []
         self.usage = tk.StringVar()
-        self.email_or_website = tk.StringVar()
-        self.contact_name = tk.StringVar()
+        self.contact = []
         self.selected_license = tk.StringVar()
         self.features = []
         self.last_button_pressed = tk.StringVar(value="None")
@@ -279,14 +271,12 @@ class Creation(tk.Frame):
     def call_func(self, section):
         self.last_button_pressed.set(section)
         self.right_text.delete("1.0", tk.END)
-        if section == "feature":
-            self.feature()
-        elif section == "license":
+        if section == "license":
             self.license()
         elif section in ("title", "description", "usage"):
             self.text_format(section)
         else:
-            self.add_delete_format(section)
+            self.dynamic_entry_format(section)
         created_part = self.saved_text.get(section, "No text.")
         self.right_text.insert(tk.END, created_part)
 
@@ -300,70 +290,18 @@ class Creation(tk.Frame):
         info = {
             'title': self.title_name.get(),
             'description': self.description.get(),
-            'requirement': self.softwares.get(),
-            'installation': f"{self.ide.get()}, {self.package_manager.get()}, {self.address.get()}",
+            'feature': ", ".join(self.features),
+            'requirement': ", ".join(self.requirement),
+            'installation': ", ".join(self.installation),
             'usage': self.usage.get(),
-            'contact': f"{self.contact_name.get()}, {self.email_or_website.get()}",
+            'contact': ", ".join(self.contact),
             'license': self.selected_license.get()
         }.get(section)
         improved = create_part(section, info) if info else "No content provided."
         text.insert(tk.END, improved)
 
-    def feature(self):
-        popup = tk.Toplevel(self.parent, bg="#f5f6f5")
-        popup.geometry("600x600")
-        popup.title("Features")
-        def generate():
-            feature = create_feature(self.features, 4)
-            self.features = feature
-        for i in range(4):
-            ttk.Label(popup, text=f"Feature {i + 1}:", font=("Helvetica", 11)).grid(row=i, column=0, padx=10, pady=5)
-            feature_entry = tk.Text(popup, width=60, height=7, font=("Helvetica", 11), bg="#f8f9fa")
-            feature_entry.grid(row=i, column=1, padx=10, pady=5)
-            self.features.append(feature_entry.get("1.0", tk.END).strip())
-            if i < len(self.features):
-                feature_entry.insert("1.0", self.features[i])
-        ttk.Button(popup, text="Generate", command=generate, style="Section.TButton").grid(row=4, column=0, columnspan=2, pady=20)
-
-    def add_delete_format(self, section):
-        popup = tk.Toplevel(self.parent, bg="#f5f6f5")
-        popup.geometry("300x300")
-        popup.title(section.capitalize())
-        entries = {}
-        if section == "requirement":
-            tk.Label(popup, text="Softwares:", font=("Helvetica", 11), bg="#f5f6f5").pack(pady=5)
-            entries["softwares"] = ttk.Entry(popup, font=("Helvetica", 11))
-            entries["softwares"].pack(pady=5)
-            if self.softwares.get():
-                entries["softwares"].insert(0, self.softwares.get())
-        elif section == "installation":
-            for label, var in [("IDE:", self.ide), ("Package Manager:", self.package_manager), ("Git Address:", self.address)]:
-                tk.Label(popup, text=label, font=("Helvetica", 11), bg="#f5f6f5").pack(pady=5)
-                entry = ttk.Entry(popup, font=("Helvetica", 11))
-                entry.pack(pady=5)
-                if var.get():
-                    entry.insert(0, var.get())
-                entries[label.strip(":")] = entry
-        elif section == "contact":
-            for label, var in [("Name:", self.contact_name), ("Email or Website:", self.email_or_website)]:
-                tk.Label(popup, text=label, font=("Helvetica", 11), bg="#f5f6f5").pack(pady=5)
-                entry = ttk.Entry(popup, font=("Helvetica", 11))
-                entry.pack(pady=5)
-                if var.get():
-                    entry.insert(0, var.get())
-                entries[label.strip(":")] = entry
-        def save_info():
-            if section == "requirement":
-                self.softwares.set(entries["softwares"].get())
-            elif section == "installation":
-                self.ide.set(entries["IDE"].get())
-                self.package_manager.set(entries["Package Manager"].get())
-                self.address.set(entries["Git Address"].get())
-            elif section == "contact":
-                self.contact_name.set(entries["Name"].get())
-                self.email_or_website.set(entries["Email or Website"].get())
-            popup.destroy()
-        ttk.Button(popup, text="Save", command=save_info, style="Section.TButton").pack(pady=10)
+    def dynamic_entry_format(self, section):
+        DynamicEntryApp(self, section)
 
     def text_format(self, section):
         popup = tk.Toplevel(self.parent, bg="#f5f6f5")
@@ -394,12 +332,7 @@ class Creation(tk.Frame):
         ttk.Button(popup, text="Save", command=save_info, style="Section.TButton").pack(pady=10)
 
     def export(self):
-        file_path = filedialog.asksaveasfilename(defaultextension=".md", filetypes=[("Markdown files", "*.md"), ("All files", "*.*")])
-        if file_path:
-            with open(file_path, "w", encoding="utf-8") as file:
-                ordered_text = ''.join(self.saved_text.get(key, '') for key in self.sections)
-                file.write(ordered_text)
-            messagebox.showinfo("Success", f"File saved at: {file_path}")
+        ExportWindow(self, self.saved_text)
 
     def license(self):
         popup = tk.Toplevel(self.parent, bg="#f5f6f5")
@@ -412,6 +345,208 @@ class Creation(tk.Frame):
     def go_back(self):
         for widget in self.parent.winfo_children():
             widget.destroy()
+
+class ExportWindow:
+    def __init__(self, master, saved_text):
+        self.master = master
+        self.saved_text = saved_text
+        self.section_order = []
+        
+        self.window = tk.Toplevel(master)
+        self.window.title("Export Sections")
+        self.window.geometry("300x400")
+        
+        self.list_frame = tk.Frame(self.window)
+        self.list_frame.pack(fill=tk.BOTH, expand=True)
+        
+        self.button_frame = tk.Frame(self.window)
+        self.button_frame.pack(side=tk.BOTTOM, fill=tk.X)
+        
+        self.export_button = tk.Button(self.button_frame, text="Export", command=self.export)
+        self.export_button.pack(side=tk.RIGHT, padx=10, pady=10)
+
+        self.back_button = tk.Button(self.button_frame, text="Back", command=self.go_back)
+        self.back_button.pack(side=tk.LEFT, padx=10, pady=10)
+        
+        self.selected_keys = list(self.saved_text.keys())
+        self.buttons = []
+        self.create_draggable_buttons()
+        
+    def create_draggable_buttons(self):
+        for key in self.selected_keys:
+            btn = tk.Button(self.list_frame, text=key, relief=tk.RAISED)
+            btn.bind("<Button-1>", self.start_drag)
+            btn.bind("<B1-Motion>", self.on_drag)
+            self.buttons.append(btn)
+            btn.pack(fill=tk.X, pady=2)
+        
+    def start_drag(self, event):
+        widget = event.widget
+        self.drag_data = {'widget': widget, 'y': event.y_root}
+    
+    def on_drag(self, event):
+        widget = self.drag_data['widget']
+        index = self.buttons.index(widget)
+
+        delta = event.y_root - self.drag_data['y']
+        if (delta < 0):
+            new_index = index - (abs(delta) // 30)
+        else:
+            new_index = index + (delta // 30)
+
+        # check if index valid
+        new_index = max(0, min(new_index, len(self.buttons) - 1))
+        if new_index != index:
+            self.buttons.insert(new_index, self.buttons.pop(index))
+            self.refresh_buttons()
+            self.drag_data['y'] = event.y_root
+    
+    def refresh_buttons(self):
+        for btn in self.buttons:
+            btn.pack_forget()
+        for btn in self.buttons:
+            btn.pack(fill=tk.X, pady=2)
+
+    def go_back(self):
+        '''
+        Return to main page.
+        '''
+        self.window.destroy()
+        
+    def export(self):
+        '''
+        Export generated markdown.
+        '''
+        self.section_order.clear()
+        self.section_order.extend([btn.cget("text") for btn in self.buttons])
+        file_path = filedialog.asksaveasfilename(
+        defaultextension=".md",
+        filetypes=[("Markdown files", "*.md"), ("All files", "*.*")],
+        title="Save Markdown File"
+    )
+        if file_path:
+            with open(file_path, "w", encoding="utf-8") as file:
+                # The sections should be in order like original one.
+                ordered_text = ''.join(
+                    self.master.saved_text[key] for key in self.section_order if key in self.master.saved_text and self.master.saved_text[key]
+                    )
+                file.write(ordered_text)
+            messagebox.showinfo(f"File saved at: {file_path}")
+
+class DynamicEntryApp:
+    def __init__(self, master, section):
+        self.master = master
+
+        self.window = tk.Toplevel(master)
+
+        if (section == "requirement"):
+            self.window.title("Requirements")
+            tk.Label(self.window, text="Softwares:").pack(pady=5)
+        elif (section == "installation"):
+            tk.Label(self.window, text="IDE, Package manager, git address...").pack(pady=5)
+            self.window.title("Installation")
+        elif (section == "feature"):
+            tk.Label(self.window, text="Features:")
+            self.window.title("Feature")
+        else:
+            tk.Label(self.window, text="Name + Email address").pack(pady=5)
+            self.window.title("Contact")
+        
+        self.entries = []
+        
+        self.frame = tk.Frame(self.window)
+        self.frame.pack(padx=10, pady=10)
+        
+        if (section == "requirement"):
+            if (len(self.master.requirement) == 0):
+                self.add_entry("")
+            else:
+                for info in self.master.requirement:
+                    self.add_entry(info)
+        elif (section == "installation"):
+            if (len(self.master.installation) == 0):
+                self.add_entry("")
+            else:
+                for info in self.master.installation:
+                    self.add_entry(info)
+        elif (section == "feature"):
+            if (len(self.master.features) == 0):
+                self.add_feature("")
+            else:
+                for info in self.master.features:
+                    self.add_feature(info)            
+        else:
+            if (len(self.master.contact) == 0):
+                self.add_entry("")
+            else:
+                for info in self.master.contact:
+                    self.add_entry(info)
+        
+        btn_frame = tk.Frame(self.window)
+        btn_frame.pack(fill='x', pady=5)
+        
+        self.add_button = tk.Button(btn_frame, text="+", command=lambda: self.add_feature("") if section == "feature" else self.add_entry(""))
+        self.add_button.pack(side='left', padx=5, pady=5)
+        
+        self.save_button = tk.Button(btn_frame, text="Save", command=lambda: self.save_entries(section))
+        self.save_button.pack(side='right', padx=5, pady=5)
+
+    
+    def add_entry(self, info):
+        frame = tk.Frame(self.frame)
+        frame.pack(fill='x', pady=2)
+        
+        entry = tk.Entry(frame, width=40)
+        entry.pack(side='left', padx=5)
+        entry.insert(0, info)
+
+        del_button = tk.Button(frame, text="Delete", command=lambda: self.delete_entry(frame, entry))
+        del_button.pack(side='right', padx=5)
+        
+        self.entries.append((frame, entry))
+    
+    def add_feature(self, info):
+        frame = tk.Frame(self.frame)
+        frame.pack(fill='x', pady=2)
+
+        entry = tk.Text(frame, width=40, height=5, font=("Helvetica", 11), bg="#f8f9fa")
+        entry.grid(row=0, column=0, padx=10, pady=5, sticky="w")
+        entry.insert(tk.END, info)
+
+        btn_frame = tk.Frame(frame)
+        btn_frame.grid(row=0, column=1, padx=5, sticky="e")
+
+        gen_button = tk.Button(btn_frame, text="Generate", command=lambda: self.generate(entry))
+        gen_button.pack(side="top", fill="x", pady=2)
+        
+        del_button = tk.Button(btn_frame, text="Delete", command=lambda: self.delete_entry(frame, entry))
+        del_button.pack(side="top", fill="x", pady=2)
+        
+        self.entries.append((frame, entry))
+    
+    def delete_entry(self, frame, entry):
+        frame.destroy()
+        self.entries = [(f, e) for f, e in self.entries if e != entry]
+    
+    def generate(self, entry):
+        feature = create_feature(self.master.features)
+        entry.delete("1.0", tk.END)
+        entry.insert(tk.END, feature)
+        self.save_entries("feature")
+
+    def save_entries(self, section):
+        if (section == "requirement"):
+            self.master.requirement.clear()
+            self.master.requirement.extend([entry.get() for _, entry in self.entries])
+        elif (section == "installation"):
+            self.master.installation.clear()
+            self.master.installation.extend([entry.get() for _, entry in self.entries])
+        elif (section == "feature"):
+            self.master.features.clear()
+            self.master.features.extend([entry.get("1.0", tk.END) for _, entry in self.entries])
+        else:
+            self.master.contact.clear()
+            self.master.contact.extend([entry.get() for _, entry in self.entries])
 
 if __name__ == "__main__":
     root = tk.Tk()

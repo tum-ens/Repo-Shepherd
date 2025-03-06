@@ -19,7 +19,7 @@ feature: |
   List the main features of the project in bullet points, focusing on what makes it valuable. Highlight any advanced or standout capabilities.
 
 a_feature: |
-  Generate features.
+  Generate feature section based on given features or bullet points, don't add features not mentioned:
 
 requirement: |
   Clearly specify requirements, including the use of package managers or similar tools in the Installation section. 
