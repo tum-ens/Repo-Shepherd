@@ -1,4 +1,5 @@
 import google.generativeai as genai
+from together import Together
 import time
 
 def gemini_api(prompt: str) -> str:
@@ -17,3 +18,19 @@ def gemini_api(prompt: str) -> str:
     # Request per minute is 15, sleep for 5 seconds can avoid crash.
     time.sleep(5)
     return result
+
+def together_api(prompt: str) -> str:
+    from together import Together
+
+    client = Together(api_key="09198cedc0012a80b53ba6353de2571ff2aaf4523ef59ce9de0b61045bc0f3cd")
+
+    response = client.chat.completions.create(
+        model="meta-llama/Meta-Llama-3-8B-Instruct-Turbo",
+        messages=[{"role": "user", 
+                   "content": prompt}],
+    )
+    return response.choices[0].message.content
+
+if __name__ == "__main__":
+    prompt = "whats the capital of france?"
+    print (together_api(prompt))
