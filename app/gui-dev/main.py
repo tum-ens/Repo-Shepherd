@@ -1,3 +1,4 @@
+# app/gui-dev/main.py
 import tkinter as tk
 from tkinter import ttk
 from tkinter import Menu
@@ -6,6 +7,7 @@ from configuration import ConfigTab
 from readme_automatic import ReadmeAutomaticTab
 from readme_improvement import ReadmeImprovementTab
 from commit_analyzer import CommitAnalyzerTab
+from security_generator import SecurityGeneratorTab 
 import os
 import sys
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
@@ -40,12 +42,14 @@ frame_setup = ConfigTab(notebook, shared_vars)
 frame_automatic_readme = ReadmeAutomaticTab(notebook, shared_vars)
 frame_improvement_readme = ReadmeImprovementTab(notebook, shared_vars)
 frame_commit = CommitAnalyzerTab(notebook, shared_vars)
+frame_security_generator = SecurityGeneratorTab(notebook, shared_vars) 
 
 # Add frames to Notebook
 notebook.add(frame_setup, text='Setup')
 notebook.add(frame_automatic_readme, text='Readme Automatic')
 notebook.add(frame_improvement_readme, text='Readme Improvement')
 notebook.add(frame_commit, text='Commit Analyzer')
+notebook.add(frame_security_generator, text='Security Generator')
 
 # Function to adjust root size based on the current tab
 def adjust_root_size(event=None):
