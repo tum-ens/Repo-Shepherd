@@ -110,8 +110,8 @@ class Current_CM(tk.Frame):
         # buttons
         generate_btn = tk.Button(self.left_frame, text="Generate", command=self.generate_commit_message)
         commit_btn = tk.Button(self.left_frame, text="Commit", command=self.commit_changes)
-        generate_btn.pack(fill=tk.Y)
-        commit_btn.pack(fill=tk.Y)
+        generate_btn.pack(side="left", expand=True, fill="x", padx=5)
+        commit_btn.pack(side="right", expand=True, fill="x", padx=5)
 
         # Right frame for code diff display
         self.right_frame = tk.Frame(self)
@@ -131,7 +131,8 @@ class Current_CM(tk.Frame):
         self.update_diff_view()
 
     def update_diff_view(self):
-        """更新 diff 视图，拼接所有选中文件的 diff"""
+        # Update code diff once click files
+        # But if integrated, it displayed strangely, need to be fixed.
         selected_files = [file for file, var in self.file_vars.items() if var.get()]
 
         if not selected_files:
@@ -139,12 +140,11 @@ class Current_CM(tk.Frame):
         else:
             diff_content = self.get_git_diff(selected_files)
 
-        # 更新显示
         self.diff_text.config(state=tk.NORMAL)
         self.diff_text.delete(1.0, tk.END)
         self.diff_text.insert(tk.END, diff_content)
 
-        # 高亮标记添加和删除的行
+        # Highlight
         lines = diff_content.splitlines()
         for line_number, line in enumerate(lines, 1):
             if line.startswith('+'):
@@ -155,9 +155,9 @@ class Current_CM(tk.Frame):
         self.diff_text.config(state=tk.DISABLED)
 
     def get_git_diff(self, filenames):
-        """获取指定文件的 diff，支持多个文件"""
+        # get multiple files to list
         if isinstance(filenames, str):
-            filenames = [filenames]  # 转换为列表
+            filenames = [filenames] 
 
         result = []
         for filename in filenames:
@@ -168,7 +168,6 @@ class Current_CM(tk.Frame):
         return "\n".join(result) if result else "No changes found."
 
     def get_git_modified_files(self):
-        """获取被修改的文件列表"""
         result = subprocess.run(["git", "diff", "--name-only"], capture_output=True, text=True, encoding="utf-8")
         return result.stdout.strip().split("\n") if result.stdout else []
 
@@ -265,7 +264,7 @@ class Old_CM(tk.Frame):
         self.commit_list_frame.bind("<Configure>", self.on_frame_configure)
 
         # TODO
-        push_button = tk.Button(self.right_frame, text="Push", command=self.push_commits, bg="black", fg="white")
+        push_button = tk.Button(self.right_frame, text="Push", command=self.push_commits)
         push_button.pack(side=tk.BOTTOM, pady=10)
 
     def on_frame_configure(self, event=None):
@@ -284,6 +283,8 @@ class Old_CM(tk.Frame):
 
         option = self.selected_option.get()
         all_commits = list(git_repo.iter_commits(self.branch.get()))
+        # A bug may exists here, when executing this file, everything fine, but when integrate together (which means run main.py), it says:
+        # UnboundLocalError: local variable 'commit' referenced before assignment
         if (option == 1):
             commits = all_commits[:5]
         elif (option == 2):
@@ -399,6 +400,8 @@ class Old_CM(tk.Frame):
 
         def save():
             option = self.selected_option.get()
+            # A bug may exists here, when executing this file, everything fine, but when integrate together (which means run main.py), it says:
+            # UnboundLocalError: local variable 'selection' referenced before assignment
             if (option == 1):
                 selection = "Latest " + self.number.get()
             elif (option == 2):
