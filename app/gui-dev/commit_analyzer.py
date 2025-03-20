@@ -2,7 +2,8 @@ import os
 import sys
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 import tkinter as tk
-from tkinter import scrolledtext, ttk, filedialog, messagebox, BooleanVar, Checkbutton, simpledialog
+from tkinter import scrolledtext, ttk, filedialog, messagebox, BooleanVar, Checkbutton
+from utils.commit_message import generate_CM, improve_CM
 import sv_ttk
 import subprocess
 import git
@@ -20,16 +21,16 @@ class CommitAnalyzerTab(tk.Frame):
         self.grid_columnconfigure(0, weight=1)
         self.grid_rowconfigure(4, weight=1)  # Allow content_frame to expand vertically
         
-        title_label = ttk.Label(self, text="This is the commit message generator", font=("Arial", 16))
+        title_label = ttk.Label(self, text="Commit message generator", font=("Arial", 16))
         title_label.grid(row=0, column=0, pady=(20, 10))  # Reduced pady for title
 
-        description_label = ttk.Label(self, text="\n- Click on 'Current' button to edit the current commit. \n- Click on 'Old' button to old commits.", font=("Arial", 14))
+        description_label = ttk.Label(self, text="\n- Click on the \"Current\" button to edit the commit message for the current commit. \n- Click on the \"History\" button to view and edit past commit messages.", font=("Arial", 14))
         description_label.grid(row=1, column=0, pady=(10, 10))  # Row 1, increased pady for description
 
         self.button1 = ttk.Button(self, text="Current", command=self.open_screen1)
         self.button1.grid(row=2, column=0, pady=(10, 10))
 
-        self.button2 = ttk.Button(self, text="Old", command=self.open_screen2)
+        self.button2 = ttk.Button(self, text="History", command=self.open_screen2)
         self.button2.grid(row=3, column=0, pady=(10, 10)) #changed to 3, to allow content frame to be row 4.
 
         self.content_frame = ttk.Frame(self)
@@ -58,7 +59,7 @@ class CommitAnalyzerTab(tk.Frame):
             self.adjust_root_size()
 
     def open_screen2(self):
-        self.update_content(Old_CM)
+        self.update_content(History_CM)
         self.adjust_root_size()
 
     def update_content(self, content_class):
@@ -67,7 +68,7 @@ class CommitAnalyzerTab(tk.Frame):
         if content_class == Current_CM:
             Current_CM(self.content_frame, self.repo)
         else:
-            Old_CM(self.content_frame)
+            History_CM(self.content_frame)
 
 class Current_CM(tk.Frame):
     def __init__(self, parent, repo):
@@ -95,23 +96,23 @@ class Current_CM(tk.Frame):
         self.modified_files = self.get_git_modified_files()
         self.file_vars = {}
 
-        # Listen to the change of file selection
-        self.selected_file = tk.StringVar(value="")
-
         for file in self.modified_files:
-            var = BooleanVar(value=True)
+            var = BooleanVar(parent)
+            var.set(True)
             self.file_vars[file] = var
             Checkbutton(self.left_frame, text=file, variable=var, command=self.update_diff_view).pack(anchor="w")
 
         # Commit message entry
-        self.commit_text = scrolledtext.ScrolledText(self.left_frame, width=30, height=10)
+        self.commit_text = scrolledtext.ScrolledText(self.left_frame, width=50, height=10)
         self.commit_text.pack(pady=10)
 
         # buttons
         generate_btn = tk.Button(self.left_frame, text="Generate", command=self.generate_commit_message)
         commit_btn = tk.Button(self.left_frame, text="Commit", command=self.commit_changes)
+        push_btn = tk.Button(self.left_frame, text="Push", command=self.push_changes)
         generate_btn.pack(side="left", expand=True, fill="x", padx=5)
-        commit_btn.pack(side="right", expand=True, fill="x", padx=5)
+        commit_btn.pack(side="left", expand=True, fill="x", padx=5)
+        push_btn.pack(side="left", expand=True, fill="x", padx=5)
 
         # Right frame for code diff display
         self.right_frame = tk.Frame(self)
@@ -160,19 +161,51 @@ class Current_CM(tk.Frame):
             filenames = [filenames] 
 
         result = []
+
         for filename in filenames:
-            diff = subprocess.run(["git", "diff", filename], capture_output=True, text=True, encoding="utf-8").stdout
-            if diff:
-                result.append(f"### Diff for {filename} ###\n{diff}")
-        
+             # Get unstaged changes (modified)
+            diff = subprocess.run(["git", "diff", filename], capture_output=True, text=True, encoding="utf-8", cwd=self.repo).stdout
+            
+            # Get staged changes (including newly added)
+            staged_diff = subprocess.run(["git", "diff", "--cached", filename], capture_output=True, text=True, encoding="utf-8", cwd=self.repo).stdout
+            
+            # Get untracked files (new files that haven't been added)
+            untracked_files = subprocess.run(["git", "ls-files", "--others", "--exclude-standard"], capture_output=True, text=True, encoding="utf-8", cwd=self.repo).stdout.splitlines()
+
+            # If the file is untracked, show its content before adding
+            if filename in untracked_files:
+                try:
+                    with open(filename, "r", encoding="utf-8") as file:
+                        new_file_content = file.read()
+                    result.append(f"### New file (Untracked) - {filename} ###\n{new_file_content}\n")
+                except FileNotFoundError:
+                    result.append(f"Error: File {filename} not found.")
+
+            # If there are any modifications or staged changes, append those as well
+            if diff or staged_diff:
+                result.append(f"### Diff for {filename} ###")
+                if diff:
+                    result.append(f"Modified:\n{diff}")
+                if staged_diff:
+                    result.append(f"Newly Added or Staged:\n{staged_diff}")
+
         return "\n".join(result) if result else "No changes found."
 
     def get_git_modified_files(self):
-        result = subprocess.run(["git", "diff", "--name-only"], capture_output=True, text=True, encoding="utf-8")
-        return result.stdout.strip().split("\n") if result.stdout else []
+        result = subprocess.run(["git", "status", "--short"], capture_output=True, text=True, encoding="utf-8", cwd=self.repo)
+        files = result.stdout.splitlines() if result.stdout else []
+
+        # Extract the file names (remove the first two characters e.g. 'M app/gui-dev/readme_automatic.py', '?? app/prompts/commit_message.yaml')
+        file_names = [file[3:] for file in files]
+
+        # Print the cleaned-up file names
+        return file_names
 
     def generate_commit_message(self):
-        self.commit_text.insert(tk.END, "Auto-generated commit message\n")
+        self.commit_text.delete("1.0", "end")
+        content = self.diff_text.get("1.0", tk.END)
+        commit_message = generate_CM(content)
+        self.commit_text.insert(tk.END, commit_message)
 
     def commit_changes(self):
         commit_msg = self.commit_text.get("1.0", tk.END).strip()
@@ -184,13 +217,16 @@ class Current_CM(tk.Frame):
             print("No files selected for commit!")
             return
         try:
-            subprocess.run(["git", "add"] + selected_files, check=True)
-            subprocess.run(["git", "commit", "-m", commit_msg], check=True)
+            subprocess.run(["git", "add"] + selected_files, check=True, cwd=self.repo)
+            subprocess.run(["git", "commit", "-m", commit_msg], check=True, cwd=self.repo)
             print("Changes committed successfully.")
         except subprocess.CalledProcessError as e:
             print(f"Git commit failed: {e}")
 
-class Old_CM(tk.Frame):
+    def push_changes(self):
+            subprocess.run(['git', 'push'], cwd=self.repo)
+
+class History_CM(tk.Frame):
     def __init__(self, parent):
         super().__init__(parent)
         self.parent = parent
@@ -200,10 +236,11 @@ class Old_CM(tk.Frame):
         self.grid_rowconfigure(0, weight=1)
         self.repo = tk.StringVar()
         self.branch = tk.StringVar()
-        self.selected_option = tk.IntVar(value=0)
-        self.number = tk.StringVar()
+        # I don't know why, but it seems that if variables are not correctly updated, put parent frame as an initial value will solve the problem :(
+        self.selected_option = tk.IntVar(parent)
+        self.number = tk.StringVar(parent)
 
-        self.label = ttk.Label(self, text="Old Commit", font=("Helvetica", 16, "bold"), foreground="#333333")
+        self.label = ttk.Label(self, text="History Commit", font=("Helvetica", 16, "bold"), foreground="#333333")
         self.label.grid(row=0, column=1, pady=10)
 
         style = ttk.Style()
@@ -236,7 +273,8 @@ class Old_CM(tk.Frame):
         button_frame.pack(pady=20)
 
         tk.Button(button_frame, text="Fetch", command=self.fetch_commits).pack(side=tk.LEFT, padx=5)
-        tk.Button(button_frame, text="Refine", command=self.refine_commits).pack(side=tk.LEFT, padx=5)
+        tk.Button(button_frame, text="Refine All", command=self.refine_all_commits).pack(side=tk.LEFT, padx=5)
+        tk.Button(button_frame, text="Push All", command=self.push_all_commits).pack(side=tk.LEFT, padx=5)
 
         # right frame for selected commits
         self.right_frame = tk.Frame(self)
@@ -252,6 +290,8 @@ class Old_CM(tk.Frame):
 
         # Create a frame to put inside the canvas
         self.commit_list_frame = tk.Frame(self.canvas)
+        self.commit_list = []
+        self.improved_commit_list = []
 
         # Create a window inside the canvas to hold the commit_list_frame
         self.canvas.create_window((0, 0), window=self.commit_list_frame, anchor="nw")
@@ -262,10 +302,6 @@ class Old_CM(tk.Frame):
 
         # Update the scrollable region of the canvas
         self.commit_list_frame.bind("<Configure>", self.on_frame_configure)
-
-        # TODO
-        push_button = tk.Button(self.right_frame, text="Push", command=self.push_commits)
-        push_button.pack(side=tk.BOTTOM, pady=10)
 
     def on_frame_configure(self, event=None):
         # Update scroll region when the frame is resized
@@ -283,18 +319,17 @@ class Old_CM(tk.Frame):
 
         option = self.selected_option.get()
         all_commits = list(git_repo.iter_commits(self.branch.get()))
-        # A bug may exists here, when executing this file, everything fine, but when integrate together (which means run main.py), it says:
-        # UnboundLocalError: local variable 'commit' referenced before assignment
+        self.commit_list.clear()
         if (option == 1):
-            commits = all_commits[:5]
+            self.commit_list.extend(all_commits[:int(self.number.get())])
         elif (option == 2):
-            commits = all_commits[-5:]
+            self.commit_list.extend(all_commits[-int(self.number.get()):])
         elif (option == 3):
-            commits = all_commits
+            self.commit_list.extend(all_commits)
         else:
             tk.messagebox.showwarning("Warning", "Invalid commit selection")
-        
-        for commit in commits:
+
+        for commit in self.commit_list:
             commit_button = tk.Button(
                 self.commit_list_frame, 
                 text=f"{commit.hexsha[:7]} - {commit.message.splitlines()[0]}",
@@ -304,10 +339,10 @@ class Old_CM(tk.Frame):
             )
             commit_button.pack(fill="x", padx=5, pady=2)
 
-    def refine_commits(self):
+    def refine_all_commits(self):
         pass
 
-    def push_commits(self):
+    def push_all_commits(self):
         pass
 
     def select_repo(self):
@@ -339,15 +374,16 @@ class Old_CM(tk.Frame):
         branch_window = tk.Toplevel(self)
         branch_window.title("Select Branch")
         branch_window.geometry("300x300")
-        
-        self.branch_var = tk.StringVar(value=branches[0])
+
+        # I don't know why, but it seems that if variables are not correctly updated, put parent frame as an initial value will solve the problem :(
+        branch_var = tk.StringVar(self)
         
         for branch in branches:
-            ttk.Radiobutton(branch_window, text=branch, variable=self.branch_var, value=branch).pack(anchor="w", padx=10, pady=2)
+            ttk.Radiobutton(branch_window, text=branch, variable=branch_var, value=branch).pack(anchor="w", padx=10, pady=2)
         
         def confirm_selection():
-            self.branch_label.config(text=self.branch_var.get())
-            self.branch.set(self.branch_var.get())     
+            self.branch_label.config(text=branch_var.get())
+            self.branch.set(branch_var.get())     
             branch_window.destroy()
         
         tk.Button(branch_window, text="OK", command=confirm_selection).pack(pady=10)
@@ -355,29 +391,93 @@ class Old_CM(tk.Frame):
     def show_commit_details(self, commit):
         commit_window = tk.Toplevel(self)
         commit_window.title("Commit Details")
-        commit_window.geometry("400x300")
+        commit_window.geometry("800x400")
         
-        tk.Label(commit_window, text=f"Commit: {commit.hexsha}", font=("Arial", 10, "bold")).pack(pady=5)
-        
-        text_area = tk.Text(commit_window, wrap=tk.WORD, height=10, width=50)
-        text_area.pack(padx=10, pady=5, fill="both", expand=True)
+        tk.Label(commit_window, text=f"Commit: {commit.hexsha}", font=("Arial", 10, "bold")).grid(row=0, column=0, columnspan=2, pady=5)
+
+        tk.Label(commit_window, text="original", font=("Arial", 10, "bold")).grid(row=1, column=0, pady=5)
+        tk.Label(commit_window, text="refined", font=("Arial", 10, "bold")).grid(row=1, column=1, pady=5)
+        # Left Text Area (Original Commit Message)
+        text_area = tk.Text(commit_window, wrap=tk.WORD, height=20, width=50)
+        text_area.grid(row=2, column=0, padx=10, pady=5, sticky="nsew")
         text_area.insert(tk.END, commit.message.strip())
         text_area.config(state=tk.DISABLED)
+
+        def refine_message():
+            improved_text_area.delete("1.0", "end")
+            code_diff = "\n".join([patch.diff.decode("utf-8") for patch in commit.diff("HEAD~1", create_patch=True)])
+            original_CM = commit.message.strip()
+            commit_message = improve_CM(code_diff, original_CM)
+            improved_text_area.insert(tk.END, commit_message)
+
+        def push_refined_message():
+            """
+            Push refined message to remote repo
+            """
+            commit_hash = commit.hexsha
+            refined_CM = improved_text_area.get(1.0, tk.END)
+            commit_replacements = {
+                commit_hash: refined_CM,
+            }
+
+            subprocess.run([
+                "git", "filter-repo", "--commit-callback",
+                f'''
+            import sys
+            commit_map = {commit_replacements}
+            if commit.original_id.hex in commit_map:
+                commit.message = commit_map[commit.original_id.hex].encode()
+                sys.stderr.write(f"Updated commit {commit_hash}\\n")
+            ''', "--force"
+            ], check=True)
+                    
+        # Right Improved Text Area
+        improved_text_area = tk.Text(commit_window, wrap=tk.WORD, height=20, width=50)
+        improved_text_area.grid(row=2, column=1, padx=10, pady=5, sticky="nsew")
+
+        # Buttons at the Bottom of the Right Area
+        refine_button = tk.Button(commit_window, text="Refine", command=refine_message)
+        refine_button.grid(row=3, column=1, padx=10, pady=5, sticky="sw")
         
+        clear_button = tk.Button(commit_window, text="Clear", command=lambda: improved_text_area.delete(1.0, tk.END))
+        clear_button.grid(row=3, column=1, padx=10, pady=5, sticky="s")
+
+        push_button = tk.Button(commit_window, text="Push", command=push_refined_message)
+        push_button.grid(row=3, column=1, padx=10, pady=5, sticky="se")
+        
+        # Diff Button at the Bottom of the Left Area
         diff_button = tk.Button(commit_window, text="Code Diff", command=lambda: self.show_code_diff(commit))
-        diff_button.pack(side="left", padx=10, pady=10)
-        
-        close_button = tk.Button(commit_window, text="Close", command=commit_window.destroy)
-        close_button.pack(side="right", padx=10, pady=10)
-    
+        diff_button.grid(row=3, column=0, padx=10, pady=5)
+
+        # Grid configuration to make sure layout behaves correctly
+        commit_window.grid_rowconfigure(1, weight=1)
+        commit_window.grid_columnconfigure(0, weight=1)
+        commit_window.grid_columnconfigure(1, weight=1)
+
+
+
     def show_code_diff(self, commit):
         diff_window = tk.Toplevel(self)
         diff_window.title("Code Diff")
         diff_window.geometry("600x400")
         
         text_area = tk.Text(diff_window, wrap=tk.WORD, height=20, width=70)
+        text_area.tag_configure("added", foreground="green")
+        text_area.tag_configure("removed", foreground="red")
+        text_area.tag_configure("normal", foreground="black")
         text_area.pack(padx=10, pady=5, fill="both", expand=True)
-        text_area.insert(tk.END, commit.diff("HEAD~1", create_patch=True))
+
+        diff_content = "\n".join([patch.diff.decode("utf-8") for patch in commit.diff("HEAD~1", create_patch=True)])
+
+        for line in diff_content.splitlines():
+
+            if line.startswith("+"):
+                text_area.insert(tk.END, line + "\n", "added")
+            elif line.startswith("-"):
+                text_area.insert(tk.END, line + "\n", "removed")
+            else:
+                text_area.insert(tk.END, line + "\n", "normal")
+
         text_area.config(state=tk.DISABLED)
         
         close_button = tk.Button(diff_window, text="Close", command=diff_window.destroy)
@@ -389,9 +489,9 @@ class Old_CM(tk.Frame):
         popup.geometry("300x150")
 
         # Choose lateset, oldest, or all
-        ttk.Checkbutton(popup, text="Latest", variable=self.selected_option, onvalue=1, offvalue=0).grid(row=0, column=0, padx=5, pady=5)
-        ttk.Checkbutton(popup, text="Oldest", variable=self.selected_option, onvalue=2, offvalue=0).grid(row=0, column=1, padx=5, pady=5)
-        ttk.Checkbutton(popup, text="All", variable=self.selected_option, onvalue=3, offvalue=0).grid(row=0, column=2, padx=5, pady=5)
+        ttk.Radiobutton(popup, text="Latest", variable=self.selected_option, value=1).grid(row=0, column=0, padx=5, pady=5)
+        ttk.Radiobutton(popup, text="Oldest", variable=self.selected_option, value=2).grid(row=0, column=1, padx=5, pady=5)
+        ttk.Radiobutton(popup, text="All", variable=self.selected_option, value=3).grid(row=0, column=2, padx=5, pady=5)
 
         # Choose number
         ttk.Label(popup, text="Number:").grid(row=1, column=0, padx=5, pady=5, sticky="w")
@@ -400,20 +500,21 @@ class Old_CM(tk.Frame):
 
         def save():
             option = self.selected_option.get()
-            # A bug may exists here, when executing this file, everything fine, but when integrate together (which means run main.py), it says:
-            # UnboundLocalError: local variable 'selection' referenced before assignment
             if (option == 1):
                 selection = "Latest " + self.number.get()
             elif (option == 2):
                 selection = "Oldest " + self.number.get()
             elif (option == 3):
                 selection = "All"
+            else:
+                selection = "Select commits"
             
             self.select_label.config(text=selection)     
             popup.destroy()
 
         save_button = tk.Button(popup, text="Save", command=save)
         save_button.grid(row=2, column=1, columnspan=2, padx=5, pady=5, sticky="we")
+
 
 # For test, delete later
 if __name__ == "__main__":
