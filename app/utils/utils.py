@@ -67,6 +67,7 @@ def get_local_repo_path(repo_path: str) -> Path:
 def get_remote_repo_url(repo_url: str) -> str:
     """
     Validates the remote repository URL format.
+    This function accepts URLs with branch information in the '/tree/<branch>' format.
     """
     if repo_url.startswith("https://github.com/") or repo_url.startswith("git@github.com:"):
         return repo_url
@@ -78,12 +79,34 @@ def clone_remote_repo(repo_url: str) -> Path:
     """
     Clones the remote repository into a temporary directory.
     Returns the path to the cloned repository.
+    If the repo_url includes branch information in the '/tree/<branch>' format,
+    the repository is cloned using that branch.
     """
     try:
+        branch = None
+        # If the URL contains '/tree/', extract the branch name and base URL.
+        if '/tree/' in repo_url:
+            parts = repo_url.split('/tree/')
+            repo_url = parts[0]
+            branch = parts[1]
+            # Ensure the base repository URL ends with .git
+            if not repo_url.endswith('.git'):
+                repo_url += '.git'
+        else:
+            # For standard URLs, ensure it ends with .git
+            if not repo_url.endswith('.git'):
+                repo_url += '.git'
+        
         temp_dir = Path(tempfile.mkdtemp(prefix="cloned_repo_"))
         logging.info(f"Cloning remote repository {repo_url} into {temp_dir}")
-        subprocess.run(["git", "clone", repo_url, str(temp_dir)],
-                       check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        
+        # Build the clone command, adding the --branch option if needed.
+        cmd = ["git", "clone"]
+        if branch:
+            cmd.extend(["--branch", branch])
+        cmd.extend([repo_url, str(temp_dir)])
+        
+        subprocess.run(cmd, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         logging.info(f"Successfully cloned repository to {temp_dir}")
         return temp_dir
     except subprocess.CalledProcessError as e:
@@ -93,6 +116,7 @@ def clone_remote_repo(repo_url: str) -> Path:
     except Exception as e:
         logging.error(f"Unexpected error during cloning: {e}")
         raise RuntimeError(f"Unexpected error during cloning: {e}")
+
 
 def convert_repo_to_txt(repo_path: Path, output_txt_path: Path):
     """

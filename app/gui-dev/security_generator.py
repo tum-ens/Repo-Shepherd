@@ -30,12 +30,11 @@ class SecurityGeneratorTab(ttk.Frame):
         self.model_name = "gemini-1.5-flash"
         self.log_file_path = Path(__file__).parent.parent / "security_generator.log"
 
-        # Shared variables for repository path and type
+        # Shared variables for repository path and type are obtained from shared_vars
         self.repo_path_var = shared_vars.get('repo_path_var', tk.StringVar())
         self.repo_type_var = shared_vars.get('repo_type_var', tk.StringVar(value='local'))
 
-        # Contact fields (always visible)
-        # We'll still use StringVar for potential other uses but we will read directly from the Entry widgets.
+        # Contact fields
         self.contact_name_var = tk.StringVar()
         self.contact_email_var = tk.StringVar()
 
@@ -53,109 +52,66 @@ class SecurityGeneratorTab(ttk.Frame):
         title_label = ttk.Label(self.main_frame, text="Security.md Generator", font=("Helvetica", 16, "bold"))
         title_label.grid(row=0, column=0, columnspan=3, pady=10)
 
-        # Repository type radio buttons (local/remote)
-        repo_type_frame = ttk.Frame(self.main_frame)
-        repo_type_frame.grid(row=1, column=0, columnspan=3, pady=5, sticky='ew')
-        local_radio = ttk.Radiobutton(
-            repo_type_frame, text="Local Repository",
-            variable=self.repo_type_var, value='local',
-            command=lambda: self.set_repo_type('local')
-        )
-        local_radio.pack(side=tk.LEFT, padx=10)
-        remote_radio = ttk.Radiobutton(
-            repo_type_frame, text="Remote Repository",
-            variable=self.repo_type_var, value='remote',
-            command=lambda: self.set_repo_type('remote')
-        )
-        remote_radio.pack(side=tk.LEFT, padx=10)
-
-        # Repository path entry and browse button
-        self.repo_path_label = ttk.Label(self.main_frame, text="Local Repository Path:")
-        self.repo_path_label.grid(row=2, column=0, sticky='w', padx=10, pady=5)
-        self.repo_path_entry = ttk.Entry(self.main_frame, textvariable=self.repo_path_var, width=50)
-        self.repo_path_entry.grid(row=2, column=1, sticky='ew', padx=10, pady=5)
-        self.browse_button = ttk.Button(self.main_frame, text="Browse", command=self.browse_local_repo)
-        self.browse_button.grid(row=2, column=2, padx=5, pady=5)
-
         # Dropdown for Report Vulnerability Via
         report_via_label = ttk.Label(self.main_frame, text="Report Vulnerability Via:")
-        report_via_label.grid(row=3, column=0, sticky='w', padx=10, pady=5)
+        report_via_label.grid(row=1, column=0, sticky='w', padx=10, pady=5)
         self.report_via_combo = ttk.Combobox(
             self.main_frame,
             values=["Only With Issues", "Email", "Website Form", "Slack", "Other"],
             state="readonly"
         )
-        self.report_via_combo.grid(row=3, column=1, sticky='ew', padx=10, pady=5)
+        self.report_via_combo.grid(row=1, column=1, sticky='ew', padx=10, pady=5)
 
         # Disclosure Policy Time dropdown
         disclosure_time_label = ttk.Label(self.main_frame, text="Disclosure Policy Time:")
-        disclosure_time_label.grid(row=4, column=0, sticky='w', padx=10, pady=5)
+        disclosure_time_label.grid(row=2, column=0, sticky='w', padx=10, pady=5)
         self.disclosure_time_combo = ttk.Combobox(
             self.main_frame,
             values=["7 Days", "14 Days", "30 Days", "Custom"],
             state="readonly"
         )
-        self.disclosure_time_combo.grid(row=4, column=1, sticky='ew', padx=10, pady=5)
+        self.disclosure_time_combo.grid(row=2, column=1, sticky='ew', padx=10, pady=5)
 
         # Preferred Languages dropdown
         preferred_lang_label = ttk.Label(self.main_frame, text="Preferred Languages:")
-        preferred_lang_label.grid(row=5, column=0, sticky='w', padx=10, pady=5)
+        preferred_lang_label.grid(row=3, column=0, sticky='w', padx=10, pady=5)
         self.language_combo = ttk.Combobox(
             self.main_frame,
             values=["English*", "Spanish", "French", "German", "Other"],
             state="readonly"
         )
-        self.language_combo.grid(row=5, column=1, sticky='ew', padx=10, pady=5)
+        self.language_combo.grid(row=3, column=1, sticky='ew', padx=10, pady=5)
 
-        # Contact Information fields (always visible)
+        # Contact Information fields 
         contact_info_label = ttk.Label(
             self.main_frame,
             text="Contact Information (if left empty, README.md contact info will be used):"
         )
-        contact_info_label.grid(row=6, column=0, columnspan=3, sticky='w', padx=10, pady=5)
+        contact_info_label.grid(row=4, column=0, columnspan=3, sticky='w', padx=10, pady=5)
 
         # Contact Name
         self.contact_name_label = ttk.Label(self.main_frame, text="Contact Name:")
-        self.contact_name_label.grid(row=7, column=0, sticky='w', padx=10, pady=5)
+        self.contact_name_label.grid(row=5, column=0, sticky='w', padx=10, pady=5)
         self.contact_name_entry = ttk.Entry(self.main_frame, textvariable=self.contact_name_var, width=50)
-        self.contact_name_entry.grid(row=7, column=1, sticky='ew', padx=10, pady=5)
+        self.contact_name_entry.grid(row=5, column=1, sticky='ew', padx=10, pady=5)
 
         # Contact Email
         self.contact_email_label = ttk.Label(self.main_frame, text="Contact Email:")
-        self.contact_email_label.grid(row=8, column=0, sticky='w', padx=10, pady=5)
+        self.contact_email_label.grid(row=6, column=0, sticky='w', padx=10, pady=5)
         self.contact_email_entry = ttk.Entry(self.main_frame, textvariable=self.contact_email_var, width=50)
-        self.contact_email_entry.grid(row=8, column=1, sticky='ew', padx=10, pady=5)
+        self.contact_email_entry.grid(row=6, column=1, sticky='ew', padx=10, pady=5)
 
         # Generate button and status label
         self.generate_button = ttk.Button(self.main_frame, text="Generate SECURITY.md", command=self.start_generation)
-        self.generate_button.grid(row=9, column=0, columnspan=3, pady=20)
+        self.generate_button.grid(row=7, column=0, columnspan=3, pady=20)
         self.status_label = ttk.Label(self.main_frame, text="", wraplength=400)
-        self.status_label.grid(row=10, column=0, columnspan=3, pady=10)
-
-    def set_repo_type(self, repo_type):
-        self.repo_type_var.set(repo_type)
-        self.update_repo_entry_label()
-
-    def update_repo_entry_label(self):
-        if self.repo_type_var.get() == 'local':
-            self.repo_path_label.config(text="Local Repository Path:")
-            self.browse_button.grid(row=2, column=2, padx=5, pady=5)
-            self.repo_path_entry.config(state=tk.NORMAL)
-        else:
-            self.repo_path_label.config(text="Remote Repository URL:")
-            self.browse_button.grid_forget()
-            self.repo_path_entry.config(state=tk.NORMAL)
-
-    def browse_local_repo(self):
-        repo_path = filedialog.askdirectory()
-        if repo_path:
-            self.repo_path_var.set(repo_path)
+        self.status_label.grid(row=8, column=0, columnspan=3, pady=10)
 
     def start_generation(self):
-        # Read values directly from the Entry widgets (like the remote repo URL field)
-        repo_input = self.repo_path_entry.get().strip()
+        # Get repository info from shared variables (set in the Config tab)
+        repo_input = self.shared_vars['repo_path_var'].get().strip()
         if not repo_input:
-            messagebox.showerror("Error", "Please enter a repository path or URL.")
+            messagebox.showerror("Error", "Repository path/URL is not configured. Please set it in the Setup tab.")
             return
 
         report_via_value = self.report_via_combo.get()
@@ -171,7 +127,7 @@ class SecurityGeneratorTab(ttk.Frame):
         print("DEBUG - Contact Name:", contact_name)
         print("DEBUG - Contact Email:", contact_email)
 
-        repo_type = self.repo_type_var.get()
+        repo_type = self.shared_vars['repo_type_var'].get()
         if repo_type == 'local':
             try:
                 repo_path = get_local_repo_path(repo_input)
@@ -235,9 +191,6 @@ class SecurityGeneratorTab(ttk.Frame):
         language_value = repo_selection_info.get('language', "Unknown")
 
         PROMPT = (
-           
-            
-
             "I am working on creating a `SECURITY.md` file for my GitHub repository. I want you to create a `SECURITY.md` "
             "that follows the sections below and uses information from the `README.md` file. Ensure that all website links are "
             "formatted in Markdown as \"[text...](http://...)\". The output should be in Markdown.\n\n"
@@ -246,7 +199,6 @@ class SecurityGeneratorTab(ttk.Frame):
             f"- Disclosure Policy Time: {disclosure_time_value}\n"
             f"- Preferred Languages: {language_value}\n"
             f"- Contact Info Setup:\n{custom_contact_info}\n"
-
             "## Summary\nProvide a brief overview of the security policy and its importance to the project.\n\n"
             "## Reporting Vulnerabilities\nPlease report security vulnerabilities through {report_via_value}. "
             "\n- Contact the [security team](mailto:security@example.com) via email.\n\n"
@@ -262,10 +214,8 @@ class SecurityGeneratorTab(ttk.Frame):
             "- **Proof-of-concept or exploit code:** (if possible)\n\n"
             "## Disclosure Policy\nWe follow a responsible disclosure policy. Upon receiving a vulnerability report, we will acknowledge it within {disclosure_time_value} days and work to resolve the issue within two weeks. Details of fixed vulnerabilities will be publicly disclosed once the fix is released.\n\n"
             "## Preferred Languages\nWe prefer all communications to be in English.\n\n"
-            "## License\nInclude the license information from the `README.md`."
-
+            "## License\nInclude the license information from the `README.md` dont write entire license just information."
             "As a output just write `SECURITY.md` file with the above content"
-
         )
 
         if repo_selection_info['type'] == 'local':
@@ -300,7 +250,7 @@ class SecurityGeneratorTab(ttk.Frame):
 
     def save_security_md(self, content, repo_type):
         if repo_type == 'local':
-            output_path = Path(self.repo_path_var.get()) / "SECURITY.md"
+            output_path = Path(self.shared_vars['repo_path_var'].get()) / "SECURITY.md"
         else:
             output_path = Path(__file__).parent.parent / "SECURITY.md"
 
@@ -317,7 +267,11 @@ class SecurityGeneratorTab(ttk.Frame):
 if __name__ == "__main__":
     root = tk.Tk()
     root.title("Security Generator Tab Test")
-    shared_vars = {'api_gemini_key': tk.StringVar(value="YOUR_API_KEY_HERE")}
+    shared_vars = {
+        'api_gemini_key': tk.StringVar(value="YOUR_API_KEY_HERE"),
+        'repo_path_var': tk.StringVar(),
+        'repo_type_var': tk.StringVar(value='local')
+    }
     tab = SecurityGeneratorTab(root, shared_vars)
     tab.pack(expand=True, fill='both')
     root.mainloop()
