@@ -37,6 +37,42 @@ def setup_logging(log_file: Path, level=logging.INFO, log_to_console=True):
 
 # ------------------------------ Gemini API Configuration ------------------------------
 
+def check_api_key(self):
+    api_gemini_key = self.api_key_entry.get().strip()
+    if not api_gemini_key:
+        self.api_key_status.config(text="✖️", foreground="red")
+        self.api_key_validated = False
+        messagebox.showerror("Error", "Gemini API Key is required.")
+        return
+
+    # Always use "gemini-2.0-exp" for checking the key
+    model_name = "gemini-2.0-exp"
+
+def validate_gemini_api_key(api_key: str, test_prompt: str = "Test") -> tuple[bool, str]:
+    """
+    Validates the provided Gemini API key by configuring the API and attempting a minimal
+    text generation using the "gemini-2.0-flash-001" model.
+
+    Returns:
+        (True, "") if the key is valid,
+        (False, error_message) if invalid.
+    """
+    try:
+        genai.configure(api_key=api_key)
+        # Use a supported model for key validation
+        check_model = "gemini-2.0-flash-001"
+        model_instance = genai.GenerativeModel(model_name=check_model)
+        # Call generate_content without any extra parameters
+        response = model_instance.generate_content(test_prompt)
+        if not response.text:
+            raise ValueError("No text returned from the model.")
+        logging.info("Gemini API key validation succeeded.")
+        return True, ""
+    except Exception as e:
+        error_message = str(e)
+        logging.error(f"Gemini API key validation failed: {error_message}")
+        return False, error_message
+    
 def configure_genai_api(api_key: str):
     """
     Configures the Google Gemini API with the provided API key.
@@ -47,6 +83,10 @@ def configure_genai_api(api_key: str):
     except Exception as e:
         logging.error(f"Failed to configure Google Gemini API: {e}")
         raise RuntimeError(f"Error configuring Google Gemini API: {e}")
+
+
+
+
 
 # ------------------------------ Repository Utilities ------------------------------
 
@@ -117,7 +157,6 @@ def clone_remote_repo(repo_url: str) -> Path:
         logging.error(f"Unexpected error during cloning: {e}")
         raise RuntimeError(f"Unexpected error during cloning: {e}")
 
-
 def convert_repo_to_txt(repo_path: Path, output_txt_path: Path):
     """
     Walks through the repository directory, captures the file tree,
@@ -175,7 +214,6 @@ def upload_file_to_gemini(file_path: Path):
     except Exception as e:
         logging.error(f"Failed to upload file {file_path.name}: {e}")
         raise RuntimeError(f"Error uploading file {file_path.name}: {e}")
-# utils.py (Add this function)
 
 def convert_file_to_txt(source_file: Path, output_file: Path):
     """

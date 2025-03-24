@@ -8,7 +8,10 @@ from readme_automatic import ReadmeAutomaticTab
 from readme_improvement import ReadmeImprovementTab
 from commit_analyzer import CommitAnalyzerTab
 from security_generator import SecurityGeneratorTab
-from security_scanner_tab import SecurityScannerTab 
+from security_scanner_tab import SecurityScannerTab
+from gemini_chat_tab import GeminiChatTab
+from improve_structure_tab import ImproveStructureTab
+
 
 import os
 import sys
@@ -47,7 +50,10 @@ frame_automatic_readme = ReadmeAutomaticTab(notebook, shared_vars)
 frame_improvement_readme = ReadmeImprovementTab(notebook, shared_vars)
 frame_commit = CommitAnalyzerTab(notebook, shared_vars)
 frame_security_generator = SecurityGeneratorTab(notebook, shared_vars) 
-frame_security_scanner = SecurityScannerTab(notebook, shared_vars) 
+frame_security_scanner = SecurityScannerTab(notebook, shared_vars)
+frame_gemini_chat = GeminiChatTab(notebook, shared_vars)
+frame_improve_structure = ImproveStructureTab(notebook, shared_vars)
+
 
 
 # Add frames to Notebook
@@ -57,6 +63,10 @@ notebook.add(frame_improvement_readme, text='Readme Improvement')
 notebook.add(frame_commit, text='Commit Analyzer')
 notebook.add(frame_security_generator, text='Security Generator')
 notebook.add(frame_security_scanner, text='Security Scanner')
+notebook.add(frame_gemini_chat, text='Gemini Chat')
+notebook.add(frame_improve_structure, text='Improve Structure')
+
+
 
 
 # Function to adjust root size based on the current tab

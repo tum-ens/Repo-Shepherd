@@ -3,10 +3,15 @@ from tkinter import ttk, messagebox, filedialog
 import webbrowser
 import subprocess
 import threading
-import google.generativeai as genai
 import time
 import os
 import queue
+import google.generativeai as genai
+import sys
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
+
+import app.utils.utils as utils
+
 
 def open_url(url):
     webbrowser.open(url, new=2)
@@ -99,36 +104,24 @@ class ConfigTab(tk.Frame):
         self.repo_frame = ttk.LabelFrame(self, text="Repository Selection", padding=(10, 10))
         self.repo_frame.grid(row=2, column=0, padx=10, pady=10, sticky="ew")
 
-        local_repo_radio = ttk.Radiobutton(
-            self.repo_frame, text="Local Repository",
-            variable=self.shared_vars['repo_type_var'], value='local'
-        )
-        local_repo_radio.grid(row=0, column=0, padx=5, pady=5, sticky="w")
-        remote_repo_radio = ttk.Radiobutton(
-            self.repo_frame, text="Remote Repository",
-            variable=self.shared_vars['repo_type_var'], value='remote'
-        )
-        remote_repo_radio.grid(row=0, column=1, padx=5, pady=5, sticky="w")
-
         repo_path_label = ttk.Label(self.repo_frame, text="Repository Path/URL:")
-        repo_path_label.grid(row=1, column=0, padx=5, pady=5, sticky="w")
+        repo_path_label.grid(row=0, column=0, padx=5, pady=5, sticky="w")
         self.repo_path_entry = ttk.Entry(
             self.repo_frame, textvariable=self.shared_vars['repo_path_var'], width=50
         )
-        self.repo_path_entry.grid(row=1, column=1, padx=5, pady=5, sticky="ew")
-
+        self.repo_path_entry.grid(row=0, column=1, padx=5, pady=5, sticky="ew")
         self.browse_button = ttk.Button(self.repo_frame, text="Browse", command=self.browse_local_repo)
-        self.browse_button.grid(row=1, column=2, padx=5, pady=5)
+        self.browse_button.grid(row=0, column=2, padx=5, pady=5)
 
         # Status label for repo path check (like API key status)
         self.repo_path_status = ttk.Label(self.repo_frame, text="")
-        self.repo_path_status.grid(row=2, column=0, sticky='w', padx=5, pady=5)
+        self.repo_path_status.grid(row=1, column=0, sticky='w', padx=5, pady=5)
 
         # Button to save (check) the repo path
         self.save_repo_button = ttk.Button(
             self.repo_frame, text="Save Repo Selection", command=self.check_repo_path
         )
-        self.save_repo_button.grid(row=2, column=1, padx=5, pady=5, sticky="ew")
+        self.save_repo_button.grid(row=1, column=1, padx=5, pady=5, sticky="ew")
 
     # -----------------------------
     # Repository path logic (similar to API key logic)
@@ -236,7 +229,7 @@ class ConfigTab(tk.Frame):
         self.gemini_model_dropdown = ttk.Combobox(
             self.api_frame, textvariable=self.gemini_model, state="readonly"
         )
-        self.gemini_model_dropdown['values'] = ["Flash 1.5 (Recommended)", "Flash 2.0 EXP (Experimental)"]
+        self.gemini_model_dropdown['values'] = ["gemini-1.5-flash", "gemini-2.0-flash"]
         self.gemini_model_dropdown.current(0)
         self.gemini_model_dropdown.grid(row=7, column=0, columnspan=2, sticky='ew', padx=20, pady=5)
         
@@ -253,30 +246,31 @@ class ConfigTab(tk.Frame):
             messagebox.showerror("Error", "Gemini API Key is required.")
             return
 
-        def validate_key():
+        # Retrieve the tkinter variable value in the main thread
+        selected_model = self.gemini_model.get()
+
+        def validate_key(model):
             self.data_queue.put(("status", "Checking...", "blue"))
             self.data_queue.put(("button", "disabled"))
             
-            try:
-                time.sleep(1)  # simulate check
-                valid = True
-                if valid:
-                    self.data_queue.put(("status", "✔️", "green"))
-                    self.data_queue.put(("shared_var", api_gemini_key))
-                    self.api_key_validated = True
-                    self.api_gemini_key = api_gemini_key
-                    print(f"API Key validated: {self.api_gemini_key}")
-                else:
-                    self.data_queue.put(("status", "✖️", "red"))
-                    self.api_key_validated = False
-                    self.data_queue.put(("error", "Invalid Gemini API Key."))
-            except Exception as e:
+            test_prompt = "Test"
+            valid, error_message = utils.validate_gemini_api_key(api_gemini_key, test_prompt)
+
+            
+            if valid:
+                self.data_queue.put(("status", "✔️", "green"))
+                self.data_queue.put(("shared_var", api_gemini_key))
+                self.api_key_validated = True
+                self.api_gemini_key = api_gemini_key
+                print(f"API Key validated: {self.api_gemini_key}")
+            else:
                 self.data_queue.put(("status", "✖️", "red"))
                 self.api_key_validated = False
-                self.data_queue.put(("error", f"An error occurred: {e}"))
-            
+                self.data_queue.put(("error", f"Invalid Gemini API Key: {error_message}"))
+                
             self.data_queue.put(("button", "normal"))
-        threading.Thread(target=validate_key).start()
+            
+        threading.Thread(target=validate_key, args=(selected_model,)).start()
 
     def save_api_config(self):
         if not self.api_key_validated:

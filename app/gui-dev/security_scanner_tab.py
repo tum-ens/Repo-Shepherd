@@ -269,7 +269,22 @@ class SecurityScannerTab(ttk.Frame):
             output_path = script_dir / IMPROVED_SECURITY_OUTPUT_FILE
             save_json(improved_security_output, output_path, "improved security vulnerabilities (second pass)")
 
-            summary_text = json.dumps(improved_security_output.get("threat_summary", {}), indent=4)
+            first_summary = security_report.get("threat_summary", {})
+            improved_summary = improved_security_output.get("threat_summary", {})
+            delta_summary = {}
+            for key in improved_summary:
+                delta = improved_summary[key] - first_summary.get(key, 0)
+                # Format with a sign: e.g., "+5" or "-5"
+                delta_summary[key] = f"{'+' if delta >= 0 else ''}{delta}"
+
+            # Create a combined summary to display both improved summary and the delta changes
+            final_summary = {
+                "improved_summary": improved_summary,
+                "changes": delta_summary
+            }
+
+            # Display the final summary in the text widget
+            summary_text = json.dumps(final_summary, indent=4)
             self.after(0, lambda: self.summary_text.delete("1.0", tk.END))
             self.after(0, lambda: self.summary_text.insert(tk.END, summary_text))
             self.after(0, lambda: messagebox.showinfo("Success", f"Second pass completed.\nResults saved to:\n{output_path}"))
