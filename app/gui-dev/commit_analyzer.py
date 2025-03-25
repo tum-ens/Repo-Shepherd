@@ -293,6 +293,9 @@ class History_CM(tk.Frame):
         self.commit_list = []
         self.improved_commit_list = []
 
+        # Saved refined commit messages
+        self.refined_messages = {}
+
         # Create a window inside the canvas to hold the commit_list_frame
         self.canvas.create_window((0, 0), window=self.commit_list_frame, anchor="nw")
 
@@ -340,10 +343,112 @@ class History_CM(tk.Frame):
             commit_button.pack(fill="x", padx=5, pady=2)
 
     def refine_all_commits(self):
-        pass
+        for commit in self.commit_list:
+            code_diff = "\n".join([patch.diff.decode("utf-8") for patch in commit.diff("HEAD~1", create_patch=True)])
+            original_CM = commit.message.strip()
+            commit_hash =commit.hexsha
+            refined_CM = improve_CM(code_diff, original_CM)
+            self.refined_messages.update({commit_hash: refined_CM})
+
+    def has_unstashed_changes(self):
+        unstashed_query = subprocess.run(["git", "status", "--porcelain"], capture_output=True, text=True, cwd=self.repo.get())
+        result = bool(unstashed_query.stdout.strip())
+
+        def stash_changes():
+            '''
+            git stash
+            '''
+            subprocess.run(["git", "stash"], check=True, cwd=self.repo.get())
+
+        def reset_changes():
+            '''
+            git reset --hard
+            '''
+            subprocess.run(["git", "reset", "--hard"], check=True, cwd=self.repo.get())
+
+        if result:
+            result = messagebox.askquestion("Detect unstashed changes", "Press 'yes' to stash or 'no' to reset?\n\n")
+            if result == 'yes':
+                stash_changes()
+            else:
+                reset_changes()
 
     def push_all_commits(self):
-        pass
+        if not self.refined_messages:
+            print("No commits to process.")
+            return
+        
+        self.has_unstashed_changes()
+
+        def get_commit_range(commit_hashes):
+            '''
+            Get commit range (from earlist to latest) from given commit_hashes
+            '''
+            git_repo = git.Repo(self.repo.get())
+
+            sorted_hashes = sorted(commit_hashes, key=lambda h: git_repo.commit(h).committed_datetime)
+
+            earliest_commit = sorted_hashes[0]  
+            # latest_commit = sorted_hashes[-1] 
+
+            # Best case, saving time, avoiding iterating from HEAD to earlist commit
+            # but it seems that git filter-branch can't use this phrase... 
+            # commit_range = f"{earliest_commit}^..{latest_commit}"
+            commit_range = f"{earliest_commit}^..HEAD"
+
+            return commit_range
+
+        msg_filter_script_if = """if [ "$GIT_COMMIT" = "{commit}" ]; then
+                    echo "{title}"
+        {body}
+                """
+        msg_filter_script_elif = """elif [ "$GIT_COMMIT" = "{commit}" ]; then
+                    echo "{title}"
+        {body}
+                """
+
+        script_lines = []
+        for i, (commit, message) in enumerate(self.refined_messages.items()):
+            # If " or ' exists in bash code, they will occur instruction interrupt. Delete them.
+            message = message.replace('"', '').replace("'", "")
+
+            title, *body_lines = message.split("\n")
+            body = "\n".join(f"            echo \"{line}\"" for line in body_lines)
+            
+            if i == 0:
+                script_lines.append(msg_filter_script_if.format(commit=commit, title=title, body=body))
+            else:
+                script_lines.append(msg_filter_script_elif.format(commit=commit, title=title, body=body))
+
+        msg_filter = "\n".join(script_lines)
+                
+        commit_range = get_commit_range(list(self.refined_messages.keys()))
+
+        full_script = ("git filter-branch --msg-filter '" + "\n" 
+                        + msg_filter + "\n"
+                        + "else cat" + "\n"
+                        + "fi' " + commit_range + " && rm -fr \"$(git rev-parse --git-dir)/refs/original/\""
+                        )
+
+        try:
+            # Windows need to run bash code on git-bash, not shell
+            if sys.platform.startswith("win"):  # Windows
+                # Should ask user to configurate git bash position
+                subprocess.run(
+                ["C:/Program Files/Git/bin/bash.exe", "-c", full_script],
+                check=True, cwd=self.repo.get()
+            )
+            elif sys.platform.startswith("darwin"):  # macOS
+                subprocess.run(full_script, shell=False, check=True, cwd=self.repo.get())
+            else:
+                print("Only support Windows & macOS.")
+
+
+            subprocess.run(['git', 'push', '--force'], cwd=self.repo.get())
+
+        except subprocess.CalledProcessError as e:
+            print(f"Error: {e}")
+
 
     def select_repo(self):
         popup = tk.Toplevel(self)
@@ -410,30 +515,19 @@ class History_CM(tk.Frame):
             commit_message = improve_CM(code_diff, original_CM)
             improved_text_area.insert(tk.END, commit_message)
 
-        def push_refined_message():
+        def save_refined_message():
             """
-            Push refined message to remote repo
+            Save refined message
             """
             commit_hash = commit.hexsha
             refined_CM = improved_text_area.get(1.0, tk.END)
-            commit_replacements = {
-                commit_hash: refined_CM,
-            }
-
-            subprocess.run([
-                "git", "filter-repo", "--commit-callback",
-                f'''
-            import sys
-            commit_map = {commit_replacements}
-            if commit.original_id.hex in commit_map:
-                commit.message = commit_map[commit.original_id.hex].encode()
-                sys.stderr.write(f"Updated commit {commit_hash}\\n")
-            ''', "--force"
-            ], check=True)
+            self.refined_messages.update({commit_hash: refined_CM})
                     
         # Right Improved Text Area
         improved_text_area = tk.Text(commit_window, wrap=tk.WORD, height=20, width=50)
         improved_text_area.grid(row=2, column=1, padx=10, pady=5, sticky="nsew")
+        if commit.hexsha in self.refined_messages:
+            improved_text_area.insert(tk.END, self.refined_messages[commit.hexsha])
 
         # Buttons at the Bottom of the Right Area
         refine_button = tk.Button(commit_window, text="Refine", command=refine_message)
@@ -442,7 +536,7 @@ class History_CM(tk.Frame):
         clear_button = tk.Button(commit_window, text="Clear", command=lambda: improved_text_area.delete(1.0, tk.END))
         clear_button.grid(row=3, column=1, padx=10, pady=5, sticky="s")
 
-        push_button = tk.Button(commit_window, text="Push", command=push_refined_message)
+        push_button = tk.Button(commit_window, text="Save", command=save_refined_message)
         push_button.grid(row=3, column=1, padx=10, pady=5, sticky="se")
         
         # Diff Button at the Bottom of the Left Area
@@ -453,8 +547,6 @@ class History_CM(tk.Frame):
         commit_window.grid_rowconfigure(1, weight=1)
         commit_window.grid_columnconfigure(0, weight=1)
         commit_window.grid_columnconfigure(1, weight=1)
-
-
 
     def show_code_diff(self, commit):
         diff_window = tk.Toplevel(self)
