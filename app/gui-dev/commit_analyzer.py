@@ -439,7 +439,14 @@ class History_CM(tk.Frame):
                 check=True, cwd=self.repo.get()
             )
             elif sys.platform.startswith("darwin"):  # macOS
-                subprocess.run(full_script, shell=False, check=True, cwd=self.repo.get())
+                script_path = "/tmp/git_script.sh"
+                with open(script_path, "w") as file:
+                    file.write("#!/bin/bash" + "\n" + full_script)
+                os.chmod(script_path, 0o755)  # Make it executable
+                
+
+                subprocess.run([script_path], shell=False, check=True, cwd=self.repo.get())
+                os.remove(script_path)
             else:
                 print("Only support Windows & macOS.")
 
