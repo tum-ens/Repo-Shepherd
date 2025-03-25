@@ -222,21 +222,37 @@ class ConfigTab(tk.Frame):
         )
         api_key_help_button.grid(row=5, column=0, columnspan=2, sticky='w', padx=20, pady=5)
         
+        # Gemini Model Selection
         gemini_model_label = ttk.Label(self.api_frame, text="Select Gemini Model:")
         gemini_model_label.grid(row=6, column=0, sticky='w', padx=20, pady=(10, 0))
 
-        self.gemini_model = tk.StringVar()
+        # Set the default value to "auto" and include "auto" in options
+        self.gemini_model = tk.StringVar(value="auto")
         self.gemini_model_dropdown = ttk.Combobox(
             self.api_frame, textvariable=self.gemini_model, state="readonly"
         )
-        self.gemini_model_dropdown['values'] = ["gemini-1.5-flash", "gemini-2.0-flash"]
+        self.gemini_model_dropdown['values'] = ["auto", "gemini-2.0-flash-lite","gemini-1.5-flash", "gemini-2.0-flash","gemini-2.0-flash-thinking-exp-01-21","gemini-1.5-pro","gemini-2.5-pro-exp-03-25"]
         self.gemini_model_dropdown.current(0)
-        self.gemini_model_dropdown.grid(row=7, column=0, columnspan=2, sticky='ew', padx=20, pady=5)
+        self.gemini_model_dropdown.grid(row=7, column=0, sticky='ew', padx=20, pady=5)
+        # Bind the event so the StringVar is updated when a new option is selected
+        self.gemini_model_dropdown.bind("<<ComboboxSelected>>", self.on_gemini_model_selected)
+        
+        # New "Save Model" button next to Gemini model dropdown
+        self.save_model_button = ttk.Button(
+            self.api_frame, text="Save Model", command=self.save_gemini_model
+        )
+        self.save_model_button.grid(row=7, column=1, sticky='w', padx=5, pady=5)
         
         self.api_save_button = ttk.Button(
             self.api_frame, text="Save", command=self.save_api_config
         )
         self.api_save_button.grid(row=8, column=1, sticky='se', padx=20, pady=20)
+
+    def on_gemini_model_selected(self, event):
+        # Update the StringVar explicitly from the combobox selection
+        current_value = self.gemini_model_dropdown.get()
+        self.gemini_model.set(current_value)
+        print(f"DEBUG [ConfigTab]: Gemini model updated to -> {current_value}")
 
     def check_api_key(self):
         api_gemini_key = self.api_key_entry.get().strip()
@@ -256,7 +272,6 @@ class ConfigTab(tk.Frame):
             test_prompt = "Test"
             valid, error_message = utils.validate_gemini_api_key(api_gemini_key, test_prompt)
 
-            
             if valid:
                 self.data_queue.put(("status", "✔️", "green"))
                 self.data_queue.put(("shared_var", api_gemini_key))
@@ -287,6 +302,17 @@ class ConfigTab(tk.Frame):
         print(f"API Key saved: {self.api_gemini_key}")
         selected_model = self.gemini_model.get()
         messagebox.showinfo("Saved", f"API Configuration saved.\nModel: {selected_model}")
+
+    def save_gemini_model(self):
+        # For debugging, print both the StringVar value and the combobox's get() value.
+        selected_model_var = self.gemini_model.get()
+        selected_model_combo = self.gemini_model_dropdown.get()
+        print(f"DEBUG [ConfigTab]: self.gemini_model.get() -> {selected_model_var}")
+        print(f"DEBUG [ConfigTab]: combobox.get() -> {selected_model_combo}")
+        self.shared_vars['default_gemini_model'].set(selected_model_var)
+        print(f"DEBUG [ConfigTab]: self.shared_vars['default_gemini_model'] -> {selected_model_var}")
+
+        messagebox.showinfo("Saved", f"Default Gemini Model saved: {selected_model_var}")
 
     # -----------------------------
     # Local frames logic
@@ -428,7 +454,8 @@ if __name__ == "__main__":
     shared_vars_test = {
         'api_gemini_key': tk.StringVar(),
         'repo_path_var': tk.StringVar(),
-        'repo_type_var': tk.StringVar(value='local')
+        'repo_type_var': tk.StringVar(value='local'),
+        'default_gemini_model': tk.StringVar(value="auto")
     }
     app = ConfigTab(root, shared_vars_test)
     app.pack(fill="both", expand=True)

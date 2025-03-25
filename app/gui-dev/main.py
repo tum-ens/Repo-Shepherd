@@ -33,7 +33,9 @@ sv_ttk.use_light_theme()
 shared_vars = {
     'api_gemini_key': tk.StringVar(),
     'repo_path_var': tk.StringVar(),          # Holds the local path or remote URL
-    'repo_type_var': tk.StringVar(value='local') # Holds the repository type ('local' or 'remote')
+    'repo_type_var': tk.StringVar(value='local'), # Holds the repository type ('local' or 'remote')
+    'default_gemini_model': tk.StringVar(value="auto")  # New shared variable for Gemini model selection
+
 }
 
 # Configure the grid layout for the root window
