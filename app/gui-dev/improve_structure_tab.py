@@ -100,7 +100,7 @@ class ImproveStructureTab(ttk.Frame):
 
                 # Define the prompt for Gemini (adjust as needed)
                 prompt = (
-                    """"
+                    """" 
 I am working on improving the project structure of a GitLab repository. I want you to check the following templates for different projects and choose the best one for my repository. Please provide an improved file tree and project structure according to the chosen template.
 
 ### Available Templates:
@@ -109,7 +109,6 @@ I am working on improving the project structure of a GitLab repository. I want y
 Purpose: Standardized structure for data science projects.
 
 File Tree:
-
 
 ├── data
 │   ├── external
@@ -134,7 +133,6 @@ Purpose: Django web application with best practices.
 
 File Tree:
 
-
 ├── config
 │   ├── settings
 │   ├── urls.py
@@ -152,7 +150,6 @@ File Tree:
 Purpose: Flask web application with modular structure.
 
 File Tree:
-
 
 ├── app
 │   ├── templates
@@ -172,7 +169,6 @@ Purpose: Python package template for library development.
 
 File Tree:
 
-
 ├── src
 │   └── [package_name]
 │       ├── __init__.py
@@ -191,7 +187,6 @@ Purpose: FastAPI application setup with best practices.
 
 File Tree:
 
-
 ├── app
 │   ├── api
 │   ├── core
@@ -209,7 +204,6 @@ File Tree:
 Purpose: React.js frontend application setup.
 
 File Tree:
-
 
 ├── public
 │   ├── index.html
@@ -231,7 +225,6 @@ Purpose: Node.js backend application with Express.
 
 File Tree:
 
-
 ├── src
 │   ├── controllers
 │   ├── models
@@ -250,7 +243,6 @@ File Tree:
 Purpose: Vue.js frontend application setup.
 
 File Tree:
-
 
 ├── public
 │   └── index.html
@@ -271,7 +263,6 @@ File Tree:
 Purpose: Spring Boot Java application setup.
 
 File Tree:
-
 
 ├── src
 │   ├── main
@@ -301,7 +292,6 @@ Purpose: Angular frontend application setup.
 
 File Tree:
 
-
 ├── e2e
 ├── src
 │   ├── app
@@ -322,7 +312,6 @@ File Tree:
 Purpose: Ruby on Rails web application setup.
 
 File Tree:
-
 
 ├── app
 │   ├── controllers
@@ -352,7 +341,6 @@ Purpose: Express.js backend application with MVC structure.
 
 File Tree:
 
-
 ├── src
 │   ├── controllers
 │   ├── models
@@ -374,7 +362,6 @@ Purpose: Go application with modular structure.
 
 File Tree:
 
-
 ├── cmd
 │   └── [app_name]
 │       └── main.go
@@ -395,7 +382,6 @@ Purpose: Electron desktop application setup.
 
 File Tree:
 
-
 ├── src
 │   ├── main.js
 │   ├── renderer.js
@@ -412,7 +398,6 @@ File Tree:
 Purpose: Laravel PHP framework application setup.
 
 File Tree:
-
 
 ├── app
 │   ├── Console
@@ -443,7 +428,6 @@ File Tree:
 Purpose: Svelte.js frontend application setup.
 
 File Tree:
-
 
 ├── public
 │   ├── index.html
@@ -507,7 +491,6 @@ Purpose: Jupyter Notebook project setup.
 
 File Tree:
 
-
 ├── notebooks
 │   ├── 01_data_cleaning.ipynb
 │   ├── 02_exploratory_analysis.ipynb
@@ -551,14 +534,38 @@ Please only provide the title of the chosen template and the improved file struc
 """
                 )
 
-                # Set up and call the Gemini model
-                MODEL_NAME = "gemini-2.0-flash-thinking-exp-01-21"
-                model = genai.GenerativeModel(MODEL_NAME)
-                inputs = [uploaded_file, "\n\n", prompt]
-                response = model.generate_content(inputs)
-                improved_structure = response.text.strip()
+                # --- Gemini Model Call on Main Thread ---
+                # Schedule the Gemini call on the main thread to avoid threading issues.
+                self.after(0, lambda: self.generate_improvement_immediately(uploaded_file, prompt))
+        except Exception as e:
+            # Schedule error UI updates on the main thread
+            self.after(0, lambda err=e: self.show_error(err))
+            self.after(0, lambda: self.improve_button.config(state="normal"))
 
-            # Save the improved structure to a file in the same directory as this tab's module
+    def generate_improvement_immediately(self, uploaded_file, prompt):
+        try:
+            # Check the shared variable for default model selection.
+            shared_model = self.shared_vars.get("default_gemini_model").get()
+            if shared_model.lower() == "auto":
+                model_to_use = "gemini-2.0-flash-thinking-exp-01-21"
+            else:
+                model_to_use = shared_model
+
+            debug_message = f"DEBUG: Using model -> {model_to_use}"
+            print(debug_message)
+            self.status_label.config(text=debug_message, foreground="purple")
+
+            model = genai.GenerativeModel(model_to_use)
+            inputs = [uploaded_file, "\n\n", prompt]
+            response = model.generate_content(inputs)
+            improved_structure = response.text.strip()
+        except Exception as e:
+            self.show_error(e)
+            self.improve_button.config(state="normal")
+            return
+
+        # Save the improved structure to a file in the same directory as this tab's module
+        try:
             script_dir = Path(__file__).parent
             structure_path = script_dir / "suggested_project_structure.md"
             backup_path = script_dir / "PROJECT_STRUCTURE_backup.md"
@@ -567,16 +574,13 @@ Please only provide the title of the chosen template and the improved file struc
                 shutil.copy(structure_path, backup_path)
             with open(structure_path, 'w', encoding='utf-8') as f:
                 f.write(improved_structure)
+        except Exception as file_err:
+            self.show_error(file_err)
+            self.improve_button.config(state="normal")
+            return
 
-        except Exception as e:
-            # Schedule error UI updates on the main thread
-            self.after(0, lambda err=e: self.show_error(err))
-        else:
-            # Schedule success UI updates on the main thread
-            self.after(0, lambda: self.show_success(improved_structure))
-        finally:
-            # Re-enable the button on the main thread
-            self.after(0, lambda: self.improve_button.config(state="normal"))
+        self.show_success(improved_structure)
+        self.improve_button.config(state="normal")
 
     def show_error(self, err):
         self.status_label.config(text=f"Error: {err}", foreground="red")

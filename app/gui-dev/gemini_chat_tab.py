@@ -1,6 +1,5 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
-import threading
 import tempfile
 from pathlib import Path
 
@@ -16,7 +15,7 @@ from app.utils.utils import (
 
 import google.generativeai as genai
 
-# You can change this if you have a different model for chat.
+# Default model to use if shared variable is set to "auto"
 MODEL_NAME = "gemini-1.5-flash"
 
 class GeminiChatTab(ttk.Frame):
@@ -87,12 +86,8 @@ class GeminiChatTab(ttk.Frame):
             return
 
         self._append_text("Initializing repository context...\n")
-        # Start the background thread with captured values
-        threading.Thread(
-            target=self._initialize_repo_context_thread,
-            args=(repo_input, repo_type, api_key),
-            daemon=True
-        ).start()
+        # Run initialization synchronously on the main thread
+        self._initialize_repo_context_thread(repo_input, repo_type, api_key)
 
     def _initialize_repo_context_thread(self, repo_input, repo_type, api_key):
         try:
@@ -103,7 +98,6 @@ class GeminiChatTab(ttk.Frame):
                 repo_path = clone_remote_repo(repo_input)
             self.repo_path = repo_path
 
-            import tempfile
             temp_dir = tempfile.TemporaryDirectory()
             self.temp_dir = temp_dir  # Keep reference to avoid early cleanup
             output_txt_path = Path(temp_dir.name) / "repo_content.txt"
@@ -131,14 +125,27 @@ class GeminiChatTab(ttk.Frame):
             "You are a helpful assistant for using and developing the repository. Based on the repository content provided, answer the following question:\n\n"
             f"Question: {user_input}\n\nAnswer:"
         )
-        threading.Thread(target=self.generate_gemini_response, args=(prompt,), daemon=True).start()
+        # Call generate_gemini_response directly (synchronously) on the main thread.
+        self.generate_gemini_response(prompt)
 
     def generate_gemini_response(self, prompt):
         try:
             if not self.uploaded_file:
                 self._append_text("Error: Repository context not initialized. Please click 'Initialize Repository Context' first.\n")
                 return
-            model = genai.GenerativeModel(MODEL_NAME)
+            # Check the shared variable for default model selection.
+            shared_model = self.shared_vars.get('default_gemini_model').get()
+            if shared_model.lower() == "auto":
+                model_to_use = MODEL_NAME
+            else:
+                model_to_use = shared_model
+
+            # Debug: print and append the used model
+            debug_message = f"DEBUG: Using model -> {model_to_use}"
+            print(f"DEBUG [GeminiChatTab]: {debug_message}")
+            self._append_text(debug_message + "\n", tag="gemini")
+
+            model = genai.GenerativeModel(model_to_use)
             response = model.generate_content([self.uploaded_file, "\n\n", prompt])
             answer = response.text.strip()
             # Append Gemini response in dark blue with a blank line after it
