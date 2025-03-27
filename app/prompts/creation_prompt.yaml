@@ -59,3 +59,7 @@ a_license: |
 
 output-meta: |
   Provide only the improved README.md content based on the guidelines above. Only include sections above. Following is the original section.
+
+structure: |
+  Following is the readme sections in order. You should recompose them into a well-structured readme markdown. Don't change the order.
+  

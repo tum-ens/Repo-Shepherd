@@ -4,7 +4,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 import tkinter as tk
 from tkinter import messagebox, filedialog, ttk
 from app.improvement_main_window import split_sections, improve_part
-from app.utils.creation import create_part, create_feature
+from app.utils.creation import create_part, create_feature, structure_markdown
 from app.utils.repo_structure import generate_file_tree, convert_repo_to_txt
 import sv_ttk
 
@@ -90,7 +90,6 @@ class Improvement(tk.Frame):
         self.generated_section_title = tk.StringVar()
         self.saved_text = {}
         self.file_tree = tk.StringVar()
-        self.repo_path = tk.StringVar()
         self.repo_txt = tk.StringVar()
         self.text_updated = False
         self.last_button_pressed = tk.StringVar()
@@ -126,23 +125,34 @@ class Improvement(tk.Frame):
         self.right_frame = tk.Frame(self,relief="solid", bd=1)
         self.right_frame.grid(row=0, column=2, sticky='nsew', padx=5)
         self.right_frame.grid_columnconfigure(0, weight=1)
-        self.right_frame.grid_rowconfigure(1, weight=1)
+        self.right_frame.grid_rowconfigure(0, weight=0)  # Label not extendable
+        self.right_frame.grid_rowconfigure(1, weight=1)  # Text extendable
+        self.right_frame.grid_rowconfigure(2, weight=0)  # Buttons not extendable
 
         right_label = ttk.Label(self.right_frame, text="Suggestions", font=("Helvetica", 14, "bold"))
-        right_label.pack(pady=5)
+        right_label.grid(row=0, column=0, pady=5)
 
         self.right_text = tk.Text(self.right_frame, wrap="word", bg="white", fg="black", font=("Helvetica", 12))
-        self.right_text.pack(padx=10, pady=5, fill="both", expand=True)
+        self.right_text.grid(row=1, column=0, padx=10, pady=5, sticky="nsew")
 
-        generate_btn = ttk.Button(self.right_frame, text="Generate", command=lambda: self.show_improved_text(self.right_text, self.last_button_pressed.get()), style="Section.TButton")
-        generate_btn.pack(pady=5)
+        btn_frame = tk.Frame(self.right_frame)
+        btn_frame.grid(row=2, column=0, pady=5, sticky="ew") 
+        btn_frame.grid_columnconfigure(0, weight=1)
+        btn_frame.grid_columnconfigure(1, weight=1)
 
-        save_btn = ttk.Button(self.right_frame, text="Save", command=self.save_improved_text, style="Section.TButton")
-        save_btn.pack(pady=5)
+        generate_btn = ttk.Button(btn_frame, text="Generate", command=lambda: self.show_improved_text(self.right_text, self.last_button_pressed.get()), style="Section.TButton")
+        generate_btn.grid(row=0, column=0, padx=5, sticky="ew")
+
+        save_btn = ttk.Button(btn_frame, text="Save", command=self.save_improved_text, style="Section.TButton")
+        save_btn.grid(row=0, column=1, padx=5, sticky="ew")
 
     def show_original_text(self, section):
+        '''
+        Click section and show original text
+        '''
+        # If generated text is unsaved, pop this window
         if self.text_updated:
-            self.warning_before_saving()
+            WarningIfTextUpdated(self)
         content = self.section_text.get(section, "No original text.")
         self.middle_text.delete("1.0", tk.END)
         self.right_text.delete("1.0", tk.END)
@@ -152,12 +162,18 @@ class Improvement(tk.Frame):
             self.right_text.insert(tk.END, self.saved_text[section])
 
     def save_improved_text(self):
+        '''
+        Save improved text by LLM
+        '''
         key = self.generated_section_title.get()
         value = self.generated_section_text.get()
         self.saved_text[key] = value
         self.text_updated = False
 
     def show_improved_text(self, text, section):
+        '''
+        Display improved text if it exists
+        '''
         text.delete("1.0", tk.END)
         original = self.section_text.get(section, "No original text.")
         improved = improve_part(section, original, self.file_tree.get())
@@ -166,48 +182,24 @@ class Improvement(tk.Frame):
         self.generated_section_text.set(improved)
         self.text_updated = True
 
-    def warning_before_saving(self):
-        popup = tk.Toplevel(self.parent, bg="#f5f6f5")
-        popup.title("Warning")
-        popup.geometry("300x200")
-        tk.Label(popup, text="You haven't saved generated text.", font=("Helvetica", 12), bg="#f5f6f5").pack(pady=20)
-        ttk.Button(popup, text="Save", command=lambda: [self.save_improved_text(), popup.destroy()], style="Section.TButton").pack(pady=5)
-        ttk.Button(popup, text="Abandon", command=lambda: [setattr(self, 'text_updated', False), popup.destroy()], style="Section.TButton").pack(pady=5)
-        popup.grab_set()
-
     def export(self):
+        '''
+        Export markdown file
+        '''
         ExportWindow(self, self.saved_text)
 
     def select_repo(self):
+        '''
+        Select repo location and import file tree
+        '''
         repo = filedialog.askdirectory(title="Select Repository Folder")
         if repo:
-            self.repo_path.set(repo)
-            self.show_popup(repo)
-
-    def show_popup(self, repo_path):
-        popup = tk.Toplevel(self.parent, bg="#f5f6f5")
-        popup.title("Repository Options")
-        popup.geometry("300x150")
-        def show_file_tree_options():
-            for widget in popup.winfo_children():
-                widget.destroy()
-            tk.Label(popup, text=f"Repo: {repo_path}", font=("Helvetica", 11), bg="#f5f6f5").pack(pady=5)
-            tk.Label(popup, text="Depth:", font=("Helvetica", 11), bg="#f5f6f5").pack()
-            depth_entry = ttk.Entry(popup)
-            depth_entry.pack(pady=5)
-            only_folders_var = tk.BooleanVar()
-            ttk.Checkbutton(popup, text="Only Folders", variable=only_folders_var).pack(pady=5)
-            ttk.Button(popup, text="Import", command=lambda: self.import_file_tree(depth_entry.get(), only_folders_var.get()), style="Section.TButton").pack(pady=5)
-        def import_file_tree(depth, show_files):
-            messagebox.showinfo("Info", "Already Imported")
-            file_tree = generate_file_tree(self.repo_path.get(), int(depth) if depth.isdigit() else 2, show_files)
-            self.file_tree.set(file_tree)
-            popup.destroy()
-        tk.Label(popup, text=f"Repo: {repo_path}", font=("Helvetica", 11), bg="#f5f6f5").pack(pady=5)
-        ttk.Button(popup, text="File Tree", command=show_file_tree_options, style="Section.TButton").pack(pady=5)
-        ttk.Button(popup, text="Repo to TXT", command=lambda: [messagebox.showinfo("Info", "Already Imported"), popup.destroy()], style="Section.TButton").pack(pady=5)
+            FileTreePopup(self, repo)
 
     def go_back(self):
+        '''
+        Back to main page
+        '''
         for widget in self.parent.winfo_children():
             widget.destroy()
 
@@ -235,6 +227,7 @@ class Creation(tk.Frame):
         self.selected_license = tk.StringVar()
         self.features = []
         self.last_button_pressed = tk.StringVar(value="None")
+        self.text_updated = False
 
         style = ttk.Style()
         style.configure("Section.TButton", font=("Helvetica", 11), padding=8)
@@ -244,7 +237,7 @@ class Creation(tk.Frame):
             btn = ttk.Button(self.left_frame, text=section, command=lambda s=section: self.call_func(s), style="Section.TButton")
             btn.pack(pady=5, padx=10)
         
-        repo_btn = ttk.Button(self.left_frame, text="Repo", style="Section.TButton")
+        repo_btn = ttk.Button(self.left_frame, text="Repo", command=self.select_repo, style="Section.TButton")
         repo_btn.pack(pady=(20, 5), padx=10)
 
         export_btn = ttk.Button(self.left_frame, text="Export", command=self.export, style="Section.TButton")
@@ -256,21 +249,34 @@ class Creation(tk.Frame):
         self.right_frame = tk.Frame(self, relief="solid", bd=1)
         self.right_frame.grid(row=0, column=1, sticky='nsew', padx=5)
         self.right_frame.grid_columnconfigure(0, weight=1)
-        self.right_frame.grid_rowconfigure(1, weight=1)
+        self.right_frame.grid_rowconfigure(0, weight=0)  # Label not extendable
+        self.right_frame.grid_rowconfigure(1, weight=1)  # Text extendable
+        self.right_frame.grid_rowconfigure(2, weight=0)  # Buttons not extendable
 
         right_label = ttk.Label(self.right_frame, text="Suggestions", font=("Helvetica", 14, "bold"))
-        right_label.pack(pady=5)
+        right_label.grid(row=0, column=0, pady=5)
 
         self.right_text = tk.Text(self.right_frame, wrap="word", bg="white", fg="black", font=("Helvetica", 12))
-        self.right_text.pack(padx=10, pady=5, fill="both", expand=True)
+        self.right_text.grid(row=1, column=0, padx=10, pady=5, sticky="nsew")
 
-        generate_btn = ttk.Button(self.right_frame, text="Generate", command=lambda: self.show_created_text(self.right_text, self.last_button_pressed.get()), style="Section.TButton")
-        generate_btn.pack(pady=5)
+        btn_frame = tk.Frame(self.right_frame)
+        btn_frame.grid(row=2, column=0, pady=5, sticky="ew") 
+        btn_frame.grid_columnconfigure(0, weight=1)
+        btn_frame.grid_columnconfigure(1, weight=1)
 
-        save_btn = ttk.Button(self.right_frame, text="Save", command=lambda: self.save_created_text(self.last_button_pressed.get()), style="Section.TButton")
-        save_btn.pack(pady=5)
+        generate_btn = ttk.Button(btn_frame, text="Generate", command=lambda: self.show_created_text(self.right_text, self.last_button_pressed.get()), style="Section.TButton")
+        generate_btn.grid(row=0, column=0, padx=5, sticky="ew")
+
+        save_btn = ttk.Button(btn_frame, text="Save", command=lambda: self.save_created_text(self.last_button_pressed.get()), style="Section.TButton")
+        save_btn.grid(row=0, column=1, padx=5, sticky="ew")
 
     def call_func(self, section):
+        '''
+        There are 3 different types of sections
+        License: users can select one from three
+        Text format: users input text information inside
+        Dynamic entry format: users are able to add or delete columns for information
+        '''
         self.last_button_pressed.set(section)
         self.right_text.delete("1.0", tk.END)
         if section == "license":
@@ -283,11 +289,18 @@ class Creation(tk.Frame):
         self.right_text.insert(tk.END, created_part)
 
     def save_created_text(self, section):
+        '''
+        Save created text by LLM
+        '''
         key = section
         value = self.right_text.get("1.0", tk.END).strip()
         self.saved_text[key] = value
+        self.text_updated = False
 
     def show_created_text(self, text, section):
+        '''
+        Display created text if it exists.
+        '''
         text.delete("1.0", tk.END)
         info = {
             'title': self.title_name.get(),
@@ -301,11 +314,15 @@ class Creation(tk.Frame):
         }.get(section)
         improved = create_part(section, info) if info else "No content provided."
         text.insert(tk.END, improved)
+        self.text_updated = True
 
     def dynamic_entry_format(self, section):
         DynamicEntryApp(self, section)
 
     def text_format(self, section):
+        '''
+        UI for text format
+        '''
         popup = tk.Toplevel(self.parent, bg="#f5f6f5")
         popup.geometry("300x300")
         popup.title(section.capitalize())
@@ -323,7 +340,11 @@ class Creation(tk.Frame):
                 entry.insert(tk.END, self.description.get())
             elif section == "usage" and self.usage.get():
                 entry.insert(tk.END, self.usage.get())
+
         def save_info():
+            '''
+            Save information users give
+            '''
             if section == "title":
                 self.title_name.set(entry.get())
             elif section == "description":
@@ -333,10 +354,24 @@ class Creation(tk.Frame):
             popup.destroy()
         ttk.Button(popup, text="Save", command=save_info, style="Section.TButton").pack(pady=10)
 
+    def select_repo(self):
+        '''
+        Select repo location and import file tree
+        '''
+        repo = filedialog.askdirectory(title="Select Repository Folder")
+        if repo:
+            FileTreePopup(self, repo)
+
     def export(self):
+        '''
+        Export markdown file
+        '''
         ExportWindow(self, self.saved_text)
 
     def license(self):
+        '''
+        Select 1 license from 3
+        '''
         popup = tk.Toplevel(self.parent, bg="#f5f6f5")
         popup.title("License")
         popup.geometry("300x200")
@@ -345,6 +380,9 @@ class Creation(tk.Frame):
             ttk.Button(popup, text=lic, command=lambda l=lic: [self.selected_license.set(l), popup.destroy()], style="Section.TButton").pack(pady=5)
 
     def go_back(self):
+        '''
+        Go back to main page
+        '''
         for widget in self.parent.winfo_children():
             widget.destroy()
 
@@ -375,6 +413,9 @@ class ExportWindow:
         self.create_draggable_buttons()
         
     def create_draggable_buttons(self):
+        '''
+        Drag section buttons
+        '''
         for key in self.selected_keys:
             btn = tk.Button(self.list_frame, text=key, relief=tk.RAISED)
             btn.bind("<Button-1>", self.start_drag)
@@ -432,7 +473,8 @@ class ExportWindow:
                 ordered_text = ''.join(
                     self.master.saved_text[key] for key in self.section_order if key in self.master.saved_text and self.master.saved_text[key]
                     )
-                file.write(ordered_text)
+                structured_text = structure_markdown(ordered_text)
+                file.write(structured_text)
             messagebox.showinfo(f"File saved at: {file_path}")
 
 class DynamicEntryApp:
@@ -495,6 +537,9 @@ class DynamicEntryApp:
 
     
     def add_entry(self, info):
+        '''
+        Add column
+        '''
         frame = tk.Frame(self.frame)
         frame.pack(fill='x', pady=2)
         
@@ -508,6 +553,9 @@ class DynamicEntryApp:
         self.entries.append((frame, entry))
     
     def add_feature(self, info):
+        '''
+        Feature column have more buttons than normal one
+        '''
         frame = tk.Frame(self.frame)
         frame.pack(fill='x', pady=2)
 
@@ -527,10 +575,16 @@ class DynamicEntryApp:
         self.entries.append((frame, entry))
     
     def delete_entry(self, frame, entry):
+        '''
+        Delete column
+        '''
         frame.destroy()
         self.entries = [(f, e) for f, e in self.entries if e != entry]
     
     def generate(self, entry):
+        '''
+        Generate features by LLM
+        '''
         feature = create_feature(self.master.features)
         entry.delete("1.0", tk.END)
         entry.insert(tk.END, feature)
@@ -549,6 +603,49 @@ class DynamicEntryApp:
         else:
             self.master.contact.clear()
             self.master.contact.extend([entry.get() for _, entry in self.entries])
+
+class FileTreePopup:
+     def __init__(self, master, repo_path):
+        self.master = master
+        self.popup = tk.Toplevel(master, bg="#f5f6f5")
+        self.popup.title("Repository Options")
+        self.popup.geometry("300x200")
+
+        def show_file_tree_options():
+            '''
+            UI for file tree import
+            '''
+            for widget in self.popup.winfo_children():
+                widget.destroy()
+            tk.Label(self.popup, text=f"Repo: {repo_path}", font=("Helvetica", 11), bg="#f5f6f5").pack(pady=5)
+            tk.Label(self.popup, text="Depth:", font=("Helvetica", 11), bg="#f5f6f5").pack()
+            depth_entry = ttk.Entry(self.popup)
+            depth_entry.pack(pady=5)
+            only_folders_var = tk.BooleanVar()
+            ttk.Checkbutton(self.popup, text="Only Folders", variable=only_folders_var).pack(pady=5)
+            ttk.Button(self.popup, text="Import", command=lambda: import_file_tree(depth_entry.get(), only_folders_var.get()), style="Section.TButton").pack(pady=5)
+        
+        def import_file_tree(depth, show_files):
+            messagebox.showinfo("Info", "Already Imported")
+            file_tree = generate_file_tree(self.repo_path.get(), int(depth) if depth.isdigit() else 2, show_files)
+            self.file_tree.set(file_tree)
+            self.popup.destroy()
+
+        tk.Label(self.popup, text=f"Repo: {repo_path}", font=("Helvetica", 11), bg="#f5f6f5").pack(pady=5)
+        ttk.Button(self.popup, text="File Tree", command=show_file_tree_options, style="Section.TButton").pack(pady=5)
+        # TODO
+        # ttk.Button(popup, text="Repo to TXT", command=lambda: [messagebox.showinfo("Info", "Already Imported"), popup.destroy()], style="Section.TButton").pack(pady=5)
+
+class WarningIfTextUpdated:
+    def __init__(self, master):
+        self.master = master
+        self.popup = tk.Toplevel(master, bg="#f5f6f5")
+        self.popup.title("Warning")
+        self.popup.geometry("300x200")
+        tk.Label(self.popup, text="You haven't saved generated text.", font=("Helvetica", 12), bg="#f5f6f5").pack(pady=20)
+        ttk.Button(self.popup, text="Save", command=lambda: [self.master.save_improved_text(), self.popup.destroy()], style="Section.TButton").pack(pady=5)
+        ttk.Button(self.popup, text="Abandon", command=lambda: [setattr(self, 'text_updated', False), self.popup.destroy()], style="Section.TButton").pack(pady=5)
+        self.popup.grab_set()
 
 if __name__ == "__main__":
     root = tk.Tk()

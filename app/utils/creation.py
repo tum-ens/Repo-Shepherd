@@ -48,3 +48,15 @@ def create_feature(existed_feature):
     prompt = meta_prompt + feature_prompt + str(features) + "\n\n" + output_format
     result = llm_api.together_api(prompt)
     return result
+
+
+def structure_markdown(ordered_text):
+    with open("app/prompts/creation_prompt.yaml", 'r') as file:
+        prompts_repo = yaml.safe_load(file)
+
+    instruction = prompts_repo["structure"]
+    prompt = instruction + "\n\n" + ordered_text
+
+    result = llm_api.together_api(prompt)
+    return result
+    

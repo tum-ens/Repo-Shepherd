@@ -100,8 +100,6 @@ def improve_part(part_name, content, file_tree):
             + output_prompt + "\n\n"
             + content)
         
-    # During development I use together_ai since it's faster.
-    print(prompt)
     result = llm_api.together_api(prompt)
 
     # add section name if LLM misses it.
