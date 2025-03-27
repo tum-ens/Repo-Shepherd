@@ -95,6 +95,7 @@ class Current_CM(tk.Frame):
         file_label.pack(anchor="center")
         self.modified_files = self.get_git_modified_files()
         self.file_vars = {}
+        self.committed = False
 
         for file in self.modified_files:
             var = BooleanVar(parent)
@@ -134,12 +135,12 @@ class Current_CM(tk.Frame):
     def update_diff_view(self):
         # Update code diff once click files
         # But if integrated, it displayed strangely, need to be fixed.
-        selected_files = [file for file, var in self.file_vars.items() if var.get()]
+        self.selected_files = [file for file, var in self.file_vars.items() if var.get()]
 
-        if not selected_files:
+        if not self.selected_files:
             diff_content = "No file selected."
         else:
-            diff_content = self.get_git_diff(selected_files)
+            diff_content = self.get_git_diff(self.selected_files)
 
         self.diff_text.config(state=tk.NORMAL)
         self.diff_text.delete(1.0, tk.END)
@@ -204,27 +205,40 @@ class Current_CM(tk.Frame):
     def generate_commit_message(self):
         self.commit_text.delete("1.0", "end")
         content = self.diff_text.get("1.0", tk.END)
+        if not self.selected_files:
+            tk.messagebox.showwarning("Warning", "No files selected for commit!")
+            return
         commit_message = generate_CM(content)
         self.commit_text.insert(tk.END, commit_message)
 
     def commit_changes(self):
         commit_msg = self.commit_text.get("1.0", tk.END).strip()
         if not commit_msg:
-            print("Commit message is empty!")
+            tk.messagebox.showwarning("Warning", "Commit message is empty!")
             return
         selected_files = [f for f, var in self.file_vars.items() if var.get()]
         if not selected_files:
-            print("No files selected for commit!")
+            tk.messagebox.showwarning("Warning", "No files selected for commit!")
             return
         try:
             subprocess.run(["git", "add"] + selected_files, check=True, cwd=self.repo)
             subprocess.run(["git", "commit", "-m", commit_msg], check=True, cwd=self.repo)
-            print("Changes committed successfully.")
+            tk.messagebox.showwarning("Info", "Commit successfully")
+            self.committed = True
         except subprocess.CalledProcessError as e:
-            print(f"Git commit failed: {e}")
+            tk.messagebox.showwarning("Warning", f"Git commit failed: {e}")
+            
 
     def push_changes(self):
+        if not self.committed:
+            tk.messagebox.showwarning("Warning", "You should commit first!")
+            return
+        try:
             subprocess.run(['git', 'push'], cwd=self.repo)
+            self.committed = False
+        except subprocess.CalledProcessError as e:
+            tk.messagebox.showwarning("Warning", f"Git commit failed: {e}")
+
 
 class History_CM(tk.Frame):
     def __init__(self, parent):
@@ -311,10 +325,19 @@ class History_CM(tk.Frame):
         self.canvas.configure(scrollregion=self.canvas.bbox("all"))
 
     def fetch_commits(self):
+        
+        if not self.repo.get():
+            tk.messagebox.showwarning("Warning", "No repo selected. Please select a repo first.")
+            return
+
         git_repo = git.Repo(self.repo.get())
 
-        if not self.branch:
+        if not self.branch.get():
             tk.messagebox.showwarning("Warning", "No branch selected. Please select a branch first.")
+            return
+        
+        if not self.number.get().isdigit():
+            tk.messagebox.showwarning("Warning", "Invalid commit selection.")
             return
         
         for widget in self.commit_list_frame.winfo_children():
@@ -330,7 +353,7 @@ class History_CM(tk.Frame):
         elif (option == 3):
             self.commit_list.extend(all_commits)
         else:
-            tk.messagebox.showwarning("Warning", "Invalid commit selection")
+            tk.messagebox.showwarning("Warning", "Invalid commit selection.")
 
         for commit in self.commit_list:
             commit_button = tk.Button(
@@ -343,12 +366,38 @@ class History_CM(tk.Frame):
             commit_button.pack(fill="x", padx=5, pady=2)
 
     def refine_all_commits(self):
-        for commit in self.commit_list:
+        '''
+        refine all commits on right frame
+        '''
+        if not self.commit_list:
+            tk.messagebox.showwarning("Warning", "No commits fetched")
+            return
+        
+        # progress_window
+        progress_window = tk.Toplevel(self)
+        progress_window.title("Processing Commits")
+        progress_label = tk.Label(progress_window, text="Processing commits...")
+        progress_label.pack(pady=10)
+        
+        progress = ttk.Progressbar(progress_window, orient=tk.HORIZONTAL, length=300, mode='determinate')
+        progress.pack(pady=20)
+        
+        total_commits = len(self.commit_list)
+        progress["maximum"] = total_commits
+
+        for i, commit in enumerate(self.commit_list):
             code_diff = "\n".join([patch.diff.decode("utf-8") for patch in commit.diff("HEAD~1", create_patch=True)])
             original_CM = commit.message.strip()
-            commit_hash =commit.hexsha
+            commit_hash = commit.hexsha
             refined_CM = improve_CM(code_diff, original_CM)
             self.refined_messages.update({commit_hash: refined_CM})
+
+            # update progress
+            progress["value"] = i + 1
+            progress_window.update_idletasks()
+
+        messagebox.showinfo("Info", "All commits refined successfully!")
+        progress_window.destroy()
 
     def has_unstashed_changes(self):
         unstashed_query = subprocess.run(["git", "status", "--porcelain"], capture_output=True, text=True, cwd=self.repo.get())
@@ -375,7 +424,7 @@ class History_CM(tk.Frame):
 
     def push_all_commits(self):
         if not self.refined_messages:
-            print("No commits to process.")
+            tk.messagebox.showwarning("Warning", "No edited commits to process.")
             return
         
         self.has_unstashed_changes()
@@ -448,13 +497,12 @@ class History_CM(tk.Frame):
                 subprocess.run([script_path], shell=False, check=True, cwd=self.repo.get())
                 os.remove(script_path)
             else:
-                print("Only support Windows & macOS.")
-
+                tk.messagebox.showwarning("Warning", "Only support Windows & macOS.")
 
             subprocess.run(['git', 'push', '--force'], cwd=self.repo.get())
 
         except subprocess.CalledProcessError as e:
-            print(f"Error: {e}")
+            tk.messagebox.showwarning("Warning", f"Git commit failed: {e}")
 
 
     def select_repo(self):
