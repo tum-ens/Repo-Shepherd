@@ -234,17 +234,39 @@ class SecurityGeneratorTab(ttk.Frame):
             license_txt_path = temp_dir / "LICENSE.txt"
 
             convert_file_to_txt(README_PATH, readme_txt_path)
-            convert_file_to_txt(LICENSE_PATH, license_txt_path)
+            readme_file = upload_file_to_gemini(readme_txt_path)
+
+            # Check if LICENSE exists; if not, skip it
+            license_file = None
+            license_section = ""
+            if LICENSE_PATH.exists():
+                convert_file_to_txt(LICENSE_PATH, license_txt_path)
+                license_file = upload_file_to_gemini(license_txt_path)
+                # Only include the License section if the LICENSE file exists
+                license_section = (
+                    "## License\n"
+                    "Include the license information from the `README.md` "
+                    "but don't write the entire license, just a brief summary.\n"
+                )
+
+            # Combine the prompt
+            PROMPT += license_section
+            PROMPT += "As a final output, write the complete `SECURITY.md` file with the above content."
 
             configure_genai_api(API_KEY)
             readme_file = upload_file_to_gemini(readme_txt_path)
-            license_file = upload_file_to_gemini(license_txt_path)
+            if license_file:
+                license_file = upload_file_to_gemini(license_txt_path)
 
             return self.generate_security_md(readme_file, license_file, PROMPT, MODEL_NAME)
 
     def generate_security_md(self, readme_file, license_file, prompt, model_name):
         model = genai.GenerativeModel(model_name)
-        inputs = [readme_file, "\n\n", license_file, "\n\n", prompt]
+        # If license_file is None, omit it from inputs
+        if license_file:
+            inputs = [readme_file, "\n\n", license_file, "\n\n", prompt]
+        else:
+            inputs = [readme_file, "\n\n", prompt]
         response = model.generate_content(inputs)
         return response.text.strip()
 
