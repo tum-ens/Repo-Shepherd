@@ -323,11 +323,13 @@ class History_CM(tk.Frame):
 
         option = self.selected_option.get()
         all_commits = list(git_repo.iter_commits(self.branch.get()))[:-1]
-        
+        count_of_commits = len(all_commits)
         if (option == 1):
-            self.commit_list.extend(all_commits[:int(self.number.get())])
+            available_commits = min(int(self.number.get()), count_of_commits)
+            self.commit_list.extend(all_commits[:available_commits])
         elif (option == 2):
-            self.commit_list.extend(all_commits[-int(self.number.get()):])
+            available_commits = min(int(self.number.get()), count_of_commits)
+            self.commit_list.extend(all_commits[-available_commits:])
         elif (option == 3):
             self.commit_list.extend(all_commits)
         else:
@@ -349,7 +351,7 @@ class History_CM(tk.Frame):
             if commit.message.startswith("Merge branch"):
                 continue  
 
-            code_diff = "\n".join([patch.diff.decode("utf-8") for patch in commit.diff("HEAD~1", create_patch=True)])
+            code_diff = "\n".join([patch.diff.decode("utf-8") for patch in commit.diff(commit.parents[0], create_patch=True)])
             original_CM = commit.message.strip()
             commit_hash =commit.hexsha
             refined_CM = improve_CM(code_diff, original_CM)
@@ -385,36 +387,26 @@ class History_CM(tk.Frame):
         
         self.has_unstashed_changes()
 
-        def get_commit_range(commit_hashes):
-            '''
-            Get commit range (from earlist to latest) from given commit_hashes
-            '''
-            git_repo = git.Repo(self.repo.get())
-
-            sorted_hashes = sorted(commit_hashes, key=lambda h: git_repo.commit(h).committed_datetime)
-
-            earliest_commit = sorted_hashes[0]  
-            # latest_commit = sorted_hashes[-1] 
-
-            # Best case, saving time, avoiding iterating from HEAD to earlist commit
-            # but it seems that git filter-branch can't use this phrase... 
-            # commit_range = f"{earliest_commit}^..{latest_commit}"
-            commit_range = f"{earliest_commit}^..HEAD"
-
-            return commit_range
-
         msg_filter_script_if = """
         if test "$GIT_COMMIT" = "{commit}"; then
             echo "{title}"
         {body}
                 """
         
-        # msg_filter_script_elif = """elif [ "$GIT_COMMIT" = "{commit}" ]; then
-        #             echo "{title}"
-        # {body}
-        #         """
-        
         bash_scripts = []
+
+        git_repo = git.Repo(self.repo.get())
+        commit_messages = self.refined_messages.items()
+
+        # sort by commit time
+        sorted_messages = sorted(
+            commit_messages, 
+            key=lambda item: git_repo.commit(item[0]).committed_datetime, 
+            reverse=True
+        )
+
+        # return to dict
+        self.refined_messages = dict(sorted_messages)
 
         for i, (commit, message) in enumerate(self.refined_messages.items()):
             # If " or ' exists in bash code, they will occur instruction interrupt. Delete them.
@@ -434,8 +426,6 @@ class History_CM(tk.Frame):
                         )
 
             bash_scripts.append(full_script)
-                
-        # commit_range = get_commit_range(list(self.refined_messages.keys()))
 
         try:
             # Windows need to run bash code on git-bash, not shell
@@ -459,7 +449,7 @@ class History_CM(tk.Frame):
                     os.chmod(script_path, 0o755)  # Make it executable
                     subprocess.run([script_path], shell=False, check=True, cwd=self.repo.get())
                     os.remove(script_path)
-                    subprocess.run("rm -fr \"$(git rev-parse --git-dir)/refs/original/\"", shell=False, check=True, cwd=self.repo.get())
+                subprocess.run("rm -fr $(git rev-parse --git-dir)/refs/original/", shell=True, check=True, cwd=self.repo.get())
                     
             else:
                 print("Only support Windows & macOS.")
@@ -547,7 +537,7 @@ class History_CM(tk.Frame):
 
         def refine_message():
             improved_text_area.delete("1.0", "end")
-            code_diff = "\n".join([patch.diff.decode("utf-8") for patch in commit.diff("HEAD~1", create_patch=True)])
+            code_diff = "\n".join([patch.diff.decode("utf-8") for patch in commit.parents[0].diff(commit, create_patch=True)])
             original_CM = commit.message.strip()
             commit_message = improve_CM(code_diff, original_CM)
             improved_text_area.insert(tk.END, commit_message)
@@ -596,7 +586,7 @@ class History_CM(tk.Frame):
         text_area.tag_configure("normal", foreground="black")
         text_area.pack(padx=10, pady=5, fill="both", expand=True)
 
-        diff_content = "\n".join([patch.diff.decode("utf-8") for patch in commit.diff(commit.parents[0], create_patch=True)])
+        diff_content = "\n".join([patch.diff.decode("utf-8") for patch in commit.parents[0].diff(commit, create_patch=True)])
 
         for line in diff_content.splitlines():
 
