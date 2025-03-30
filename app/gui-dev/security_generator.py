@@ -193,7 +193,8 @@ class SecurityGeneratorTab(ttk.Frame):
         PROMPT = (
             "I am working on creating a `SECURITY.md` file for my GitHub repository. I want you to create a `SECURITY.md` "
             "that follows the sections below and uses information from the `README.md` file. Ensure that all website links are "
-            "formatted in Markdown as \"[text...](http://...)\". The output should be in Markdown.\n\n"
+            "formatted in Markdown as \"[text...](http://...)\"\n\n"
+            "dont start with ```markdown and end with ```\n\n"
             "Below are some custom selections from the user:\n\n"
             f"- Report Vulnerability Via: {report_via_value}\n"
             f"- Disclosure Policy Time: {disclosure_time_value}\n"
@@ -215,7 +216,7 @@ class SecurityGeneratorTab(ttk.Frame):
             "## Disclosure Policy\nWe follow a responsible disclosure policy. Upon receiving a vulnerability report, we will acknowledge it within {disclosure_time_value} days and work to resolve the issue within two weeks. Details of fixed vulnerabilities will be publicly disclosed once the fix is released.\n\n"
             "## Preferred Languages\nWe prefer all communications to be in English.\n\n"
             "## License\nInclude the license information from the `README.md` dont write entire license just information."
-            "As a output just write `SECURITY.md` file with the above content"
+            "As a output just write `SECURITY.md` file with the above content and nothing else no comments or explanations.\n\n"
         )
 
         if repo_selection_info['type'] == 'local':
