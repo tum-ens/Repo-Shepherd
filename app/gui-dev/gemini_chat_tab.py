@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
+import threading
 import tempfile
 from pathlib import Path
 
@@ -15,8 +16,8 @@ from app.utils.utils import (
 
 import google.generativeai as genai
 
-# Default model to use if shared variable is set to "auto"
-MODEL_NAME = "gemini-1.5-flash"
+# You can change this if you have a different model for chat.
+MODEL_NAME = "gemini-1.5-flash" # Default model if 'auto' is selected
 
 class GeminiChatTab(ttk.Frame):
     def __init__(self, parent, shared_vars):
@@ -86,8 +87,12 @@ class GeminiChatTab(ttk.Frame):
             return
 
         self._append_text("Initializing repository context...\n")
-        # Run initialization synchronously on the main thread
-        self._initialize_repo_context_thread(repo_input, repo_type, api_key)
+        # Start the background thread with captured values
+        threading.Thread(
+            target=self._initialize_repo_context_thread,
+            args=(repo_input, repo_type, api_key),
+            daemon=True
+        ).start()
 
     def _initialize_repo_context_thread(self, repo_input, repo_type, api_key):
         try:
@@ -98,6 +103,7 @@ class GeminiChatTab(ttk.Frame):
                 repo_path = clone_remote_repo(repo_input)
             self.repo_path = repo_path
 
+            import tempfile
             temp_dir = tempfile.TemporaryDirectory()
             self.temp_dir = temp_dir  # Keep reference to avoid early cleanup
             output_txt_path = Path(temp_dir.name) / "repo_content.txt"
@@ -106,7 +112,14 @@ class GeminiChatTab(ttk.Frame):
             convert_repo_to_txt(repo_path, output_txt_path)
 
             # Configure Gemini API using the passed API key
-            configure_genai_api(api_key)
+            # IMPORTANT: Ensure configure_genai_api is thread-safe if it does global config.
+            # It's generally okay if it just calls genai.configure(api_key=...).
+            try:
+                configure_genai_api(api_key)
+            except Exception as config_err:
+                 # Use _append_text to safely update UI from this thread
+                self._append_text(f"Error configuring Gemini API: {config_err}\n")
+                return # Stop if API config fails
 
             # Upload the text file to Gemini
             self.uploaded_file = upload_file_to_gemini(output_txt_path)
@@ -118,48 +131,85 @@ class GeminiChatTab(ttk.Frame):
         user_input = self.chat_entry.get().strip()
         if not user_input:
             return
+
+        # --- Read shared variables in the main thread ---
+        selected_model_config = self.shared_vars.get('default_gemini_model').get()
+        api_key = self.shared_vars.get('api_gemini_key').get().strip() # Get API key again, in case it changed? Safer to re-read.
+
+        if not api_key:
+             self._append_text("Error: API key is not set in the Setup tab.\n")
+             return
+
+        # Determine the actual model name string to use
+        model_name_to_use = MODEL_NAME # Default
+        if selected_model_config != "auto" and selected_model_config:
+            model_name_to_use = selected_model_config
+        # -------------------------------------------------
+
         # Append user message in red with a blank line after it
         self._append_text(f"You: {user_input}\n\n", tag="user")
         self.chat_entry.delete(0, tk.END)
+
         prompt = (
             "You are a helpful assistant for using and developing the repository. Based on the repository content provided, answer the following question:\n\n"
             f"Question: {user_input}\n\nAnswer:"
         )
-        # Call generate_gemini_response directly (synchronously) on the main thread.
-        self.generate_gemini_response(prompt)
 
-    def generate_gemini_response(self, prompt):
+        # Pass the determined model name string and api_key to the background thread
+        threading.Thread(
+            target=self.generate_gemini_response,
+            args=(prompt, model_name_to_use, api_key), # Pass model_name_to_use and api_key
+            daemon=True
+        ).start()
+
+    # Modified to accept model_name and api_key as arguments
+    def generate_gemini_response(self, prompt, model_name_to_use, api_key):
         try:
             if not self.uploaded_file:
                 self._append_text("Error: Repository context not initialized. Please click 'Initialize Repository Context' first.\n")
                 return
-            # Check the shared variable for default model selection.
-            shared_model = self.shared_vars.get('default_gemini_model').get()
-            if shared_model.lower() == "auto":
-                model_to_use = MODEL_NAME
-            else:
-                model_to_use = shared_model
 
-            # Debug: print and append the used model
-            debug_message = f"DEBUG: Using model -> {model_to_use}"
-            print(f"DEBUG [GeminiChatTab]: {debug_message}")
-            self._append_text(debug_message + "\n", tag="gemini")
+            # --- Configure API Key within the thread (safer for genai library) ---
+            # Although configured during init, re-configuring might be safer depending on genai's implementation
+            try:
+                # It's often better to configure the API key just before use within the thread
+                # if the library isn't explicitly documented as globally thread-safe.
+                genai.configure(api_key=api_key)
+            except Exception as config_err:
+                self._append_text(f"Error re-configuring Gemini API in thread: {config_err}\n")
+                return
+            # --------------------------------------------------------------------
 
-            model = genai.GenerativeModel(model_to_use)
+            # Use the model name passed as an argument
+            model = genai.GenerativeModel(model_name_to_use)
             response = model.generate_content([self.uploaded_file, "\n\n", prompt])
             answer = response.text.strip()
             # Append Gemini response in dark blue with a blank line after it
             self._append_text(f"Gemini: {answer}\n\n", tag="gemini")
         except Exception as e:
-            self._append_text(f"Error generating response: {e}\n\n")
+            # Make sure the error message itself doesn't cause another error
+            error_message = f"Error generating response: {e}\n\n"
+            self._append_text(error_message) # Display the actual error
+
 
     def _append_text(self, text, tag=None):
-        # Schedule the UI update to run on the main thread.
-        self.after(0, lambda: self._update_text(text, tag))
+        # Schedule the UI update to run on the main thread using self.after (original working version)
+        # This assumes 'self' (the Frame widget) is still valid and attached to the main loop.
+        try:
+            self.after(0, lambda: self._update_text(text, tag))
+        except tk.TclError as e:
+            # Handle cases where the widget might have been destroyed
+            print(f"Error scheduling UI update (_append_text): {e}")
+
 
     def _update_text(self, text, tag):
-        if tag:
-            self.chat_text.insert(tk.END, text, tag)
-        else:
-            self.chat_text.insert(tk.END, text)
-        self.chat_text.see(tk.END)
+        # This function runs in the main thread
+        try:
+            if tag:
+                self.chat_text.insert(tk.END, text, tag)
+            else:
+                self.chat_text.insert(tk.END, text)
+            self.chat_text.see(tk.END)
+        except tk.TclError as e:
+            # Handle cases where the text widget might have been destroyed
+             print(f"Error updating text widget (_update_text): {e}")
