@@ -52,6 +52,8 @@ class ReadmeAutomaticTab(tk.Frame):
             sections = readme.split_sections(file_path)
             empty_list, suggestion_dict, ready_dict = readme.check_section_existence(sections)
 
+
+            # Just provide an overall prompt to improve the readme.
             default_list = ['title&about', 'description', 'feature', 'requirement', 'installation', 'usage', 'contact', 'license']
             title = readme.improve_part(default_list[0], ready_dict[default_list[0]])
             description = readme.improve_part(default_list[1], ready_dict[default_list[1]])
