@@ -1,7 +1,6 @@
-# app/gui-dev/main.py
+# main.py
 import tkinter as tk
-from tkinter import ttk
-from tkinter import Menu
+from tkinter import ttk, messagebox
 import sv_ttk
 from configuration import ConfigTab
 from readme_automatic import ReadmeAutomaticTab
@@ -11,7 +10,6 @@ from security_generator import SecurityGeneratorTab
 from security_scanner_tab import SecurityScannerTab
 from gemini_chat_tab import GeminiChatTab
 from improve_structure_tab import ImproveStructureTab
-
 
 import os
 import sys
@@ -23,19 +21,16 @@ def show_frame(frame):
 
 root = tk.Tk()
 root.title("IDP")
-# root.geometry("800x600")  # Adjust the window size
-root.resizable(True, True) # Prevent the window from being resizable
-# Applying the theme
-# sv_ttk.use_dark_theme()
+# root.geometry("800x600")  # Adjust the window size if needed
+root.resizable(True, True)
 sv_ttk.use_light_theme()
 
 # Shared variable objects
 shared_vars = {
     'api_gemini_key': tk.StringVar(),
-    'repo_path_var': tk.StringVar(),          # Holds the local path or remote URL
-    'repo_type_var': tk.StringVar(value='local'), # Holds the repository type ('local' or 'remote')
-    'default_gemini_model': tk.StringVar(value="auto")  # New shared variable for Gemini model selection
-
+    'repo_path_var': tk.StringVar(),           # Holds the local path or remote URL
+    'repo_type_var': tk.StringVar(value='local'),  # Holds the repository type ('local' or 'remote')
+    'default_gemini_model': tk.StringVar(value="auto")  # Default Gemini model selection
 }
 
 # Configure the grid layout for the root window
@@ -56,8 +51,6 @@ frame_security_scanner = SecurityScannerTab(notebook, shared_vars)
 frame_gemini_chat = GeminiChatTab(notebook, shared_vars)
 frame_improve_structure = ImproveStructureTab(notebook, shared_vars)
 
-
-
 # Add frames to Notebook
 notebook.add(frame_setup, text='Setup')
 notebook.add(frame_automatic_readme, text='Readme Automatic')
@@ -68,8 +61,39 @@ notebook.add(frame_security_scanner, text='Security Scanner')
 notebook.add(frame_gemini_chat, text='Gemini Chat')
 notebook.add(frame_improve_structure, text='Improve Structure')
 
+# Initially disable all tabs except the Setup tab (index 0)
+for i in range(1, notebook.index("end")):
+    notebook.tab(i, state="disabled")
 
+# Function to enable/disable tabs based on API key and repo path values.
+def check_enable_tabs(*args):
+    api_key = shared_vars['api_gemini_key'].get().strip()
+    repo_path = shared_vars['repo_path_var'].get().strip()
+    if api_key and repo_path:
+        for i in range(1, notebook.index("end")):
+            notebook.tab(i, state="normal")
+    else:
+        for i in range(1, notebook.index("end")):
+            notebook.tab(i, state="disabled")
 
+# Trace changes on both variables to update tab states.
+shared_vars['api_gemini_key'].trace_add("write", check_enable_tabs)
+shared_vars['repo_path_var'].trace_add("write", check_enable_tabs)
+
+# Bind a click event on the Notebook to intercept clicks on disabled tabs.
+def on_notebook_click(event):
+    # Determine the tab index based on click coordinates.
+    try:
+        index = notebook.index(f"@{event.x},{event.y}")
+    except tk.TclError:
+        return
+    # Check if the clicked tab is disabled.
+    if notebook.tab(index, "state") == "disabled":
+        messagebox.showinfo("Information", "Please add API key and repo first.")
+        return "break"  # Prevent the default behavior.
+
+# Bind the left mouse button click event to the Notebook.
+notebook.bind("<Button-1>", on_notebook_click, add="+") 
 
 # Function to adjust root size based on the current tab
 def adjust_root_size(event=None):
@@ -89,4 +113,5 @@ def adjust_root_size(event=None):
 
 notebook.bind("<<NotebookTabChanged>>", adjust_root_size)
 adjust_root_size()
+
 root.mainloop()
