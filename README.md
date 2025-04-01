@@ -216,3 +216,18 @@ IDP's architecture consists of several key components:
    ### Conclusion
 
     The refactored code is more modular, readable, and maintainable. It includes input validation, error handling, and a clear separation of concerns. The `get_number()` function ensures that the user enters valid numbers, while the `calculate()` function performs the arithmetic operations. The `main()` function coordinates the entire process.
+
+## Troubleshooting
+
+### `General`
+
+1. **Error: "Package not found"**
+   * **Cause**: The required package is not installed.
+   * **Solution**: Install the missing tool using the following command:
+
+     ```bash
+     pip install -r requirements.txt
+     ```
+   * **Reference image**: (if available)
+
+TODO: add here more sections according to your tabs.

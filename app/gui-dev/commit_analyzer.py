@@ -330,6 +330,8 @@ class History_CM(tk.Frame):
             tk.messagebox.showwarning("Warning", "No repo selected. Please select a repo first.")
             return
 
+        self.clear()
+
         git_repo = git.Repo(self.repo.get())
 
         if not self.branch.get():
@@ -344,12 +346,14 @@ class History_CM(tk.Frame):
             widget.destroy()
 
         option = self.selected_option.get()
-        all_commits = list(git_repo.iter_commits(self.branch.get()))
-        self.commit_list.clear()
+        all_commits = list(git_repo.iter_commits(self.branch.get()))[:-1]
+        count_of_commits = len(all_commits)
         if (option == 1):
-            self.commit_list.extend(all_commits[:int(self.number.get())])
+            available_commits = min(int(self.number.get()), count_of_commits)
+            self.commit_list.extend(all_commits[:available_commits])
         elif (option == 2):
-            self.commit_list.extend(all_commits[-int(self.number.get()):])
+            available_commits = min(int(self.number.get()), count_of_commits)
+            self.commit_list.extend(all_commits[-available_commits:])
         elif (option == 3):
             self.commit_list.extend(all_commits)
         else:
@@ -366,6 +370,7 @@ class History_CM(tk.Frame):
             commit_button.pack(fill="x", padx=5, pady=2)
 
     def refine_all_commits(self):
+
         '''
         refine all commits on right frame
         '''
@@ -385,8 +390,14 @@ class History_CM(tk.Frame):
         total_commits = len(self.commit_list)
         progress["maximum"] = total_commits
 
-        for i, commit in enumerate(self.commit_list):
-            code_diff = "\n".join([patch.diff.decode("utf-8") for patch in commit.diff("HEAD~1", create_patch=True)])
+
+        for commit in self.commit_list:
+            # Refining Merge commits is useless
+            if commit.message.startswith("Merge branch"):
+                continue  
+
+            code_diff = "\n".join([patch.diff.decode("utf-8") for patch in commit.diff(commit.parents[0], create_patch=True)])
+
             original_CM = commit.message.strip()
             commit_hash = commit.hexsha
             refined_CM = improve_CM(code_diff, original_CM)
@@ -429,81 +440,91 @@ class History_CM(tk.Frame):
         
         self.has_unstashed_changes()
 
-        def get_commit_range(commit_hashes):
-            '''
-            Get commit range (from earlist to latest) from given commit_hashes
-            '''
-            git_repo = git.Repo(self.repo.get())
-
-            sorted_hashes = sorted(commit_hashes, key=lambda h: git_repo.commit(h).committed_datetime)
-
-            earliest_commit = sorted_hashes[0]  
-            # latest_commit = sorted_hashes[-1] 
-
-            # Best case, saving time, avoiding iterating from HEAD to earlist commit
-            # but it seems that git filter-branch can't use this phrase... 
-            # commit_range = f"{earliest_commit}^..{latest_commit}"
-            commit_range = f"{earliest_commit}^..HEAD"
-
-            return commit_range
-
-        msg_filter_script_if = """if [ "$GIT_COMMIT" = "{commit}" ]; then
-                    echo "{title}"
+        msg_filter_script_if = """
+        if test "$GIT_COMMIT" = "{commit}"; then
+            echo "{title}"
         {body}
                 """
-        msg_filter_script_elif = """elif [ "$GIT_COMMIT" = "{commit}" ]; then
-                    echo "{title}"
-        {body}
-                """
+        
+        bash_scripts = []
 
-        script_lines = []
+        git_repo = git.Repo(self.repo.get())
+        commit_messages = self.refined_messages.items()
+
+        # sort by commit time
+        sorted_messages = sorted(
+            commit_messages, 
+            key=lambda item: git_repo.commit(item[0]).committed_datetime, 
+            reverse=True
+        )
+
+        # return to dict
+        self.refined_messages = dict(sorted_messages)
+
         for i, (commit, message) in enumerate(self.refined_messages.items()):
             # If " or ' exists in bash code, they will occur instruction interrupt. Delete them.
             message = message.replace('"', '').replace("'", "")
 
             title, *body_lines = message.split("\n")
-            body = "\n".join(f"            echo \"{line}\"" for line in body_lines)
+            body = "\n".join(f"    echo \"{line}\"" for line in body_lines)
             
-            if i == 0:
-                script_lines.append(msg_filter_script_if.format(commit=commit, title=title, body=body))
-            else:
-                script_lines.append(msg_filter_script_elif.format(commit=commit, title=title, body=body))
+            script_lines = msg_filter_script_if.format(commit=commit, title=title, body=body)
+            # else:
+            #     script_lines.append(msg_filter_script_elif.format(commit=commit, title=title, body=body))
 
-        msg_filter = "\n".join(script_lines)
-                
-        commit_range = get_commit_range(list(self.refined_messages.keys()))
-
-        full_script = ("git filter-branch --msg-filter '" + "\n" 
-                        + msg_filter + "\n"
+            full_script = ("git filter-branch -f --msg-filter '" + "\n" 
+                        + script_lines + "\n"
                         + "else cat" + "\n"
-                        + "fi' " + commit_range + " && rm -fr \"$(git rev-parse --git-dir)/refs/original/\""
+                        + "fi' " + commit + "^..HEAD"
                         )
+
+            bash_scripts.append(full_script)
 
         try:
             # Windows need to run bash code on git-bash, not shell
             if sys.platform.startswith("win"):  # Windows
                 # Should ask user to configurate git bash position
+                for script in bash_scripts:
+                    subprocess.run(
+                        ["C:/Program Files/Git/bin/bash.exe", "-c", script],
+                        check=True, cwd=self.repo.get()
+                    )
                 subprocess.run(
-                ["C:/Program Files/Git/bin/bash.exe", "-c", full_script],
-                check=True, cwd=self.repo.get()
-            )
+                        ["C:/Program Files/Git/bin/bash.exe", "-c", "rm -fr \"$(git rev-parse --git-dir)/refs/original/\""],
+                        check=True, cwd=self.repo.get()
+                    )
+                    
             elif sys.platform.startswith("darwin"):  # macOS
-                script_path = "/tmp/git_script.sh"
-                with open(script_path, "w") as file:
-                    file.write("#!/bin/bash" + "\n" + full_script)
-                os.chmod(script_path, 0o755)  # Make it executable
-                
-
-                subprocess.run([script_path], shell=False, check=True, cwd=self.repo.get())
-                os.remove(script_path)
+                for script in bash_scripts:
+                    script_path = "/tmp/git_script.sh"
+                    with open(script_path, "w") as file:
+                        file.write("#!/bin/bash" + "\n" + script)
+                    os.chmod(script_path, 0o755)  # Make it executable
+                    subprocess.run([script_path], shell=False, check=True, cwd=self.repo.get())
+                    os.remove(script_path)
+                subprocess.run("rm -fr $(git rev-parse --git-dir)/refs/original/", shell=True, check=True, cwd=self.repo.get())
+                    
             else:
                 tk.messagebox.showwarning("Warning", "Only support Windows & macOS.")
 
             subprocess.run(['git', 'push', '--force'], cwd=self.repo.get())
 
+            # Refresh fetched commits
+            self.clear()
+            self.fetch_commits()
+
         except subprocess.CalledProcessError as e:
             tk.messagebox.showwarning("Warning", f"Git commit failed: {e}")
 
+    def clear(self):
+        '''
+        Clear fetched commits in right frame.
+        '''
+        self.commit_list.clear()  
+        self.improved_commit_list.clear()  
+        self.refined_messages.clear()
+        for widget in self.commit_list_frame.winfo_children():
+            widget.destroy()
 
     def select_repo(self):
         popup = tk.Toplevel(self)
@@ -523,6 +544,8 @@ class History_CM(tk.Frame):
         # TODO remote
         remote_btn = tk.Button(popup, text="Remote") 
         remote_btn.pack(pady=5)
+
+        self.clear()
 
     def select_branch(self):
         git_repo = git.Repo(self.repo.get())
@@ -548,6 +571,8 @@ class History_CM(tk.Frame):
         
         tk.Button(branch_window, text="OK", command=confirm_selection).pack(pady=10)
 
+        self.clear()
+
     def show_commit_details(self, commit):
         commit_window = tk.Toplevel(self)
         commit_window.title("Commit Details")
@@ -565,7 +590,7 @@ class History_CM(tk.Frame):
 
         def refine_message():
             improved_text_area.delete("1.0", "end")
-            code_diff = "\n".join([patch.diff.decode("utf-8") for patch in commit.diff("HEAD~1", create_patch=True)])
+            code_diff = "\n".join([patch.diff.decode("utf-8") for patch in commit.parents[0].diff(commit, create_patch=True)])
             original_CM = commit.message.strip()
             commit_message = improve_CM(code_diff, original_CM)
             improved_text_area.insert(tk.END, commit_message)
@@ -614,7 +639,7 @@ class History_CM(tk.Frame):
         text_area.tag_configure("normal", foreground="black")
         text_area.pack(padx=10, pady=5, fill="both", expand=True)
 
-        diff_content = "\n".join([patch.diff.decode("utf-8") for patch in commit.diff("HEAD~1", create_patch=True)])
+        diff_content = "\n".join([patch.diff.decode("utf-8") for patch in commit.parents[0].diff(commit, create_patch=True)])
 
         for line in diff_content.splitlines():
 
