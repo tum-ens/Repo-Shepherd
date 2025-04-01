@@ -172,7 +172,12 @@ class SecurityGeneratorTab(ttk.Frame):
 
     def generate_security_md_process(self, repo_selection_info):
         API_KEY = self.shared_vars.get('api_gemini_key', tk.StringVar()).get()
-        MODEL_NAME = self.model_name
+        # Check the shared variable for default_gemini_model. Use the hardcoded model if it's set to "auto"
+        default_model = self.shared_vars.get('default_gemini_model', tk.StringVar(value="auto")).get()
+        if default_model != "auto":
+            MODEL_NAME = default_model
+        else:
+            MODEL_NAME = self.model_name
 
         # Read contact information directly from the Entry widgets.
         contact_name = self.contact_name_entry.get().strip()
@@ -293,7 +298,8 @@ if __name__ == "__main__":
     shared_vars = {
         'api_gemini_key': tk.StringVar(value="YOUR_API_KEY_HERE"),
         'repo_path_var': tk.StringVar(),
-        'repo_type_var': tk.StringVar(value='local')
+        'repo_type_var': tk.StringVar(value='local'),
+        'default_gemini_model': tk.StringVar(value="auto")
     }
     tab = SecurityGeneratorTab(root, shared_vars)
     tab.pack(expand=True, fill='both')
