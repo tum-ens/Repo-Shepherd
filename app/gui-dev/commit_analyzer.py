@@ -7,6 +7,7 @@ from utils.commit_message import generate_CM, improve_CM
 import sv_ttk
 import subprocess
 import git
+from utils.help_popup import HelpPopup
 
 class CommitAnalyzerTab(tk.Frame):
     def __init__(self, root, shared_vars):
@@ -24,7 +25,7 @@ class CommitAnalyzerTab(tk.Frame):
         title_label = ttk.Label(self, text="Commit message generator", font=("Arial", 16))
         title_label.grid(row=0, column=0, pady=(20, 10))  # Reduced pady for title
 
-        description_label = ttk.Label(self, text="\n- Click on the \"Current\" button to edit the commit message for the current commit. \n- Click on the \"History\" button to view and edit past commit messages.", font=("Arial", 14))
+        description_label = ttk.Label(self, text="\n- Click on the \"Current\" button to edit the commit message for the current commit. \n- Click on the \"History\" button to view and edit past commit messages. \n- Then, Click on the \"Help\" to get guide of this tab.", font=("Arial", 14))
         description_label.grid(row=1, column=0, pady=(10, 10))  # Row 1, increased pady for description
 
         self.button1 = ttk.Button(self, text="Current", command=self.open_screen1)
@@ -107,10 +108,13 @@ class Current_CM(tk.Frame):
         self.commit_text = scrolledtext.ScrolledText(self.left_frame, width=50, height=10)
         self.commit_text.pack(pady=10)
 
-        # buttons
+        # buttons        
+        
+        help_btn = tk.Button(self.left_frame, text="Help", command=self.help)
         generate_btn = tk.Button(self.left_frame, text="Generate", command=self.generate_commit_message)
         commit_btn = tk.Button(self.left_frame, text="Commit", command=self.commit_changes)
         push_btn = tk.Button(self.left_frame, text="Push", command=self.push_changes)
+        help_btn.pack(side="left", expand=True, fill="x", padx=5)
         generate_btn.pack(side="left", expand=True, fill="x", padx=5)
         commit_btn.pack(side="left", expand=True, fill="x", padx=5)
         push_btn.pack(side="left", expand=True, fill="x", padx=5)
@@ -206,7 +210,7 @@ class Current_CM(tk.Frame):
         self.commit_text.delete("1.0", "end")
         content = self.diff_text.get("1.0", tk.END)
         if not self.selected_files:
-            tk.messagebox.showwarning("Warning", "No files selected for commit!")
+            messagebox.showwarning("Warning", "No files selected for commit!")
             return
         commit_message = generate_CM(content)
         self.commit_text.insert(tk.END, commit_message)
@@ -214,30 +218,33 @@ class Current_CM(tk.Frame):
     def commit_changes(self):
         commit_msg = self.commit_text.get("1.0", tk.END).strip()
         if not commit_msg:
-            tk.messagebox.showwarning("Warning", "Commit message is empty!")
+            messagebox.showwarning("Warning", "Commit message is empty!")
             return
         selected_files = [f for f, var in self.file_vars.items() if var.get()]
         if not selected_files:
-            tk.messagebox.showwarning("Warning", "No files selected for commit!")
+            messagebox.showwarning("Warning", "No files selected for commit!")
             return
         try:
             subprocess.run(["git", "add"] + selected_files, check=True, cwd=self.repo)
             subprocess.run(["git", "commit", "-m", commit_msg], check=True, cwd=self.repo)
-            tk.messagebox.showwarning("Info", "Commit successfully")
+            messagebox.showinfo("Info", "Commit successfully")
             self.committed = True
         except subprocess.CalledProcessError as e:
-            tk.messagebox.showwarning("Warning", f"Git commit failed: {e}")
+            messagebox.showwarning("Warning", f"Git commit failed: {e}")
             
 
     def push_changes(self):
         if not self.committed:
-            tk.messagebox.showwarning("Warning", "You should commit first!")
+            messagebox.showwarning("Warning", "You should commit first!")
             return
         try:
             subprocess.run(['git', 'push'], cwd=self.repo)
             self.committed = False
         except subprocess.CalledProcessError as e:
-            tk.messagebox.showwarning("Warning", f"Git commit failed: {e}")
+            messagebox.showwarning("Warning", f"Git commit failed: {e}")
+
+    def help(self):
+        HelpPopup(self, "app/guide/Current_CM.png")
 
 
 class History_CM(tk.Frame):
@@ -250,6 +257,8 @@ class History_CM(tk.Frame):
         self.grid_rowconfigure(0, weight=1)
         self.repo = tk.StringVar()
         self.branch = tk.StringVar()
+        self.bash_path = tk.StringVar()
+        self.bash_path.set("C:/Program Files/Git/bin/bash.exe")
         # I don't know why, but it seems that if variables are not correctly updated, put parent frame as an initial value will solve the problem :(
         self.selected_option = tk.IntVar(parent)
         self.number = tk.StringVar(parent)
@@ -283,12 +292,20 @@ class History_CM(tk.Frame):
         commits_button.pack(anchor="center")
 
         # Git button
-        button_frame = tk.Frame(self.left_frame)
-        button_frame.pack(pady=20)
+        git_button_frame = tk.Frame(self.left_frame)
+        git_button_frame.pack(pady=20)
 
-        tk.Button(button_frame, text="Fetch", command=self.fetch_commits).pack(side=tk.LEFT, padx=5)
-        tk.Button(button_frame, text="Refine All", command=self.refine_all_commits).pack(side=tk.LEFT, padx=5)
-        tk.Button(button_frame, text="Push All", command=self.push_all_commits).pack(side=tk.LEFT, padx=5)
+        tk.Button(git_button_frame, text="Fetch", command=self.fetch_commits).pack(side=tk.LEFT, padx=5)
+        tk.Button(git_button_frame, text="Refine All", command=self.refine_all_commits).pack(side=tk.LEFT, padx=5)
+        tk.Button(git_button_frame, text="Push", command=self.push_all_commits).pack(side=tk.LEFT, padx=5)
+
+        # Navigation button
+        self.navi_label = tk.Label(self.left_frame, text="Navigation", font=("Arial", 12, "bold"))
+        self.navi_label.pack(pady=10, anchor="center")
+        navi_button_frame = tk.Frame(self.left_frame)
+        navi_button_frame.pack(pady=10)
+        tk.Button(navi_button_frame, text="Help", command=self.help).pack(side=tk.LEFT, padx=5)
+        tk.Button(navi_button_frame, text="Bash", command=self.change_bash_path).pack(side=tk.LEFT, padx=5)
 
         # right frame for selected commits
         self.right_frame = tk.Frame(self)
@@ -327,7 +344,7 @@ class History_CM(tk.Frame):
     def fetch_commits(self):
         
         if not self.repo.get():
-            tk.messagebox.showwarning("Warning", "No repo selected. Please select a repo first.")
+            messagebox.showwarning("Warning", "No repo selected. Please select a repo first.")
             return
 
         self.clear()
@@ -335,11 +352,11 @@ class History_CM(tk.Frame):
         git_repo = git.Repo(self.repo.get())
 
         if not self.branch.get():
-            tk.messagebox.showwarning("Warning", "No branch selected. Please select a branch first.")
+            messagebox.showwarning("Warning", "No branch selected. Please select a branch first.")
             return
         
         if not self.number.get().isdigit():
-            tk.messagebox.showwarning("Warning", "Invalid commit selection.")
+            messagebox.showwarning("Warning", "Invalid commit selection.")
             return
         
         for widget in self.commit_list_frame.winfo_children():
@@ -357,7 +374,7 @@ class History_CM(tk.Frame):
         elif (option == 3):
             self.commit_list.extend(all_commits)
         else:
-            tk.messagebox.showwarning("Warning", "Invalid commit selection.")
+            messagebox.showwarning("Warning", "Invalid commit selection.")
 
         for commit in self.commit_list:
             commit_button = tk.Button(
@@ -375,7 +392,7 @@ class History_CM(tk.Frame):
         refine all commits on right frame
         '''
         if not self.commit_list:
-            tk.messagebox.showwarning("Warning", "No commits fetched")
+            messagebox.showwarning("Warning", "No commits fetched")
             return
         
         # progress_window
@@ -391,7 +408,7 @@ class History_CM(tk.Frame):
         progress["maximum"] = total_commits
 
 
-        for commit in self.commit_list:
+        for i, commit in enumerate(self.commit_list):
             # Refining Merge commits is useless
             if commit.message.startswith("Merge branch"):
                 continue  
@@ -435,7 +452,7 @@ class History_CM(tk.Frame):
 
     def push_all_commits(self):
         if not self.refined_messages:
-            tk.messagebox.showwarning("Warning", "No edited commits to process.")
+            messagebox.showwarning("Warning", "No edited commits to process.")
             return
         
         self.has_unstashed_changes()
@@ -460,6 +477,18 @@ class History_CM(tk.Frame):
 
         # return to dict
         self.refined_messages = dict(sorted_messages)
+
+        # progress_window
+        progress_window = tk.Toplevel(self)
+        progress_window.title("Editing history")
+        progress_label = tk.Label(progress_window, text="Editing history...")
+        progress_label.pack(pady=10)
+        
+        progress = ttk.Progressbar(progress_window, orient=tk.HORIZONTAL, length=300, mode='determinate')
+        progress.pack(pady=20)
+        
+        total_edit = len(self.refined_messages)
+        progress["maximum"] = total_edit
 
         for i, (commit, message) in enumerate(self.refined_messages.items()):
             # If " or ' exists in bash code, they will occur instruction interrupt. Delete them.
@@ -486,14 +515,17 @@ class History_CM(tk.Frame):
                 # Should ask user to configurate git bash position
                 for script in bash_scripts:
                     subprocess.run(
-                        ["C:/Program Files/Git/bin/bash.exe", "-c", script],
-                        check=True, cwd=self.repo.get()
+                        [self.bash_path.get(), "-c", script], check=True, cwd=self.repo.get()
                     )
+                    # update progress
+                    progress["value"] = i + 1
+                    progress_window.update_idletasks()
+                progress_window.destroy()
                 subprocess.run(
-                        ["C:/Program Files/Git/bin/bash.exe", "-c", "rm -fr \"$(git rev-parse --git-dir)/refs/original/\""],
+                        [self.bash_path.get(), "-c", "rm -fr \"$(git rev-parse --git-dir)/refs/original/\""],
                         check=True, cwd=self.repo.get()
-                    )
-                    
+                )
+                     
             elif sys.platform.startswith("darwin"):  # macOS
                 for script in bash_scripts:
                     script_path = "/tmp/git_script.sh"
@@ -502,19 +534,24 @@ class History_CM(tk.Frame):
                     os.chmod(script_path, 0o755)  # Make it executable
                     subprocess.run([script_path], shell=False, check=True, cwd=self.repo.get())
                     os.remove(script_path)
+                    # update progress
+                    progress["value"] = i + 1
+                    progress_window.update_idletasks()
+                progress_window.destroy()
                 subprocess.run("rm -fr $(git rev-parse --git-dir)/refs/original/", shell=True, check=True, cwd=self.repo.get())
                     
             else:
-                tk.messagebox.showwarning("Warning", "Only support Windows & macOS.")
+                messagebox.showwarning("Warning", "Only support Windows & macOS.")
 
             subprocess.run(['git', 'push', '--force'], cwd=self.repo.get())
+            messagebox.showinfo("info", "Push successed. You can check them in the remote repo!")
 
             # Refresh fetched commits
             self.clear()
             self.fetch_commits()
 
         except subprocess.CalledProcessError as e:
-            tk.messagebox.showwarning("Warning", f"Git commit failed: {e}")
+            messagebox.showwarning("Warning", f"Git commit failed: {e}")
 
     def clear(self):
         '''
@@ -601,7 +638,11 @@ class History_CM(tk.Frame):
             """
             commit_hash = commit.hexsha
             refined_CM = improved_text_area.get(1.0, tk.END)
-            self.refined_messages.update({commit_hash: refined_CM})
+            if (refined_CM):
+                self.refined_messages.update({commit_hash: refined_CM})
+                messagebox.showinfo("Info", "Refined message saved!")
+            else:
+                messagebox.showwarning("Warning", "Refined message is empty!")
                     
         # Right Improved Text Area
         improved_text_area = tk.Text(commit_window, wrap=tk.WORD, height=20, width=50)
@@ -686,7 +727,33 @@ class History_CM(tk.Frame):
 
         save_button = tk.Button(popup, text="Save", command=save)
         save_button.grid(row=2, column=1, columnspan=2, padx=5, pady=5, sticky="we")
+    
+    def help(self):
+        HelpPopup(self, "")
 
+    def change_bash_path(self):
+        '''
+        Change path of git bash.
+        Git filter-branch must use git bash.
+        '''
+        popup = tk.Toplevel(self)
+        popup.title("Bash path")
+
+        tk.Label(popup, text="Git bash path:", font=("Helvetica", 11), bg="#f5f6f5").pack(pady=5)
+        entry = ttk.Entry(popup, font=("Helvetica", 11), width=50)
+        entry.pack(pady=5)
+
+        if self.bash_path.get():
+            entry.insert(0, self.bash_path.get())
+
+        def save_path():
+            '''
+            Save information users give
+            '''
+            self.bash_path.set(entry.get().strip())
+            messagebox.showinfo("Info", "Path saved!")
+            popup.destroy()
+        ttk.Button(popup, text="Save", command=save_path, style="Section.TButton").pack(pady=10)
 
 # For test, delete later
 if __name__ == "__main__":

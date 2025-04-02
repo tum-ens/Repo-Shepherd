@@ -7,7 +7,7 @@ import utils.llm_api as llm_api
 def convert_repo_to_txt():
     pass
 
-def create_part(part_name, info):
+def create_part(part_name, info, file_tree):
     '''
     Create the given section by gemini.
     :param: part_name: name of section
@@ -23,9 +23,15 @@ def create_part(part_name, info):
     # title need both title_prompt and about_prompt
     if info:
         output_prompt = prompts_repo["a_" + part_name] + info + "\n\n" + output_prompt
+
+    if file_tree:
+        file_tree_prompt = prompts_repo["file-tree"] + "\n\n" + file_tree
+    else:
+        file_tree_prompt = ""
     
     prompt = (meta_prompt + "\n\n"
         + prompts_repo[part_name] + "\n\n"
+        + file_tree_prompt + "\n\n"
         + output_prompt + "\n\n"
     )
     # During development I use together_ai since it's faster.
@@ -37,15 +43,21 @@ def create_part(part_name, info):
 
     return result
 
-def create_feature(existed_feature):
+def create_feature(existed_feature, file_tree):
     with open("app/prompts/creation_prompt.yaml", 'r') as file:
         prompts_repo = yaml.safe_load(file)
     features = [entry for entry in existed_feature if entry.strip()]
+    
+    if file_tree:
+        file_tree_prompt = prompts_repo["file-tree"] + "\n\n" + file_tree
+    else:
+        file_tree_prompt = ""
+
     meta_prompt = prompts_repo["meta-prompt"]
     feature_prompt = prompts_repo["feature"] + "List 1 feature. It should be different from:" + "\n\n"
     output_format = "You should only return feature and its description without any other sentences."
 
-    prompt = meta_prompt + feature_prompt + str(features) + "\n\n" + output_format
+    prompt = meta_prompt + feature_prompt + str(features) + "\n\n" + file_tree_prompt + "\n\n" + output_format
     result = llm_api.together_api(prompt)
     return result
 
