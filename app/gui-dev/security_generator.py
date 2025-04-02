@@ -27,7 +27,7 @@ class SecurityGeneratorTab(ttk.Frame):
         self.shared_vars = shared_vars
         self.grid(row=0, column=0, sticky='nsew')
 
-        self.model_name = "gemini-1.5-flash"
+        self.model_name = "gemini-2.0-flash"
         self.log_file_path = Path(__file__).parent.parent / "security_generator.log"
 
         # Shared variables for repository path and type are obtained from shared_vars
@@ -48,64 +48,100 @@ class SecurityGeneratorTab(ttk.Frame):
         self.main_frame = ttk.Frame(self, padding="20")
         self.main_frame.pack(expand=True, fill='both')
 
-        # Title
-        title_label = ttk.Label(self.main_frame, text="Security.md Generator", font=("Helvetica", 16, "bold"))
+        # Title label
+        title_label = ttk.Label(
+            self.main_frame,
+            text="Security.md Generator",
+            font=("Helvetica", 16, "bold")
+        )
         title_label.grid(row=0, column=0, columnspan=3, pady=10)
-
+        
+        # Description label
+        desc_text = (
+            "This tab helps you create a SECURITY.md file for your repository. "
+            "Customize the reporting method, disclosure policy time, preferred languages, "
+            "and contact information. Click the button below to generate your SECURITY.md document."
+        )
+        desc_label = ttk.Label(self.main_frame, text=desc_text, wraplength=500, justify="left")
+        desc_label.grid(row=1, column=0, columnspan=3, pady=(0, 10))
+        
         # Dropdown for Report Vulnerability Via
         report_via_label = ttk.Label(self.main_frame, text="Report Vulnerability Via:")
-        report_via_label.grid(row=1, column=0, sticky='w', padx=10, pady=5)
+        report_via_label.grid(row=2, column=0, sticky='w', padx=10, pady=5)
         self.report_via_combo = ttk.Combobox(
             self.main_frame,
             values=["Only With Issues", "Email", "Website Form", "Slack", "Other"],
             state="readonly"
         )
-        self.report_via_combo.grid(row=1, column=1, sticky='ew', padx=10, pady=5)
-
+        self.report_via_combo.grid(row=2, column=1, sticky='ew', padx=10, pady=5)
+        self.report_via_combo.bind("<<ComboboxSelected>>", self.on_report_via_selected)
+        
         # Disclosure Policy Time dropdown
         disclosure_time_label = ttk.Label(self.main_frame, text="Disclosure Policy Time:")
-        disclosure_time_label.grid(row=2, column=0, sticky='w', padx=10, pady=5)
+        disclosure_time_label.grid(row=3, column=0, sticky='w', padx=10, pady=5)
         self.disclosure_time_combo = ttk.Combobox(
             self.main_frame,
             values=["7 Days", "14 Days", "30 Days", "Custom"],
             state="readonly"
         )
-        self.disclosure_time_combo.grid(row=2, column=1, sticky='ew', padx=10, pady=5)
-
+        self.disclosure_time_combo.grid(row=3, column=1, sticky='ew', padx=10, pady=5)
+        self.disclosure_time_combo.bind("<<ComboboxSelected>>", self.on_disclosure_time_selected)
+        
         # Preferred Languages dropdown
         preferred_lang_label = ttk.Label(self.main_frame, text="Preferred Languages:")
-        preferred_lang_label.grid(row=3, column=0, sticky='w', padx=10, pady=5)
+        preferred_lang_label.grid(row=4, column=0, sticky='w', padx=10, pady=5)
         self.language_combo = ttk.Combobox(
             self.main_frame,
             values=["English*", "Spanish", "French", "German", "Other"],
             state="readonly"
         )
-        self.language_combo.grid(row=3, column=1, sticky='ew', padx=10, pady=5)
-
+        self.language_combo.grid(row=4, column=1, sticky='ew', padx=10, pady=5)
+        self.language_combo.bind("<<ComboboxSelected>>", self.on_language_selected)
+        
         # Contact Information fields 
         contact_info_label = ttk.Label(
             self.main_frame,
             text="Contact Information (if left empty, README.md contact info will be used):"
         )
-        contact_info_label.grid(row=4, column=0, columnspan=3, sticky='w', padx=10, pady=5)
+        contact_info_label.grid(row=5, column=0, columnspan=3, sticky='w', padx=10, pady=5)
 
         # Contact Name
         self.contact_name_label = ttk.Label(self.main_frame, text="Contact Name:")
-        self.contact_name_label.grid(row=5, column=0, sticky='w', padx=10, pady=5)
+        self.contact_name_label.grid(row=6, column=0, sticky='w', padx=10, pady=5)
         self.contact_name_entry = ttk.Entry(self.main_frame, textvariable=self.contact_name_var, width=50)
-        self.contact_name_entry.grid(row=5, column=1, sticky='ew', padx=10, pady=5)
+        self.contact_name_entry.grid(row=6, column=1, sticky='ew', padx=10, pady=5)
 
         # Contact Email
         self.contact_email_label = ttk.Label(self.main_frame, text="Contact Email:")
-        self.contact_email_label.grid(row=6, column=0, sticky='w', padx=10, pady=5)
+        self.contact_email_label.grid(row=7, column=0, sticky='w', padx=10, pady=5)
         self.contact_email_entry = ttk.Entry(self.main_frame, textvariable=self.contact_email_var, width=50)
-        self.contact_email_entry.grid(row=6, column=1, sticky='ew', padx=10, pady=5)
+        self.contact_email_entry.grid(row=7, column=1, sticky='ew', padx=10, pady=5)
 
         # Generate button and status label
         self.generate_button = ttk.Button(self.main_frame, text="Generate SECURITY.md", command=self.start_generation)
-        self.generate_button.grid(row=7, column=0, columnspan=3, pady=20)
+        self.generate_button.grid(row=8, column=0, columnspan=3, pady=20)
         self.status_label = ttk.Label(self.main_frame, text="", wraplength=400)
-        self.status_label.grid(row=8, column=0, columnspan=3, pady=10)
+        self.status_label.grid(row=9, column=0, columnspan=3, pady=10)
+
+    # Event handlers for enabling text entry when "Other" or "Custom" is selected:
+    def on_report_via_selected(self, event):
+        if self.report_via_combo.get() == "Other":
+            self.report_via_combo.config(state="normal")
+        else:
+            self.report_via_combo.config(state="readonly")
+
+    def on_disclosure_time_selected(self, event):
+        if self.disclosure_time_combo.get() == "Custom":
+            self.disclosure_time_combo.config(state="normal")
+        else:
+            self.disclosure_time_combo.config(state="readonly")
+
+    def on_language_selected(self, event):
+        if self.language_combo.get() == "Other":
+            self.language_combo.config(state="normal")
+        else:
+            self.language_combo.config(state="readonly")
+
 
     def start_generation(self):
         # Get repository info from shared variables (set in the Config tab)
@@ -184,7 +220,7 @@ class SecurityGeneratorTab(ttk.Frame):
         contact_email = self.contact_email_entry.get().strip()
 
         if not contact_name and not contact_email:
-            custom_contact_info = "Using contact information provided in README.md.\n"
+            custom_contact_info = "(Use contact information provided in README.txt filei i already uploaded)"
         else:
             custom_contact_info = (
                 f"Contact Name: {contact_name}\n"
@@ -207,7 +243,7 @@ class SecurityGeneratorTab(ttk.Frame):
             f"- Contact Info Setup:\n{custom_contact_info}\n"
             "## Summary\nProvide a brief overview of the security policy and its importance to the project.\n\n"
             "## Reporting Vulnerabilities\nPlease report security vulnerabilities through {report_via_value}. "
-            "\n- Contact the [security team](mailto:security@example.com) via email.\n\n"
+            "\n- Contact the [security team](mailto:{contact_email}) via email.\n\n"
             "**Please include as much of the information listed below as possible to help us better understand and resolve the issue:**\n\n"
             "- **Type of issue:** (e.g., buffer overflow, SQL injection, cross-site scripting)\n"
             "- **Affected version(s):**\n"
@@ -219,7 +255,8 @@ class SecurityGeneratorTab(ttk.Frame):
             "- **Log files related to the issue:** (if possible)\n"
             "- **Proof-of-concept or exploit code:** (if possible)\n\n"
             "## Disclosure Policy\nWe follow a responsible disclosure policy. Upon receiving a vulnerability report, we will acknowledge it within {disclosure_time_value} days and work to resolve the issue within two weeks. Details of fixed vulnerabilities will be publicly disclosed once the fix is released.\n\n"
-            "## Preferred Languages\nWe prefer all communications to be in English.\n\n"
+            "## Preferred Languages\nWe prefer all communications to be in {language_value}.\n\n"
+            "## Contact Info.\ncustom_contact_info\n\n"
             "## License\nInclude the license information from the `README.md` dont write entire license just information."
             "As a output just write `SECURITY.md` file with the above content and nothing else no comments or explanations.\n\n"
         )
