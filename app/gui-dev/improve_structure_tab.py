@@ -35,26 +35,36 @@ class ImproveStructureTab(ttk.Frame):
             font=("Helvetica", 16, "bold")
         )
         title_label.grid(row=0, column=0, columnspan=2, pady=10)
-
+        
+        # Description label (new)
+        desc_text = (
+            "This tab helps you optimize your project's file structure. "
+            "It analyzes your repository and compares it with cookiecutter popular project templates "
+            "to suggest an improved and more organized file tree along with brief explanations."
+        )
+        desc_label = ttk.Label(self.main_frame, text=desc_text, wraplength=500, justify="left")
+        desc_label.grid(row=1, column=0, columnspan=2, pady=(0, 10))
+        
         # Button to start the improvement process
         self.improve_button = ttk.Button(
             self.main_frame,
-            text="Improve Structure",
+            text="Get Project Structure Recommendation",
             command=self.run_improvement
         )
-        self.improve_button.grid(row=1, column=0, columnspan=2, pady=10)
+        self.improve_button.grid(row=2, column=0, columnspan=2, pady=10)
 
         # Status label to display progress or errors
         self.status_label = ttk.Label(self.main_frame, text="", wraplength=400, foreground="black")
-        self.status_label.grid(row=2, column=0, columnspan=2, pady=10)
+        self.status_label.grid(row=3, column=0, columnspan=2, pady=10)
 
         # Text widget to display the improved project structure
         self.output_text = tk.Text(self.main_frame, height=12, wrap="word")
-        self.output_text.grid(row=3, column=0, columnspan=2, pady=10, sticky="nsew")
+        self.output_text.grid(row=4, column=0, columnspan=2, pady=10, sticky="nsew")
 
         # Allow the text widget to expand
         self.main_frame.grid_columnconfigure(0, weight=1)
-        self.main_frame.grid_rowconfigure(3, weight=1)
+        self.main_frame.grid_rowconfigure(4, weight=1)
+
 
     def run_improvement(self):
         # Capture shared variables in the main thread
