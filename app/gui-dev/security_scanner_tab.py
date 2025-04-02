@@ -69,6 +69,16 @@ class SecurityScannerTab(ttk.Frame):
         # Title label
         title_label = ttk.Label(self, text="Security Scanner", font=("Helvetica", 16, "bold"))
         title_label.pack(pady=10)
+        # Description label for the tab
+        desc_text = (
+            "This tab scans your repository to detect potential vulnerabilities.\n\n"
+            "• First Pass: Performs an initial scan of all code files and generates a preliminary report "
+            "with detected vulnerabilities and a threat summary.\n"
+            "• Second Pass: Refines the first pass report by reanalyzing the findings with additional "
+            "context from your repository, resulting in an improved and more accurate vulnerability report and a threat summary."
+        )
+        desc_label = ttk.Label(self, text=desc_text, wraplength=500, justify="left")
+        desc_label.pack(pady=(0, 10))
 
         # Buttons for first and second pass
         self.first_pass_button = ttk.Button(self, text="Run First Pass", command=self.run_first_pass)
@@ -208,7 +218,7 @@ class SecurityScannerTab(ttk.Frame):
             summary_text = json.dumps(threat_summary, indent=4)
             self.after(0, lambda: self.summary_text.delete("1.0", tk.END))
             self.after(0, lambda: self.summary_text.insert(tk.END, summary_text))
-            self.after(0, lambda: messagebox.showinfo("Success", f"First pass completed.\nResults saved to:\n{output_path}"))
+            self.after(0, lambda: messagebox.showinfo("Success", f"First pass completed.\nvulnerability report to:\n{output_path}"))
         except Exception as e:
             self.after(0, lambda: messagebox.showerror("Error", f"First pass failed: {e}"))
         finally:
@@ -380,7 +390,7 @@ class SecurityScannerTab(ttk.Frame):
             summary_text = json.dumps(final_summary, indent=4)
             self.after(0, lambda: self.summary_text.delete("1.0", tk.END))
             self.after(0, lambda: self.summary_text.insert(tk.END, summary_text))
-            self.after(0, lambda: messagebox.showinfo("Success", f"Second pass completed.\nResults saved to:\n{output_path}"))
+            self.after(0, lambda: messagebox.showinfo("Success", f"Second pass completed.\nvulnerability report saved to:\n{output_path}"))
         except Exception as e:
             self.after(0, lambda: messagebox.showerror("Error", f"Second pass failed: {e}"))
         finally:
