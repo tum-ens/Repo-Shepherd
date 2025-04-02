@@ -29,6 +29,26 @@ class GeminiChatTab(ttk.Frame):
         self.create_widgets()
 
     def create_widgets(self):
+        # Header frame for title and description
+        header_frame = ttk.Frame(self)
+        header_frame.pack(fill=tk.X, pady=5)
+        
+        title_label = ttk.Label(header_frame, text="Gemini Chat", font=("Helvetica", 16, "bold"))
+        title_label.pack(pady=(0, 2))
+        
+        desc_label = ttk.Label(
+            header_frame,
+            text=(
+            "With this chat bot, you can talk with your AI assistant about selected repository. "
+            "Ask questions, get tailored insights, or request help based on project's content. "
+            "Simply initialize your repository context, then start chatting to explore and understand selected repo better. "
+            "You can use this feature in any language, reducing language barriers for foreign projects as well."
+        ),
+            wraplength=500,
+            justify="left"
+        )
+        desc_label.pack(pady=(0, 10))
+        
         # Top frame with initialization and clear chat buttons
         top_frame = ttk.Frame(self)
         top_frame.pack(fill=tk.X, pady=5)
@@ -69,6 +89,7 @@ class GeminiChatTab(ttk.Frame):
 
         send_button = ttk.Button(bottom_frame, text="Send", command=self.send_message)
         send_button.pack(side=tk.LEFT, padx=5)
+
 
     def clear_chat(self):
         self.chat_text.delete("1.0", tk.END)
