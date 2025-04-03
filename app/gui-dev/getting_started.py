@@ -6,36 +6,58 @@ class GettingStartedTab(ttk.Frame):
     def __init__(self, parent, shared_vars):
         super().__init__(parent)
         self.shared_vars = shared_vars
-        self.grid(row=0, column=0, sticky='nsew')  # Make it fill the tab
-        
-        # Create a Text widget for the content
-        intro_text = tk.Text(self, wrap='word', height=20, width=80)
-        intro_text.grid(row=0, column=0, padx=10, pady=10, sticky='nsew')
-        
-        # Make it read-only
+        self.notebook = parent  # Store notebook reference for tab switching
+        self.grid(row=0, column=0, sticky='nsew')
+
+        # Header Label
+        header = ttk.Label(self, text="Welcome to IDP!", font=("Helvetica", 16, "bold"))
+        header.grid(row=0, column=0, padx=10, pady=(10, 5), sticky='ew')
+
+        # Separator
+        separator = ttk.Separator(self, orient='horizontal')
+        separator.grid(row=1, column=0, padx=10, pady=5, sticky='ew')
+
+        # Text Widget with styled content
+        intro_text = tk.Text(self, wrap='word', height=20, width=80, font=("Helvetica", 10))
+        intro_text.grid(row=2, column=0, padx=10, pady=5, sticky='nsew')
+
+        # Configure tags for styling
+        intro_text.tag_configure("bold", font=("Helvetica", 18, "bold"))
+        intro_text.tag_configure("title", font=("Helvetica", 20, "bold"))
+        intro_text.tag_configure("text", font=("Helvetica", 16))
+
+        # Insert content
         intro_text.config(state='normal')
-        intro_text.insert('1.0', self.get_intro_content())
+        self.insert_styled_content(intro_text)
         intro_text.config(state='disabled')
-        
-        # Configure grid to expand
-        self.grid_rowconfigure(0, weight=1)
-        self.grid_columnconfigure(0, weight=1)
 
-    def get_intro_content(self):
-        return """Welcome to IDP(?) {We need a name xD}!
+        # Button to switch to Setup tab
+        setup_button = ttk.Button(self, text="Get Started - Go to Setup", command=self.switch_to_setup)
+        setup_button.grid(row=3, column=0, padx=10, pady=10, sticky='s')
 
-    What is IDP?
-    IDP uses AI language models (LLMs) to analyze and enhance Python repositories. Whether you're a researcher or developer, IDP simplifies improving your code projects.
+        # Configure grid weights
+        self.grid_rowconfigure(2, weight=1)  # Text expands vertically
+        self.grid_columnconfigure(0, weight=1)  # Everything expands horizontally
 
-    How can IDP help you?
-    - Generate READMEs automatically from your code.
-    - Improve existing READMEs with better structure.
-    - Analyze commit history and suggest messages.
-    - Create a clean project structure.
-    - Scan for security vulnerabilities and generate a SECURITY.md.
-    - Chat with an AI assistant about your repo.
+    def insert_styled_content(self, text_widget):
+        content = [
+            ("Your Repository Professionalization Tool\n\n", "title"),
+            ("What is IDP?\n", "bold"),
+            ("IDP uses AI language models (LLMs) to analyze and enhance Python repositories. Whether you're a researcher or developer, IDP simplifies improving your code projects.\n\n", None),
+            ("What can you do with IDP?\n", "bold"),
+            ("- Generate READMEs automatically from your code.\n"
+             "- Improve existing READMEs with better structure.\n"
+             "- Analyze commit history and suggest messages.\n"
+             "- Create a clean project structure.\n"
+             "- Scan for security vulnerabilities and generate a SECURITY.md.\n"
+             "- Chat with an AI assistant about your repo.\n\n", "text"),
+            ("How to get started:\n", "bold"),
+            ("1. Go to the 'Setup' tab.\n"
+             "2. Enter your API key (e.g., Gemini) and repository path (local or remote).\n"
+             "3. Once set up, all tabs unlock—explore and enhance your project!\n", "text"),
+        ]
+        for text, tag in content:
+            text_widget.insert('end', text, tag if tag else ())
 
-    How to Get Started:
-    1. Go to the 'Setup' tab.
-    2. Enter your API key (e.g., Gemini) and repository path (local or remote).
-    3. Once set up, all tabs unlock—explore and enhance your project!"""
+    def switch_to_setup(self):
+        self.notebook.select(1)  # Switch to Setup tab (index 1)
