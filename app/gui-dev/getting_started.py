@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
+import webbrowser
 
 
 class GettingStartedTab(ttk.Frame):
@@ -31,13 +32,27 @@ class GettingStartedTab(ttk.Frame):
         self.insert_styled_content(intro_text)
         intro_text.config(state='disabled')
 
+        # Frame to hold repository and documentation buttons
+        button_frame = ttk.Frame(self)
+        button_frame.grid(row=3, column=0, padx=10, pady=(5, 2), sticky='ew')
+
+        # Buttons for repository and documentation links
+        button_width = 30  # Standard width for all buttons
+
+        repo_button = ttk.Button(button_frame, text="Project Repository", command=lambda: self.open_link("https://github.com/carloslme/tum-idp"), width=button_width)
+        repo_button.grid(row=0, column=0, padx=(0, 5), pady=5, sticky='ew')
+
+        docs_button = ttk.Button(button_frame, text="Read the Docs (Coming Soon)", command=lambda: self.open_link("https://example.com/docs"), width=button_width)
+        docs_button.grid(row=0, column=1, padx=(5, 0), pady=5, sticky='ew')
+
         # Button to switch to Setup tab
-        setup_button = ttk.Button(self, text="Get Started - Go to Setup", command=self.switch_to_setup)
-        setup_button.grid(row=3, column=0, padx=10, pady=10, sticky='s')
+        setup_button = ttk.Button(self, text="Get Started - Go to Setup", command=self.switch_to_setup, width=button_width)
+        setup_button.grid(row=4, column=0, padx=10, pady=10, sticky='s')
 
         # Configure grid weights
         self.grid_rowconfigure(2, weight=1)  # Text expands vertically
         self.grid_columnconfigure(0, weight=1)  # Everything expands horizontally
+        button_frame.grid_columnconfigure((0, 1), weight=1)  # Buttons expand equally
 
     def insert_styled_content(self, text_widget):
         content = [
@@ -61,3 +76,6 @@ class GettingStartedTab(ttk.Frame):
 
     def switch_to_setup(self):
         self.notebook.select(1)  # Switch to Setup tab (index 1)
+
+    def open_link(self, url):
+        webbrowser.open(url)  # Opens the given URL in the default web browser
