@@ -6,8 +6,11 @@ from tkinter import messagebox, filedialog, ttk
 from app.improvement_main_window import split_sections, improve_part
 from app.utils.creation import create_part, create_feature, structure_markdown
 from app.utils.repo_structure import generate_file_tree, convert_repo_to_txt
+from app.utils.utils import configure_genai_api, get_local_repo_path, clone_remote_repo
 import sv_ttk
+import google.generativeai as genai
 from app.utils.help_popup import HelpPopup
+from pathlib import Path
 
 
 class ReadmeImprovementTab(tk.Frame):
@@ -22,7 +25,6 @@ class ReadmeImprovementTab(tk.Frame):
         # Centering the grid content
         self.grid_columnconfigure(0, weight=1)
         self.grid_rowconfigure(4, weight=1)  # Allow content_frame to expand vertically
-        
         title_label = ttk.Label(self, text="This is the Readme Improvement Generator", font=("Arial", 16))
         title_label.grid(row=0, column=0, pady=(20, 10))  # Reduced pady for title
 
@@ -52,30 +54,50 @@ class ReadmeImprovementTab(tk.Frame):
         self.root.minsize(min_width, min_height)
 
     def open_screen1(self):
-        file = filedialog.askopenfilename(title="Select File", filetypes=[("Markdown Files", "*.md *.markdown")])
-        if not file or not file.lower().endswith(('.md', '.markdown')):
-            messagebox.showwarning("Invalid File", "Please select a valid Markdown file (.md or .markdown).")
-        else:
-            self.file = file
-            self.update_content(Improvement)
-            self.adjust_root_size()
+        self.update_content(Improvement)
+        self.adjust_root_size()
 
     def open_screen2(self):
         self.update_content(Creation)
         self.adjust_root_size()
 
     def update_content(self, content_class):
+        repo_input = self.shared_vars.get("repo_path_var").get().strip()
+        repo_type = self.shared_vars.get("repo_type_var").get()
+        api_key = self.shared_vars.get("api_gemini_key").get().strip()
+        model_name = self.shared_vars.get("default_gemini_model").get()
+
+        repo_path = ""
+        if repo_type == "local":
+            repo_path = str(get_local_repo_path(repo_input))
+        else:
+            repo_path = str(clone_remote_repo(repo_input))
+
+        configure_genai_api(api_key)
+        model = genai.GenerativeModel(model_name)
+
         for widget in self.content_frame.winfo_children():
             widget.destroy()
         if content_class == Improvement:
-            Improvement(self.content_frame, self.file)
+            Improvement(self.content_frame, repo_path, model)
         else:
-            Creation(self.content_frame)
+            Creation(self.content_frame, repo_path, model)
 
 class Improvement(tk.Frame):
-    def __init__(self, parent, file):
+    def __init__(self, parent, repo_path, model):
         super().__init__(parent)
         self.parent = parent
+        self.repo_path = repo_path
+        self.model = model
+
+        readme_files = [f for f in Path(self.repo_path).iterdir() if f.is_file() and f.name.lower() == "readme.md"]
+
+        if readme_files:
+            file = readme_files[0]  
+            self.file = file
+        else:
+            messagebox.showwarning("Invalid File", "No valid Markdown file (.md or .markdown) found.")
+
         self.grid(row=0, column=0, sticky='nsew')
         self.grid_columnconfigure(1, weight=1)
         self.grid_columnconfigure(2, weight=1)
@@ -87,7 +109,7 @@ class Improvement(tk.Frame):
         self.left_frame = tk.Frame(self)
         self.left_frame.grid(row=0, column=0, sticky='nsew', padx=5)
 
-        self.section_text = split_sections(file)
+        self.section_text = split_sections(self.file)
         self.generated_section_text = tk.StringVar()
         self.generated_section_title = tk.StringVar()
         self.saved_text = {}
@@ -204,7 +226,7 @@ class Improvement(tk.Frame):
         '''
         text.delete("1.0", tk.END)
         original = self.section_text.get(section, "No original text.")
-        improved = improve_part(section, original, self.file_tree.get())
+        improved = improve_part(section, original, self.file_tree.get(), self.model)
         text.insert(tk.END, improved)
         self.generated_section_title.set(section)
         self.generated_section_text.set(improved)
@@ -220,12 +242,10 @@ class Improvement(tk.Frame):
         '''
         Select repo location and import file tree
         '''
-        repo = filedialog.askdirectory(title="Select Repository Folder")
-        if repo:
-            FileTreePopup(self, repo)
+        FileTreePopup(self, self.repo_path)
 
     def help(self):
-        HelpPopup(self, "app/guide/Readme_improvement.png")
+        HelpPopup("app/guide/Readme_improvement.png")
 
     def go_back(self):
         '''
@@ -235,9 +255,11 @@ class Improvement(tk.Frame):
             widget.destroy()
 
 class Creation(tk.Frame):
-    def __init__(self, parent):
+    def __init__(self, parent, repo_path, model):
         super().__init__(parent)
         self.parent = parent
+        self.repo_path = str(repo_path)
+        self.model = model
         self.grid(row=0, column=0, sticky='nsew')
         self.grid_columnconfigure(1, weight=1)
         self.grid_rowconfigure(0, weight=1)
@@ -374,7 +396,7 @@ class Creation(tk.Frame):
             'contact': ", ".join(self.contact),
             'license': self.selected_license.get()
         }.get(section)
-        improved = create_part(section, info, self.file_tree.get()) if info else "No content provided."
+        improved = create_part(section, info, self.file_tree.get(), self.model) if info else "No content provided."
         text.insert(tk.END, improved)
         self.text_updated = True
 
@@ -420,9 +442,7 @@ class Creation(tk.Frame):
         '''
         Select repo location and import file tree
         '''
-        repo = filedialog.askdirectory(title="Select Repository Folder")
-        if repo:
-            FileTreePopup(self, repo)
+        FileTreePopup(self, self.repo_path)
 
     def export(self):
         '''
@@ -442,7 +462,7 @@ class Creation(tk.Frame):
             ttk.Button(popup, text=lic, command=lambda l=lic: [self.selected_license.set(l), popup.destroy()], style="Section.TButton").pack(pady=5)
 
     def help(self):
-        HelpPopup(self,  "app/guide/Readme_Creation.png")
+        HelpPopup("app/guide/Readme_Creation.png")
 
     def go_back(self):
         '''
@@ -650,7 +670,7 @@ class DynamicEntryApp:
         '''
         Generate features by LLM
         '''
-        feature = create_feature(self.master.features)
+        feature = create_feature(self.master.features, self.master.file_tree.get(), self.master.model)
         entry.delete("1.0", tk.END)
         entry.insert(tk.END, feature)
         self.save_entries("feature")

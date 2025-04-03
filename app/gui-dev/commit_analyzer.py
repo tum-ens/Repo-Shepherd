@@ -2,11 +2,13 @@ import os
 import sys
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 import tkinter as tk
-from tkinter import scrolledtext, ttk, filedialog, messagebox, BooleanVar, Checkbutton
+from tkinter import scrolledtext, ttk, messagebox, BooleanVar, Checkbutton
 from utils.commit_message import generate_CM, improve_CM
+from utils.utils import configure_genai_api, get_local_repo_path, clone_remote_repo
 import sv_ttk
 import subprocess
 import git
+import google.generativeai as genai
 from utils.help_popup import HelpPopup
 
 class CommitAnalyzerTab(tk.Frame):
@@ -17,7 +19,6 @@ class CommitAnalyzerTab(tk.Frame):
 
         self.root = root.winfo_toplevel()  # Get the top-level Tk window, not the notebook
         self.file = None  # Variable to store the selected file
-        
         # Centering the grid content
         self.grid_columnconfigure(0, weight=1)
         self.grid_rowconfigure(4, weight=1)  # Allow content_frame to expand vertically
@@ -51,31 +52,40 @@ class CommitAnalyzerTab(tk.Frame):
         self.root.minsize(min_width, min_height)
 
     def open_screen1(self):
-        repo = filedialog.askdirectory(title="Select Repo")
-        if not repo:
-            messagebox.showwarning("Invalid Repo", "Please select a valid Repo.")
-        else:
-            self.repo = repo
-            self.update_content(Current_CM)
-            self.adjust_root_size()
+        self.update_content(Current_CM)
+        self.adjust_root_size()
 
     def open_screen2(self):
         self.update_content(History_CM)
         self.adjust_root_size()
 
     def update_content(self, content_class):
+        repo_input = self.shared_vars.get("repo_path_var").get().strip()
+        repo_type = self.shared_vars.get("repo_type_var").get()
+        api_key = self.shared_vars.get("api_gemini_key").get().strip()
+        model_name = self.shared_vars.get("default_gemini_model").get()
+    
+        if repo_type == "local":
+            self.repo_path = get_local_repo_path(repo_input)
+        else:
+            self.repo_path = clone_remote_repo(repo_input)
+
+        configure_genai_api(api_key)
+        self.model = genai.GenerativeModel(model_name)
+
         for widget in self.content_frame.winfo_children():
             widget.destroy()
         if content_class == Current_CM:
-            Current_CM(self.content_frame, self.repo)
+            Current_CM(self.content_frame, self.repo_path, self.model)
         else:
-            History_CM(self.content_frame)
+            History_CM(self.content_frame, self.repo_path, self.model)
 
 class Current_CM(tk.Frame):
-    def __init__(self, parent, repo):
+    def __init__(self, parent, repo_path, model):
         super().__init__(parent)
         self.parent = parent
-        self.repo = repo
+        self.repo = str(repo_path)
+        self.model = model
         self.grid(row=0, column=0, sticky='nsew')
         self.grid_columnconfigure(1, weight=1)
         self.grid_columnconfigure(2, weight=1)
@@ -212,7 +222,7 @@ class Current_CM(tk.Frame):
         if not self.selected_files:
             messagebox.showwarning("Warning", "No files selected for commit!")
             return
-        commit_message = generate_CM(content)
+        commit_message = generate_CM(content, self.model)
         self.commit_text.insert(tk.END, commit_message)
 
     def commit_changes(self):
@@ -244,18 +254,19 @@ class Current_CM(tk.Frame):
             messagebox.showwarning("Warning", f"Git commit failed: {e}")
 
     def help(self):
-        HelpPopup(self, "app/guide/Current_CM.png")
+        HelpPopup("app/guide/Current_CM.png")
 
 
 class History_CM(tk.Frame):
-    def __init__(self, parent):
+    def __init__(self, parent, repo_path, model):
         super().__init__(parent)
         self.parent = parent
         self.grid(row=0, column=0, sticky='nsew')
         self.grid_columnconfigure(1, weight=1)
         self.grid_columnconfigure(2, weight=1)
         self.grid_rowconfigure(0, weight=1)
-        self.repo = tk.StringVar()
+        self.repo = str(repo_path)
+        self.model = model
         self.branch = tk.StringVar()
         self.bash_path = tk.StringVar()
         self.bash_path.set("C:/Program Files/Git/bin/bash.exe")
@@ -273,11 +284,11 @@ class History_CM(tk.Frame):
         self.left_frame = tk.Frame(self)
         self.left_frame.grid(row=0, column=0, sticky='ns', padx=10)
 
-        # Select repo, either local or remote
-        self.repo_label = tk.Label(self.left_frame, text="Select repo", font=("Arial", 12, "bold"))
-        self.repo_label.pack(pady=10, anchor="center")
-        repo_button = tk.Button(self.left_frame, text="Repo", command=self.select_repo)
-        repo_button.pack(anchor="center")
+        # # Select repo, either local or remote
+        # self.repo_label = tk.Label(self.left_frame, text="Select repo", font=("Arial", 12, "bold"))
+        # self.repo_label.pack(pady=10, anchor="center")
+        # repo_button = tk.Button(self.left_frame, text="Repo", command=self.select_repo)
+        # repo_button.pack(anchor="center")
 
         # Select branch
         self.branch_label = tk.Label(self.left_frame, text="Select branch", font=("Arial", 12, "bold"))
@@ -342,14 +353,10 @@ class History_CM(tk.Frame):
         self.canvas.configure(scrollregion=self.canvas.bbox("all"))
 
     def fetch_commits(self):
-        
-        if not self.repo.get():
-            messagebox.showwarning("Warning", "No repo selected. Please select a repo first.")
-            return
-
+    
         self.clear()
 
-        git_repo = git.Repo(self.repo.get())
+        git_repo = git.Repo(self.repo)
 
         if not self.branch.get():
             messagebox.showwarning("Warning", "No branch selected. Please select a branch first.")
@@ -407,7 +414,6 @@ class History_CM(tk.Frame):
         total_commits = len(self.commit_list)
         progress["maximum"] = total_commits
 
-
         for i, commit in enumerate(self.commit_list):
             # Refining Merge commits is useless
             if commit.message.startswith("Merge branch"):
@@ -417,7 +423,7 @@ class History_CM(tk.Frame):
 
             original_CM = commit.message.strip()
             commit_hash = commit.hexsha
-            refined_CM = improve_CM(code_diff, original_CM)
+            refined_CM = improve_CM(code_diff, original_CM, self.model)
             self.refined_messages.update({commit_hash: refined_CM})
 
             # update progress
@@ -428,20 +434,20 @@ class History_CM(tk.Frame):
         progress_window.destroy()
 
     def has_unstashed_changes(self):
-        unstashed_query = subprocess.run(["git", "status", "--porcelain"], capture_output=True, text=True, cwd=self.repo.get())
+        unstashed_query = subprocess.run(["git", "status", "--porcelain"], capture_output=True, text=True, cwd=self.repo)
         result = bool(unstashed_query.stdout.strip())
 
         def stash_changes():
             '''
             git stash
             '''
-            subprocess.run(["git", "stash"], check=True, cwd=self.repo.get())
+            subprocess.run(["git", "stash"], check=True, cwd=self.repo)
 
         def reset_changes():
             '''
             git reset --hard
             '''
-            subprocess.run(["git", "reset", "--hard"], check=True, cwd=self.repo.get())
+            subprocess.run(["git", "reset", "--hard"], check=True, cwd=self.repo)
 
         if result:
             result = messagebox.askquestion("Detect unstashed changes", "Press 'yes' to stash or 'no' to reset?\n\n")
@@ -465,7 +471,7 @@ class History_CM(tk.Frame):
         
         bash_scripts = []
 
-        git_repo = git.Repo(self.repo.get())
+        git_repo = git.Repo(self.repo)
         commit_messages = self.refined_messages.items()
 
         # sort by commit time
@@ -515,7 +521,7 @@ class History_CM(tk.Frame):
                 # Should ask user to configurate git bash position
                 for script in bash_scripts:
                     subprocess.run(
-                        [self.bash_path.get(), "-c", script], check=True, cwd=self.repo.get()
+                        [self.bash_path.get(), "-c", script], check=True, cwd=self.repo
                     )
                     # update progress
                     progress["value"] = i + 1
@@ -523,7 +529,7 @@ class History_CM(tk.Frame):
                 progress_window.destroy()
                 subprocess.run(
                         [self.bash_path.get(), "-c", "rm -fr \"$(git rev-parse --git-dir)/refs/original/\""],
-                        check=True, cwd=self.repo.get()
+                        check=True, cwd=self.repo
                 )
                      
             elif sys.platform.startswith("darwin"):  # macOS
@@ -532,18 +538,18 @@ class History_CM(tk.Frame):
                     with open(script_path, "w") as file:
                         file.write("#!/bin/bash" + "\n" + script)
                     os.chmod(script_path, 0o755)  # Make it executable
-                    subprocess.run([script_path], shell=False, check=True, cwd=self.repo.get())
+                    subprocess.run([script_path], shell=False, check=True, cwd=self.repo)
                     os.remove(script_path)
                     # update progress
                     progress["value"] = i + 1
                     progress_window.update_idletasks()
                 progress_window.destroy()
-                subprocess.run("rm -fr $(git rev-parse --git-dir)/refs/original/", shell=True, check=True, cwd=self.repo.get())
+                subprocess.run("rm -fr $(git rev-parse --git-dir)/refs/original/", shell=True, check=True, cwd=self.repo)
                     
             else:
                 messagebox.showwarning("Warning", "Only support Windows & macOS.")
 
-            subprocess.run(['git', 'push', '--force'], cwd=self.repo.get())
+            subprocess.run(['git', 'push', '--force'], cwd=self.repo)
             messagebox.showinfo("info", "Push successed. You can check them in the remote repo!")
 
             # Refresh fetched commits
@@ -563,29 +569,29 @@ class History_CM(tk.Frame):
         for widget in self.commit_list_frame.winfo_children():
             widget.destroy()
 
-    def select_repo(self):
-        popup = tk.Toplevel(self)
-        popup.title("Select Repository")
-        popup.geometry("200x100")
+    # def select_repo(self):
+    #     popup = tk.Toplevel(self)
+    #     popup.title("Select Repository")
+    #     popup.geometry("200x100")
 
-        def choose_local():
-            folder_selected = filedialog.askdirectory()
-            if folder_selected:
-                self.repo_label.config(text=folder_selected)
-                self.repo.set(folder_selected)
-            popup.destroy()
+    #     def choose_local():
+    #         folder_selected = filedialog.askdirectory()
+    #         if folder_selected:
+    #             self.repo_label.config(text=folder_selected)
+    #             self.repo.set(folder_selected)
+    #         popup.destroy()
 
-        local_btn = tk.Button(popup, text="Local", command=choose_local)
-        local_btn.pack(pady=5)
+    #     local_btn = tk.Button(popup, text="Local", command=choose_local)
+    #     local_btn.pack(pady=5)
 
-        # TODO remote
-        remote_btn = tk.Button(popup, text="Remote") 
-        remote_btn.pack(pady=5)
+    #     # TODO remote
+    #     remote_btn = tk.Button(popup, text="Remote") 
+    #     remote_btn.pack(pady=5)
 
-        self.clear()
+    #     self.clear()
 
     def select_branch(self):
-        git_repo = git.Repo(self.repo.get())
+        git_repo = git.Repo(self.repo)
         branches = [branch.name for branch in git_repo.branches]
         if not branches:
             self.commit_list.insert(tk.END, "No branches found.\n")
@@ -729,7 +735,7 @@ class History_CM(tk.Frame):
         save_button.grid(row=2, column=1, columnspan=2, padx=5, pady=5, sticky="we")
     
     def help(self):
-        HelpPopup(self, "")
+        HelpPopup("app/guide/History_CM.png")
 
     def change_bash_path(self):
         '''

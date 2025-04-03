@@ -2,23 +2,24 @@ import tkinter as tk
 from PIL import Image, ImageTk
 
 class HelpPopup:
-    def __init__(self, master, image_path):
+    def __init__(self, image_path):
         '''
         Guide user to use this tab by image
         '''
-        popup = tk.Toplevel(master)
+        super().__init__()
+        popup = tk.Toplevel()
         popup.title("Help")
 
         # Load image
-        img = Image.open(image_path)
+        self.img = Image.open(image_path)
         
         # Resize image
-        img = img.resize((1600, 900), Image.Resampling.LANCZOS)  
-        img_tk = ImageTk.PhotoImage(img)
+        self.img = self.img.resize((1800, 750), Image.Resampling.LANCZOS)  
+        self.img_tk = ImageTk.PhotoImage(self.img)
 
         # image 
-        label = tk.Label(popup, image=img_tk)
-        label.image = img_tk 
+        label = tk.Label(popup, image=self.img_tk)
+        label.image = self.img_tk 
         label.pack(padx=10, pady=10)
 
         # close button

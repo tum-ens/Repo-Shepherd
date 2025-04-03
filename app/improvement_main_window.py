@@ -68,7 +68,7 @@ def check_section_existence(sections):
     empty_list = default_list
     return empty_list, suggestion_dict, ready_dict
 
-def improve_part(part_name, content, file_tree):
+def improve_part(part_name, content, file_tree, model):
     '''
     Improve the given section by gemini.
     :param: part_name: name of section
@@ -100,7 +100,7 @@ def improve_part(part_name, content, file_tree):
             + output_prompt + "\n\n"
             + content)
         
-    result = llm_api.together_api(prompt)
+    result = llm_api.gemini_api(prompt, model)
 
     # add section name if LLM misses it.
     if not result.startswith("##") and not part_name == "title":
