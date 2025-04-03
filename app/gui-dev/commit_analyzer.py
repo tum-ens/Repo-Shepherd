@@ -254,7 +254,7 @@ class Current_CM(tk.Frame):
             messagebox.showwarning("Warning", f"Git commit failed: {e}")
 
     def help(self):
-        HelpPopup("app/guide/Current_CM.png")
+        HelpPopup("app/guide/Current_CM.png", 1200, 800)
 
 
 class History_CM(tk.Frame):
@@ -735,7 +735,7 @@ class History_CM(tk.Frame):
         save_button.grid(row=2, column=1, columnspan=2, padx=5, pady=5, sticky="we")
     
     def help(self):
-        HelpPopup("app/guide/History_CM.png")
+        HelpPopup("app/guide/History_CM.png", 1400, 600)
 
     def change_bash_path(self):
         '''

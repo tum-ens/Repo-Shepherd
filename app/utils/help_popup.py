@@ -2,7 +2,7 @@ import tkinter as tk
 from PIL import Image, ImageTk
 
 class HelpPopup:
-    def __init__(self, image_path):
+    def __init__(self, image_path, height, width):
         '''
         Guide user to use this tab by image
         '''
@@ -14,7 +14,7 @@ class HelpPopup:
         self.img = Image.open(image_path)
         
         # Resize image
-        self.img = self.img.resize((1800, 750), Image.Resampling.LANCZOS)  
+        self.img = self.img.resize((height, width), Image.Resampling.LANCZOS)  
         self.img_tk = ImageTk.PhotoImage(self.img)
 
         # image 

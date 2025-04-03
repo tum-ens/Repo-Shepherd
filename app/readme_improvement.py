@@ -99,6 +99,7 @@ class Improvement(tk.Frame):
             messagebox.showwarning("Invalid File", "No valid Markdown file (.md or .markdown) found.")
 
         self.grid(row=0, column=0, sticky='nsew')
+        self.grid_columnconfigure(0, weight=0)
         self.grid_columnconfigure(1, weight=1)
         self.grid_columnconfigure(2, weight=1)
         self.grid_rowconfigure(0, weight=1)
@@ -108,6 +109,20 @@ class Improvement(tk.Frame):
 
         self.left_frame = tk.Frame(self)
         self.left_frame.grid(row=0, column=0, sticky='nsew', padx=5)
+        canvas = tk.Canvas(self.left_frame, highlightthickness=0)
+        scrollbar = tk.Scrollbar(self.left_frame, orient=tk.VERTICAL, command=canvas.yview)
+        scrollable_frame = tk.Frame(canvas)
+
+        # Add a scroll bar to avoid too many buttons
+        scrollable_frame.bind(
+            "<Configure>",
+            lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
+        )
+
+        window = canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
+        canvas.configure(yscrollcommand=scrollbar.set)
+        canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
 
         self.section_text = split_sections(self.file)
         self.generated_section_text = tk.StringVar()
@@ -122,41 +137,41 @@ class Improvement(tk.Frame):
         style.configure("Section.TButton", font=("Helvetica", 11), padding=8)
 
         ####### Sections buttons #######
-        section_separator = ttk.Separator(self.left_frame, orient="horizontal")
+        section_separator = ttk.Separator(scrollable_frame, orient="horizontal")
         section_separator.pack(fill="x", padx=10, pady=(10, 5))
 
-        section_info_label = ttk.Label(self.left_frame, text="Sections", font=("TkDefaultFont", 9))
+        section_info_label = ttk.Label(scrollable_frame, text="Sections", font=("TkDefaultFont", 9))
         section_info_label.pack(pady=(0, 10))
         
         self.sections = list(self.section_text.keys())
         for section in self.sections:
-            btn = ttk.Button(self.left_frame, text=section, command=lambda s=section: self.show_original_text(s), style="Section.TButton")
+            btn = ttk.Button(scrollable_frame, text=section, command=lambda s=section: self.show_original_text(s), style="Section.TButton")
             btn.pack(pady=5, padx=10)
         
         ####### File management buttons #######
-        fm_separator = ttk.Separator(self.left_frame, orient="horizontal")
+        fm_separator = ttk.Separator(scrollable_frame, orient="horizontal")
         fm_separator.pack(fill="x", padx=10, pady=(10, 5))
 
-        fm_info_label = ttk.Label(self.left_frame, text="File management", font=("TkDefaultFont", 9))
+        fm_info_label = ttk.Label(scrollable_frame, text="File management", font=("TkDefaultFont", 9))
         fm_info_label.pack(pady=(0, 10))
 
-        repo_btn = ttk.Button(self.left_frame, text="Repo", command=self.select_repo, style="Section.TButton")
+        repo_btn = ttk.Button(scrollable_frame, text="Repo", command=self.select_repo, style="Section.TButton")
         repo_btn.pack(pady=5, padx=10)
 
-        export_btn = ttk.Button(self.left_frame, text="Export", command=self.export, style="Section.TButton")
+        export_btn = ttk.Button(scrollable_frame, text="Export", command=self.export, style="Section.TButton")
         export_btn.pack(pady=5, padx=10)
 
         ####### Navigation buttons #######
-        navi_separator = ttk.Separator(self.left_frame, orient="horizontal")
+        navi_separator = ttk.Separator(scrollable_frame, orient="horizontal")
         navi_separator.pack(fill="x", padx=10, pady=(10, 5))
 
-        navi_info_label = ttk.Label(self.left_frame, text="Navigation", font=("TkDefaultFont", 9))
+        navi_info_label = ttk.Label(scrollable_frame, text="Navigation", font=("TkDefaultFont", 9))
         navi_info_label.pack(pady=(0, 10))
 
-        help_button = ttk.Button(self.left_frame, text="Help", command=self.help, style="Section.TButton")
+        help_button = ttk.Button(scrollable_frame, text="Help", command=self.help, style="Section.TButton")
         help_button.pack(pady=5, padx=10)
 
-        back_button = ttk.Button(self.left_frame, text="Back", command=self.go_back, style="Section.TButton")
+        back_button = ttk.Button(scrollable_frame, text="Back", command=self.go_back, style="Section.TButton")
         back_button.pack(pady=5, padx=10)
 
         ####### Middle frame #######
@@ -245,7 +260,7 @@ class Improvement(tk.Frame):
         FileTreePopup(self, self.repo_path)
 
     def help(self):
-        HelpPopup("app/guide/Readme_improvement.png")
+        HelpPopup("app/guide/Readme_improvement.png", 1200, 800)
 
     def go_back(self):
         '''
@@ -269,6 +284,21 @@ class Creation(tk.Frame):
 
         self.left_frame = tk.Frame(self)
         self.left_frame.grid(row=0, column=0, sticky='ns', padx=5)
+        # Scroll bar
+        canvas = tk.Canvas(self.left_frame, highlightthickness=0)
+        scrollbar = tk.Scrollbar(self.left_frame, orient=tk.VERTICAL, command=canvas.yview)
+        scrollable_frame = tk.Frame(canvas)
+
+        # Add a scroll bar to avoid too many buttons
+        scrollable_frame.bind(
+            "<Configure>",
+            lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
+        )
+
+        window = canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
+        canvas.configure(yscrollcommand=scrollbar.set)
+        canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
 
         self.saved_text = {}
         self.title_name = tk.StringVar()
@@ -287,41 +317,41 @@ class Creation(tk.Frame):
         style.configure("Section.TButton", font=("Helvetica", 11), padding=8)
 
         ####### Sections buttons #######
-        section_separator = ttk.Separator(self.left_frame, orient="horizontal")
+        section_separator = ttk.Separator(scrollable_frame, orient="horizontal")
         section_separator.pack(fill="x", padx=10, pady=(10, 5))
 
-        section_info_label = ttk.Label(self.left_frame, text="Sections", font=("TkDefaultFont", 9))
+        section_info_label = ttk.Label(scrollable_frame, text="Sections", font=("TkDefaultFont", 9))
         section_info_label.pack(pady=(0, 10))
 
         self.sections = ["title", "description", "feature", "requirement", "installation", "usage", "contact", "license"]
         for section in self.sections:
-            btn = ttk.Button(self.left_frame, text=section, command=lambda s=section: self.call_func(s), style="Section.TButton")
+            btn = ttk.Button(scrollable_frame, text=section, command=lambda s=section: self.call_func(s), style="Section.TButton")
             btn.pack(pady=5, padx=10)
 
         ####### File management buttons #######
-        fm_separator = ttk.Separator(self.left_frame, orient="horizontal")
+        fm_separator = ttk.Separator(scrollable_frame, orient="horizontal")
         fm_separator.pack(fill="x", padx=10, pady=(10, 5))
 
-        fm_info_label = ttk.Label(self.left_frame, text="File management", font=("TkDefaultFont", 9))
+        fm_info_label = ttk.Label(scrollable_frame, text="File management", font=("TkDefaultFont", 9))
         fm_info_label.pack(pady=(0, 10))
         
-        repo_btn = ttk.Button(self.left_frame, text="Repo", command=self.select_repo, style="Section.TButton")
+        repo_btn = ttk.Button(scrollable_frame, text="Repo", command=self.select_repo, style="Section.TButton")
         repo_btn.pack(pady=(20, 5), padx=10)
 
-        export_btn = ttk.Button(self.left_frame, text="Export", command=self.export, style="Section.TButton")
+        export_btn = ttk.Button(scrollable_frame, text="Export", command=self.export, style="Section.TButton")
         export_btn.pack(pady=5, padx=10)
 
         ####### Navigation buttons #######
-        navi_separator = ttk.Separator(self.left_frame, orient="horizontal")
+        navi_separator = ttk.Separator(scrollable_frame, orient="horizontal")
         navi_separator.pack(fill="x", padx=10, pady=(10, 5))
 
-        navi_info_label = ttk.Label(self.left_frame, text="Navigation", font=("TkDefaultFont", 9))
+        navi_info_label = ttk.Label(scrollable_frame, text="Navigation", font=("TkDefaultFont", 9))
         navi_info_label.pack(pady=(0, 10))
 
-        help_button = ttk.Button(self.left_frame, text="Help", command=self.help, style="Section.TButton")
+        help_button = ttk.Button(scrollable_frame, text="Help", command=self.help, style="Section.TButton")
         help_button.pack(pady=10)
 
-        back_button = ttk.Button(self.left_frame, text="Back", command=self.go_back, style="Section.TButton")
+        back_button = ttk.Button(scrollable_frame, text="Back", command=self.go_back, style="Section.TButton")
         back_button.pack(pady=10)
 
         ####### Right frame #######
@@ -462,7 +492,7 @@ class Creation(tk.Frame):
             ttk.Button(popup, text=lic, command=lambda l=lic: [self.selected_license.set(l), popup.destroy()], style="Section.TButton").pack(pady=5)
 
     def help(self):
-        HelpPopup("app/guide/Readme_Creation.png")
+        HelpPopup("app/guide/Readme_Creation.png", 1200, 800)
 
     def go_back(self):
         '''
