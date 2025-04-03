@@ -2,6 +2,7 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
 import sv_ttk
+from getting_started import GettingStartedTab
 from configuration import ConfigTab
 from readme_automatic import ReadmeAutomaticTab
 from readme_improvement import ReadmeImprovementTab
@@ -42,6 +43,7 @@ notebook = ttk.Notebook(root)
 notebook.grid(row=0, column=0, sticky='nsew')
 
 # Create frames for tabs
+frame_getting_started = GettingStartedTab(notebook, shared_vars)
 frame_setup = ConfigTab(notebook, shared_vars)
 frame_automatic_readme = ReadmeAutomaticTab(notebook, shared_vars)
 frame_improvement_readme = ReadmeImprovementTab(notebook, shared_vars)
@@ -52,6 +54,7 @@ frame_gemini_chat = GeminiChatTab(notebook, shared_vars)
 frame_improve_structure = ImproveStructureTab(notebook, shared_vars)
 
 # Add frames to Notebook
+notebook.add(frame_getting_started, text='Getting Started')
 notebook.add(frame_setup, text='Setup')
 notebook.add(frame_automatic_readme, text='Readme Automatic')
 notebook.add(frame_improvement_readme, text='Readme Improvement')
@@ -61,8 +64,8 @@ notebook.add(frame_security_scanner, text='Security Scanner')
 notebook.add(frame_gemini_chat, text='Gemini Chat')
 notebook.add(frame_improve_structure, text='Improve Structure')
 
-# Initially disable all tabs except the Setup tab (index 0)
-for i in range(1, notebook.index("end")):
+# Initially disable all tabs except Getting Started (index 0) and Setup (index 1)
+for i in range(2, notebook.index("end")):  # Start at 2 to skip Getting Started and Setup
     notebook.tab(i, state="disabled")
 
 # Function to enable/disable tabs based on API key and repo path values.
@@ -70,10 +73,10 @@ def check_enable_tabs(*args):
     api_key = shared_vars['api_gemini_key'].get().strip()
     repo_path = shared_vars['repo_path_var'].get().strip()
     if api_key and repo_path:
-        for i in range(1, notebook.index("end")):
+        for i in range(2, notebook.index("end")):  # Skip 0 and 1
             notebook.tab(i, state="normal")
     else:
-        for i in range(1, notebook.index("end")):
+        for i in range(2, notebook.index("end")):
             notebook.tab(i, state="disabled")
 
 # Trace changes on both variables to update tab states.
