@@ -43,7 +43,7 @@ class GettingStartedTab(ttk.Frame):
         content = [
             ("Your Repository Professionalization Tool\n\n", "title"),
             ("What is IDP?\n", "bold"),
-            ("IDP uses AI language models (LLMs) to analyze and enhance Python repositories. Whether you're a researcher or developer, IDP simplifies improving your code projects.\n\n", None),
+            ("IDP uses AI language models (LLMs) to analyze and enhance Python repositories. Whether you're a researcher or developer, IDP simplifies improving your code projects.\n\n", "text"),
             ("What can you do with IDP?\n", "bold"),
             ("- Generate READMEs automatically from your code.\n"
              "- Improve existing READMEs with better structure.\n"
