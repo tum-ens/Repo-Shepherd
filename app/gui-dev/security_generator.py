@@ -48,6 +48,10 @@ class SecurityGeneratorTab(ttk.Frame):
         self.main_frame = ttk.Frame(self, padding="20")
         self.main_frame.pack(expand=True, fill='both')
 
+        #center content
+        for i in range(3):
+            self.main_frame.columnconfigure(i, weight=1)
+
         # Title label
         title_label = ttk.Label(
             self.main_frame,
