@@ -10,6 +10,7 @@ import subprocess
 import git
 import google.generativeai as genai
 from utils.help_popup import HelpPopup
+import threading
 
 class CommitAnalyzerTab(tk.Frame):
     def __init__(self, root, shared_vars):
@@ -415,24 +416,32 @@ class History_CM(tk.Frame):
         total_commits = len(self.commit_list)
         progress["maximum"] = total_commits
 
-        for i, commit in enumerate(self.commit_list):
-            # Refining Merge commits is useless
-            if commit.message.startswith("Merge branch"):
-                continue  
+        def refine_commits():
+            for i, commit in enumerate(self.commit_list):
+                # Refining Merge commits is useless
+                if commit.message.startswith("Merge branch"):
+                    continue  
 
-            code_diff = "\n".join([patch.diff.decode("utf-8") for patch in commit.diff(commit.parents[0], create_patch=True)])
+                code_diff = "\n".join([patch.diff.decode("utf-8") for patch in commit.diff(commit.parents[0], create_patch=True)])
 
-            original_CM = commit.message.strip()
-            commit_hash = commit.hexsha
-            refined_CM = improve_CM(code_diff, original_CM, self.model)
-            self.refined_messages.update({commit_hash: refined_CM})
+                original_CM = commit.message.strip()
+                commit_hash = commit.hexsha
+                refined_CM = improve_CM(code_diff, original_CM, self.model)
+                self.refined_messages.update({commit_hash: refined_CM})
 
-            # update progress
-            progress["value"] = i + 1
-            progress_window.update_idletasks()
+                def update_progress():
+                # update progress bar (GUI update must be in main thread)
+                    progress["value"] = i + 1
+                    progress_window.update_idletasks()
+                progress_window.after(0, update_progress)
 
-        messagebox.showinfo("Info", "All commits refined successfully!")
-        progress_window.destroy()
+            def on_finish():
+                messagebox.showinfo("Info", "All commits refined successfully!")
+                progress_window.destroy()
+            progress_window.after(0, on_finish)
+            
+        threading.Thread(target=refine_commits).start()
+
 
     def has_unstashed_changes(self):
         unstashed_query = subprocess.run(["git", "status", "--porcelain"], capture_output=True, text=True, cwd=self.repo)
@@ -469,11 +478,10 @@ class History_CM(tk.Frame):
             echo "{title}"
         {body}
                 """
-        
-        bash_scripts = []
-
+    
         git_repo = git.Repo(self.repo)
         commit_messages = self.refined_messages.items()
+        bash_path = self.bash_path.get() 
 
         # sort by commit time
         sorted_messages = sorted(
@@ -497,6 +505,8 @@ class History_CM(tk.Frame):
         total_edit = len(self.refined_messages)
         progress["maximum"] = total_edit
 
+        bash_scripts = []
+
         for i, (commit, message) in enumerate(self.refined_messages.items()):
             # If " or ' exists in bash code, they will occur instruction interrupt. Delete them.
             message = message.replace('"', '').replace("'", "")
@@ -516,49 +526,66 @@ class History_CM(tk.Frame):
 
             bash_scripts.append(full_script)
 
-        try:
-            # Windows need to run bash code on git-bash, not shell
-            if sys.platform.startswith("win"):  # Windows
-                # Should ask user to configurate git bash position
-                for script in bash_scripts:
+        def run_scripts():
+            try:
+                # Windows need to run bash code on git-bash, not shell
+                if sys.platform.startswith("win"):  # Windows
+                    # Should ask user to configurate git bash position
+                    for idx, script in enumerate(bash_scripts):
+                        subprocess.run(
+                            [bash_path, "-c", script], check=True, cwd=self.repo
+                        )
+
+                        def update_progress(i=idx):
+                            progress["value"] = i + 1
+                            progress_window.update_idletasks()
+
+                        progress_window.after(0, update_progress)
+
                     subprocess.run(
-                        [self.bash_path.get(), "-c", script], check=True, cwd=self.repo
+                            [bash_path, "-c", "rm -fr \"$(git rev-parse --git-dir)/refs/original/\""],
+                            check=True, cwd=self.repo
                     )
-                    # update progress
-                    progress["value"] = i + 1
-                    progress_window.update_idletasks()
-                progress_window.destroy()
-                subprocess.run(
-                        [self.bash_path.get(), "-c", "rm -fr \"$(git rev-parse --git-dir)/refs/original/\""],
-                        check=True, cwd=self.repo
-                )
-                     
-            elif sys.platform.startswith("darwin"):  # macOS
-                for script in bash_scripts:
-                    script_path = "/tmp/git_script.sh"
-                    with open(script_path, "w") as file:
-                        file.write("#!/bin/bash" + "\n" + script)
-                    os.chmod(script_path, 0o755)  # Make it executable
-                    subprocess.run([script_path], shell=False, check=True, cwd=self.repo)
-                    os.remove(script_path)
-                    # update progress
-                    progress["value"] = i + 1
-                    progress_window.update_idletasks()
-                progress_window.destroy()
-                subprocess.run("rm -fr $(git rev-parse --git-dir)/refs/original/", shell=True, check=True, cwd=self.repo)
-                    
-            else:
-                messagebox.showwarning("Warning", "Only support Windows & macOS.")
+                        
+                elif sys.platform.startswith("darwin"):  # macOS
+                    for idx, script in enumerate(bash_scripts):
+                        script_path = "/tmp/git_script.sh"
+                        with open(script_path, "w") as file:
+                            file.write("#!/bin/bash" + "\n" + script)
+                        os.chmod(script_path, 0o755)  # Make it executable
+                        subprocess.run([script_path], shell=False, check=True, cwd=self.repo)
+                        os.remove(script_path)
 
-            subprocess.run(['git', 'push', '--force'], cwd=self.repo)
-            messagebox.showinfo("info", "Push successed. You can check them in the remote repo!")
+                        def update_progress(i=idx):
+                            progress["value"] = i + 1
+                            progress_window.update_idletasks()
 
-            # Refresh fetched commits
-            self.clear()
-            self.fetch_commits()
+                        progress_window.after(0, update_progress)
 
-        except subprocess.CalledProcessError as e:
-            messagebox.showwarning("Warning", f"Git commit failed: {e}")
+                    subprocess.run("rm -fr $(git rev-parse --git-dir)/refs/original/", shell=True, check=True, cwd=self.repo)
+                        
+                else:
+                    progress_window.after(0, lambda: messagebox.showwarning("Warning", "Only support Windows & macOS."))
+                    return
+
+                subprocess.run(['git', 'push', '--force'], cwd=self.repo)
+
+                def on_success():
+                    progress_window.destroy()
+                    messagebox.showinfo("Info", "Push succeeded. You can check them in the remote repo!")
+                    # Refresh fetched commits
+                    self.clear()
+                    self.fetch_commits()
+
+                progress_window.after(0, on_success)
+
+            except subprocess.CalledProcessError as e:
+                def on_error():
+                    progress_window.destroy()
+                    messagebox.showerror("Error", f"An error occurred:\n{e}")
+                progress_window.after(0, on_error)
+
+        threading.Thread(target=run_scripts).start()
 
     def clear(self):
         '''

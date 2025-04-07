@@ -58,7 +58,6 @@ def create_feature(existed_feature, file_tree, model):
     output_format = "You should only return feature and its description without any other sentences."
 
     prompt = meta_prompt + feature_prompt + str(features) + "\n\n" + file_tree_prompt + "\n\n" + output_format
-    print(prompt)
     result = llm_api.gemini_api(prompt, model)
     return result
 
