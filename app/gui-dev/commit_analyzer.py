@@ -250,6 +250,7 @@ class Current_CM(tk.Frame):
         try:
             subprocess.run(['git', 'push'], cwd=self.repo)
             self.committed = False
+            messagebox.showinfo("Info", "Successfully pushed!")
         except subprocess.CalledProcessError as e:
             messagebox.showwarning("Warning", f"Git commit failed: {e}")
 
@@ -635,7 +636,7 @@ class History_CM(tk.Frame):
             improved_text_area.delete("1.0", "end")
             code_diff = "\n".join([patch.diff.decode("utf-8") for patch in commit.parents[0].diff(commit, create_patch=True)])
             original_CM = commit.message.strip()
-            commit_message = improve_CM(code_diff, original_CM)
+            commit_message = improve_CM(code_diff, original_CM, self.model)
             improved_text_area.insert(tk.END, commit_message)
 
         def save_refined_message():

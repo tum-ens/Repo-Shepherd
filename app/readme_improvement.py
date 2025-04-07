@@ -113,13 +113,17 @@ class Improvement(tk.Frame):
         scrollbar = tk.Scrollbar(self.left_frame, orient=tk.VERTICAL, command=canvas.yview)
         scrollable_frame = tk.Frame(canvas)
 
+        def resize_scrollable_frame(event):
+            canvas.itemconfig(window, width=event.width)
+
         # Add a scroll bar to avoid too many buttons
+        window = canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
+        canvas.bind("<Configure>", resize_scrollable_frame)
+
         scrollable_frame.bind(
             "<Configure>",
             lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
         )
-
-        window = canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
         canvas.configure(yscrollcommand=scrollbar.set)
         canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
@@ -234,6 +238,7 @@ class Improvement(tk.Frame):
         value = self.generated_section_text.get()
         self.saved_text[key] = value
         self.text_updated = False
+        messagebox.showinfo("Info", "Text saved.")
 
     def show_improved_text(self, text, section):
         '''
@@ -284,18 +289,24 @@ class Creation(tk.Frame):
 
         self.left_frame = tk.Frame(self)
         self.left_frame.grid(row=0, column=0, sticky='ns', padx=5)
+        
         # Scroll bar
         canvas = tk.Canvas(self.left_frame, highlightthickness=0)
         scrollbar = tk.Scrollbar(self.left_frame, orient=tk.VERTICAL, command=canvas.yview)
         scrollable_frame = tk.Frame(canvas)
 
+        def resize_scrollable_frame(event):
+            canvas.itemconfig(window, width=event.width)
+
+        window = canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
+
+        canvas.bind("<Configure>", resize_scrollable_frame)
         # Add a scroll bar to avoid too many buttons
         scrollable_frame.bind(
             "<Configure>",
             lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
         )
 
-        window = canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
         canvas.configure(yscrollcommand=scrollbar.set)
         canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
@@ -410,6 +421,7 @@ class Creation(tk.Frame):
         value = self.right_text.get("1.0", tk.END).strip()
         self.saved_text[key] = value
         self.text_updated = False
+        messagebox.showinfo("Info", "Text saved.")
 
     def show_created_text(self, text, section):
         '''

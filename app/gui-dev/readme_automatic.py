@@ -3,15 +3,21 @@ import sys
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 sys.path.insert(1, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../app')))
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, messagebox
+from app.utils.utils import configure_genai_api, get_local_repo_path, clone_remote_repo
 from app.readme_automatic_generator import ReadmeAutomaticGenerator
+import utils.llm_api as llm_api
 from utils import toolkit
 import sv_ttk
+import yaml
+import google.generativeai as genai
+from pathlib import Path
 
 class ReadmeAutomaticTab(tk.Frame):
     def __init__(self, root, shared_vars, *args, **kwargs):
         super().__init__(root)
         self.shared_vars = shared_vars
+
         self.grid(row=0, column=0, sticky='nsew')
         
         # Centering the grid content
@@ -48,23 +54,45 @@ class ReadmeAutomaticTab(tk.Frame):
     def run_readme_improvement(self):
         try:
             readme = ReadmeAutomaticGenerator()
-            file_path = readme.load_original_readme()
-            sections = readme.split_sections(file_path)
-            empty_list, suggestion_dict, ready_dict = readme.check_section_existence(sections)
 
+            # model initialization
+            api_key = self.shared_vars.get("api_gemini_key").get().strip()
+            model_name = self.shared_vars.get("default_gemini_model").get()
+            configure_genai_api(api_key)
+            self.model = genai.GenerativeModel(model_name)
 
-            # Just provide an overall prompt to improve the readme.
-            default_list = ['title&about', 'description', 'feature', 'requirement', 'installation', 'usage', 'contact', 'license']
-            title = readme.improve_part(default_list[0], ready_dict[default_list[0]])
-            description = readme.improve_part(default_list[1], ready_dict[default_list[1]])
-            feature = readme.improve_part(default_list[2], ready_dict[default_list[2]])
-            installation = readme.improve_part(default_list[4], ready_dict[default_list[4]])
-            contact = readme.improve_part(default_list[6], ready_dict[default_list[6]])
-            license = readme.improve_part(default_list[7], ready_dict[default_list[7]])
-            content = title + description + feature + installation + contact + license
+            # repo initialzation
+            repo_input = self.shared_vars.get("repo_path_var").get().strip()
+            repo_type = self.shared_vars.get("repo_type_var").get()
+            repo_path = ""
+            if repo_type == "local":
+                repo_path = str(get_local_repo_path(repo_input))
+            else:
+                repo_path = str(clone_remote_repo(repo_input))
 
-            response = toolkit.export_markdown(content)
-            self.message_label.config(text=response, foreground="green")
+            readme_files = [f for f in Path(repo_path).iterdir() if f.is_file() and f.name.lower() == "readme.md"]
+
+            if readme_files:
+                file = readme_files[0]  
+                self.file = file
+            else:
+                messagebox.showwarning("Invalid File", "No valid Markdown file (.md or .markdown) found.")
+
+            with open(self.file, 'r', encoding='utf-8') as f:
+                markdown_content = f.read()
+
+            with open("app/prompts/improvements_prompt.yaml", 'r') as file:
+                prompts_repo = yaml.safe_load(file)
+
+            prompt = prompts_repo["automatic"]
+
+            input = prompt + "\n\n" + markdown_content
+
+            messagebox.showinfo("Info", "Start to improve. Please wait for some seconds.")
+            response = llm_api.gemini_api(input, self.model)
+
+            result = toolkit.export_markdown(response)
+            self.message_label.config(text=result, foreground="green")
         
         except Exception as e:
             self.message_label.config(text=f"Error: {e}", foreground="red")
