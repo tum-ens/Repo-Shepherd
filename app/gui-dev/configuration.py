@@ -231,7 +231,7 @@ class ConfigTab(tk.Frame):
         self.gemini_model_dropdown = ttk.Combobox(
             self.api_frame, textvariable=self.gemini_model, state="readonly"
         )
-        self.gemini_model_dropdown['values'] = ["auto", "gemini-2.0-flash-lite","gemini-1.5-flash", "gemini-2.0-flash","gemini-2.0-flash-thinking-exp-01-21","gemini-1.5-pro","gemini-2.5-pro-exp-03-25"]
+        self.gemini_model_dropdown['values'] = ["auto", "gemini-2.0-flash-lite","gemini-1.5-flash", "gemini-2.0-flash","gemini-2.0-flash-thinking-exp-01-21","gemini-1.5-pro","gemini-2.5-pro-exp-03-25","Custom"]
         self.gemini_model_dropdown.current(0)
         self.gemini_model_dropdown.grid(row=7, column=0, sticky='ew', padx=20, pady=5)
         # Bind the event so the StringVar is updated when a new option is selected
@@ -249,10 +249,16 @@ class ConfigTab(tk.Frame):
         self.api_save_button.grid(row=8, column=1, sticky='se', padx=20, pady=20)
 
     def on_gemini_model_selected(self, event):
-        # Update the StringVar explicitly from the combobox selection
         current_value = self.gemini_model_dropdown.get()
+        if current_value == "Custom":
+            # Allow the user to type a custom model name
+            self.gemini_model_dropdown.config(state="normal")
+        else:
+            # Revert back to readonly to prevent editing if a predefined option is selected
+            self.gemini_model_dropdown.config(state="readonly")
         self.gemini_model.set(current_value)
         print(f"DEBUG [ConfigTab]: Gemini model updated to -> {current_value}")
+
 
     def check_api_key(self):
         api_gemini_key = self.api_key_entry.get().strip()
@@ -299,20 +305,30 @@ class ConfigTab(tk.Frame):
             return
         self.api_gemini_key = self.api_key_entry.get().strip()
         self.shared_vars['api_gemini_key'].set(self.api_gemini_key)
+        if self.gemini_model.get() == "Custom":
+            final_model = self.gemini_model_dropdown.get()
+        else:
+            final_model = self.gemini_model.get()
         print(f"API Key saved: {self.api_gemini_key}")
+        print(f"DEBUG [ConfigTab]: Final Gemini model set to -> {final_model}")
         selected_model = self.gemini_model.get()
+        self.shared_vars['default_gemini_model'].set(final_model)
+
         messagebox.showinfo("Saved", f"API Configuration saved.\nModel: {selected_model}")
+        messagebox.showinfo("Saved", f"Default Gemini Model saved: {final_model}")
+
+        
 
     def save_gemini_model(self):
-        # For debugging, print both the StringVar value and the combobox's get() value.
-        selected_model_var = self.gemini_model.get()
-        selected_model_combo = self.gemini_model_dropdown.get()
-        print(f"DEBUG [ConfigTab]: self.gemini_model.get() -> {selected_model_var}")
-        print(f"DEBUG [ConfigTab]: combobox.get() -> {selected_model_combo}")
-        self.shared_vars['default_gemini_model'].set(selected_model_var)
-        print(f"DEBUG [ConfigTab]: self.shared_vars['default_gemini_model'] -> {selected_model_var}")
+        # If the selected model is "Custom", use the combobox's text (the user-typed value)
+        if self.gemini_model.get() == "Custom":
+            final_model = self.gemini_model_dropdown.get()
+        else:
+            final_model = self.gemini_model.get()
+        print(f"DEBUG [ConfigTab]: Final Gemini model set to -> {final_model}")
+        self.shared_vars['default_gemini_model'].set(final_model)
+        messagebox.showinfo("Saved", f"Default Gemini Model saved: {final_model}")
 
-        messagebox.showinfo("Saved", f"Default Gemini Model saved: {selected_model_var}")
 
     # -----------------------------
     # Local frames logic
