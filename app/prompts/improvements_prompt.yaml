@@ -55,3 +55,12 @@ license: |
 
 output-meta: |
   Provide only the improved README.md content based on the guidelines above. Only include sections above. Following is the original section.
+
+file-tree: |
+  You can also use the following file tree to learn the structure of the repo.
+
+automatic: |
+  I am working on improving the README.md file for a GitLab repository. 
+  I want you to improve the attached README file section by section. 
+  Ensure that all website links are formatted in Markdown as "[text...](http://...)". The output should be in markdown.
+  Provide only the improved README.md content based on the guidelines above. Only include sections above. Following is the original section.

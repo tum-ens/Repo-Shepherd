@@ -21,7 +21,7 @@ def generate_general_prompt():
     
     return prompt
 
-def generate_CM(code_diff):
+def generate_CM(code_diff, model):
     '''
     Generate CM from code diff.
     '''
@@ -40,11 +40,11 @@ def generate_CM(code_diff):
               instruction
               )
     
-    raw_result = llm_api.together_api(prompt)
+    raw_result = llm_api.gemini_api(prompt, model)
 
     return extract_result(raw_result)
 
-def improve_CM(code_diff, commit_message):
+def improve_CM(code_diff, commit_message, model):
     '''
     Generate CM from code diff and original CM.
     '''
@@ -64,7 +64,7 @@ def improve_CM(code_diff, commit_message):
               commit_message
               )
     
-    raw_result = llm_api.together_api(prompt)
+    raw_result = llm_api.gemini_api(prompt, model)
 
     return extract_result(raw_result)
 

@@ -1,5 +1,5 @@
 meta-prompt: |
-  I'm now working on creating a README.md file for a new repo. Please help me to create it section by section.  A file tree will be provided. Result should be in markdown.
+  I'm now working on creating a README.md file for a new repo. Please help me to create it section by section.  A file tree may be provided. Result should be in markdown.
 
 title: |
   Project title: Introduce the project with a clear, compelling title and a brief description that explains what the project does and why it‘s useful. 
@@ -9,17 +9,17 @@ a_title: |
   Given is project name: 
 
 description: |
-  Give a detailed overview of the project’s functionality, including any unique aspects or primary goals. Explain the problem it solves or the gap it addresses.
+  Give a detailed overview of the project's functionality, including any unique aspects or primary goals. Explain the problem it solves or the gap it addresses.
   1. Description should be in 2 paragraphs
 
 a_description: |
   Given is a short description: 
 
 feature: |
-  List the main features of the project in bullet points, focusing on what makes it valuable. Highlight any advanced or standout capabilities.
+  Imagine and generate a main feature of the project in bullet points, focusing on what makes it valuable. Highlight any advanced or standout capabilities.
 
 a_feature: |
-  Generate feature section based on given features or bullet points, don't add features not mentioned:
+  Generate feature section based on given features or bullet points. If there's no given feature, you should imagine an example. Don't add features not mentioned:
 
 requirement: |
   Clearly specify requirements, including the use of package managers or similar tools in the Installation section. 
@@ -55,7 +55,13 @@ license: |
   Generate the given license.
 
 a_license: |
-  Given is the license name.
+  Generate a license template. You should ignore file tree if it's given. Given is the license name. 
 
 output-meta: |
   Provide only the improved README.md content based on the guidelines above. Only include sections above. Following is the original section.
+
+structure: |
+  Following is the readme sections in order. You should recompose them into a well-structured readme markdown. Don't change the order.
+
+file-tree: |
+  You can also use the following file tree to learn the structure of the repo.

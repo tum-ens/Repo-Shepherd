@@ -42,6 +42,8 @@ root.grid_columnconfigure(0, weight=1)
 notebook = ttk.Notebook(root)
 notebook.grid(row=0, column=0, sticky='nsew')
 
+
+
 # Create frames for tabs
 frame_getting_started = GettingStartedTab(notebook, shared_vars)
 frame_setup = ConfigTab(notebook, shared_vars)
@@ -100,19 +102,15 @@ notebook.bind("<Button-1>", on_notebook_click, add="+")
 
 # Function to adjust root size based on the current tab
 def adjust_root_size(event=None):
-    current_tab = notebook.tab(notebook.select(), "text")
-    if current_tab == "Readme Improvement":
-        frame_improvement_readme.adjust_root_size()
-    else:
-        root.update_idletasks()
-        req_width = notebook.winfo_reqwidth()
-        req_height = notebook.winfo_reqheight()
-        min_width, min_height = 800, 600
-        max_width, max_height = root.winfo_screenwidth() * 0.8, root.winfo_screenheight() * 0.8
-        width = min(max(req_width, min_width), max_width)
-        height = min(max(req_height, min_height), max_height)
-        root.geometry(f"{int(width)}x{int(height)}")
-        root.minsize(min_width, min_height)
+    root.update_idletasks()
+    req_width = notebook.winfo_reqwidth()
+    req_height = notebook.winfo_reqheight()
+    min_width, min_height = 800, 600
+    max_width, max_height = root.winfo_screenwidth() * 0.8, root.winfo_screenheight() * 0.8
+    width = min(max(req_width, min_width), max_width)
+    height = min(max(req_height, min_height), max_height)
+    root.geometry(f"{int(width)}x{int(height)}")
+    root.minsize(min_width, min_height)
 
 notebook.bind("<<NotebookTabChanged>>", adjust_root_size)
 adjust_root_size()
