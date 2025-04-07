@@ -237,12 +237,6 @@ class ConfigTab(tk.Frame):
         # Bind the event so the StringVar is updated when a new option is selected
         self.gemini_model_dropdown.bind("<<ComboboxSelected>>", self.on_gemini_model_selected)
         
-        # New "Save Model" button next to Gemini model dropdown
-        self.save_model_button = ttk.Button(
-            self.api_frame, text="Save Model", command=self.save_gemini_model
-        )
-        self.save_model_button.grid(row=7, column=1, sticky='w', padx=5, pady=5)
-        
         self.api_save_button = ttk.Button(
             self.api_frame, text="Save", command=self.save_api_config
         )
@@ -314,9 +308,7 @@ class ConfigTab(tk.Frame):
         selected_model = self.gemini_model.get()
         self.shared_vars['default_gemini_model'].set(final_model)
 
-        messagebox.showinfo("Saved", f"API Configuration saved.\nModel: {selected_model}")
-        messagebox.showinfo("Saved", f"Default Gemini Model saved: {final_model}")
-
+        messagebox.showinfo("Saved", f"API Configuration saved.\nModel: {final_model}")
         
 
     def save_gemini_model(self):
