@@ -17,7 +17,7 @@ from app.utils.utils import (
 import google.generativeai as genai
 
 # You can change this if you have a different model for chat.
-MODEL_NAME = "gemini-1.5-flash" # Default model if 'auto' is selected
+MODEL_NAME = "gemini-2.0-flash" # Default model if 'auto' is selected
 
 class GeminiChatTab(ttk.Frame):
     def __init__(self, parent, shared_vars):
