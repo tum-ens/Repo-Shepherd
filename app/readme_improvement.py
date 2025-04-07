@@ -28,7 +28,7 @@ class ReadmeImprovementTab(tk.Frame):
         title_label = ttk.Label(self, text="This is the Readme Improvement Generator", font=("Arial", 16))
         title_label.grid(row=0, column=0, pady=(20, 10))  # Reduced pady for title
 
-        description_label = ttk.Label(self, text="\n- Click on ReadMe Improvement button, select a ReadMe file, and improve the file section by section. \n- Click on ReadMe Creation button to create every section manually. \n- Then, Click on the \"Help\" to get guide of this tab.", font=("Arial", 14))
+        description_label = ttk.Label(self, text="\n- Click on ReadMe Improvement button to improve the file section by section. \n- Click on ReadMe Creation button to create every section manually. \n- Then, Click on the \"Help\" to get guide of this tab.", font=("Arial", 14))
         description_label.grid(row=1, column=0, pady=(10, 10))  # Row 1, increased pady for description
 
         self.button1 = ttk.Button(self, text="ReadMe improvement", command=self.open_screen1)
