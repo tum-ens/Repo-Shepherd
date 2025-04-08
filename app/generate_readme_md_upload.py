@@ -10,7 +10,7 @@ import google.generativeai as genai
 
 # ------------------------------ Configuration ------------------------------
 
-API_KEY = "AIzaSyD0v_VtkuhlE0U2xIzTekrhKRJ4j-Ne53o"  # Replace with your actual Gemini API key
+API_KEY = ""  # Replace with your actual Gemini API key
 MODEL_NAME = "gemini-1.5-flash"   # Replace with your desired Gemini model
 
 # ------------------------------ Logging Configuration ------------------------------

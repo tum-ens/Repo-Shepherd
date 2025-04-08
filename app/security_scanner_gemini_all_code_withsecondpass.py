@@ -30,7 +30,7 @@ from app.utils.utils import (
 )
 
 # API key and model settings
-API_KEY = "AIzaSyDV39V5_0X15G4LU2FPPJmRfea7iNs2Pck"  # Replace with your actual Gemini API key
+API_KEY = ""  # Replace with your actual Gemini API key
 MODEL_NAME = "gemini-2.0-flash-thinking-exp-01-21"  # First pass model
 SECOND_PASS_MODEL = "gemini-2.0-flash-thinking-exp-01-21"  # Second pass model
 

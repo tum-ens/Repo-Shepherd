@@ -18,7 +18,9 @@ def gemini_api(prompt: str, model) -> str:
 def together_api(prompt: str) -> str:
     from together import Together
 
-    client = Together(api_key="0b70b715657d1ed30b062c0fd53764d2c0a04ee98c51a38ccc6577dee323dec0")
+    API_KEY = ""
+    
+    client = Together(API_KEY)
 
     response = client.chat.completions.create(
         model="meta-llama/Meta-Llama-3-8B-Instruct-Turbo",
