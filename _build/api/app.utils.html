@@ -1,0 +1,378 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>app.utils Package &mdash; repo Shepherd 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Development" href="../development/index.html" />
+    <link rel="prev" title="API Reference" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            repo Shepherd
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage/index.html">Usage Guide</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">API Reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">app.utils Package</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#modules">Modules</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#module-app.utils.utils">app.utils.utils</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-app.utils.commit_message">app.utils.commit_message</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-app.utils.creation">app.utils.creation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-app.utils.file_tree">app.utils.file_tree</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-app.utils.help_popup">app.utils.help_popup</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-app.utils.llm_api">app.utils.llm_api</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-app.utils.repo_structure">app.utils.repo_structure</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-app.utils.toolkit">app.utils.toolkit</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../development/index.html">Development</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">repo Shepherd</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">API Reference</a></li>
+      <li class="breadcrumb-item active">app.utils Package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/app.utils.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="app-utils-package">
+<h1>app.utils Package<a class="headerlink" href="#app-utils-package" title="Link to this heading"></a></h1>
+<p>Utility functions used across the application.</p>
+<section id="modules">
+<span id="module-app.utils"></span><h2>Modules<a class="headerlink" href="#modules" title="Link to this heading"></a></h2>
+<section id="module-app.utils.utils">
+<span id="app-utils-utils"></span><h3>app.utils.utils<a class="headerlink" href="#module-app.utils.utils" title="Link to this heading"></a></h3>
+<p>Provides common utility functions: logging setup (<cite>setup_logging</cite>), Gemini API configuration and validation (<cite>configure_genai_api</cite>, <cite>validate_gemini_api_key</cite>), repository path handling (<cite>get_local_repo_path</cite>, <cite>get_remote_repo_url</cite>, <cite>clone_remote_repo</cite>), repository-to-text conversion (<cite>convert_repo_to_txt</cite>), and file uploading (<cite>upload_file_to_gemini</cite>, <cite>convert_file_to_txt</cite>).</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="app.utils.utils.setup_logging">
+<span class="sig-prename descclassname"><span class="pre">app.utils.utils.</span></span><span class="sig-name descname"><span class="pre">setup_logging</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">log_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.13)"><span class="pre">Path</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">level</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_to_console</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/utils/utils.html#setup_logging"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.utils.utils.setup_logging" title="Link to this definition"></a></dt>
+<dd><p>Configures logging to output to a file and optionally to the console.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="app.utils.utils.check_api_key">
+<span class="sig-prename descclassname"><span class="pre">app.utils.utils.</span></span><span class="sig-name descname"><span class="pre">check_api_key</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/utils/utils.html#check_api_key"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.utils.utils.check_api_key" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="app.utils.utils.validate_gemini_api_key">
+<span class="sig-prename descclassname"><span class="pre">app.utils.utils.</span></span><span class="sig-name descname"><span class="pre">validate_gemini_api_key</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api_key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">test_prompt</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'Test'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.13)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/app/utils/utils.html#validate_gemini_api_key"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.utils.utils.validate_gemini_api_key" title="Link to this definition"></a></dt>
+<dd><p>Validates the provided Gemini API key by configuring the API and attempting a minimal
+text generation using the “gemini-2.0-flash-001” model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(True, “”) if the key is valid,
+(False, error_message) if invalid.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="app.utils.utils.configure_genai_api">
+<span class="sig-prename descclassname"><span class="pre">app.utils.utils.</span></span><span class="sig-name descname"><span class="pre">configure_genai_api</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api_key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/utils/utils.html#configure_genai_api"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.utils.utils.configure_genai_api" title="Link to this definition"></a></dt>
+<dd><p>Configures the Google Gemini API with the provided API key.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="app.utils.utils.get_local_repo_path">
+<span class="sig-prename descclassname"><span class="pre">app.utils.utils.</span></span><span class="sig-name descname"><span class="pre">get_local_repo_path</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">repo_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.13)"><span class="pre">Path</span></a></span></span><a class="reference internal" href="../_modules/app/utils/utils.html#get_local_repo_path"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.utils.utils.get_local_repo_path" title="Link to this definition"></a></dt>
+<dd><p>Validates that the local repository path exists and is a directory.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="app.utils.utils.get_remote_repo_url">
+<span class="sig-prename descclassname"><span class="pre">app.utils.utils.</span></span><span class="sig-name descname"><span class="pre">get_remote_repo_url</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">repo_url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></span><a class="reference internal" href="../_modules/app/utils/utils.html#get_remote_repo_url"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.utils.utils.get_remote_repo_url" title="Link to this definition"></a></dt>
+<dd><p>Validates the remote repository URL format.
+This function accepts URLs with branch information in the ‘/tree/&lt;branch&gt;’ format.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="app.utils.utils.clone_remote_repo">
+<span class="sig-prename descclassname"><span class="pre">app.utils.utils.</span></span><span class="sig-name descname"><span class="pre">clone_remote_repo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">repo_url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.13)"><span class="pre">Path</span></a></span></span><a class="reference internal" href="../_modules/app/utils/utils.html#clone_remote_repo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.utils.utils.clone_remote_repo" title="Link to this definition"></a></dt>
+<dd><p>Clones the remote repository into a temporary directory.
+Returns the path to the cloned repository.
+If the repo_url includes branch information in the ‘/tree/&lt;branch&gt;’ format,
+the repository is cloned using that branch.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="app.utils.utils.convert_repo_to_txt">
+<span class="sig-prename descclassname"><span class="pre">app.utils.utils.</span></span><span class="sig-name descname"><span class="pre">convert_repo_to_txt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">repo_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.13)"><span class="pre">Path</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_txt_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.13)"><span class="pre">Path</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/utils/utils.html#convert_repo_to_txt"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.utils.utils.convert_repo_to_txt" title="Link to this definition"></a></dt>
+<dd><p>Walks through the repository directory, captures the file tree,
+file names, and file contents, and writes them to a single .txt file.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="app.utils.utils.upload_file_to_gemini">
+<span class="sig-prename descclassname"><span class="pre">app.utils.utils.</span></span><span class="sig-name descname"><span class="pre">upload_file_to_gemini</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.13)"><span class="pre">Path</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/utils/utils.html#upload_file_to_gemini"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.utils.utils.upload_file_to_gemini" title="Link to this definition"></a></dt>
+<dd><p>Uploads the specified file to Google Gemini.
+Returns the uploaded file object.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="app.utils.utils.convert_file_to_txt">
+<span class="sig-prename descclassname"><span class="pre">app.utils.utils.</span></span><span class="sig-name descname"><span class="pre">convert_file_to_txt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.13)"><span class="pre">Path</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.13)"><span class="pre">Path</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/utils/utils.html#convert_file_to_txt"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.utils.utils.convert_file_to_txt" title="Link to this definition"></a></dt>
+<dd><p>Reads the content of a source file and writes it to an output .txt file.</p>
+</dd></dl>
+
+</section>
+<section id="module-app.utils.commit_message">
+<span id="app-utils-commit-message"></span><h3>app.utils.commit_message<a class="headerlink" href="#module-app.utils.commit_message" title="Link to this heading"></a></h3>
+<p>Contains functions related to Git commit messages. Loads prompts from YAML and defines helper functions (<cite>generate_general_prompt</cite>, <cite>extract_result</cite>). Provides core functions <cite>generate_CM</cite> (generates a commit message from code diffs) and <cite>improve_CM</cite> (improves an existing commit message based on diffs) using an LLM API call (<cite>llm_api.gemini_api</cite>).</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="app.utils.commit_message.generate_general_prompt">
+<span class="sig-prename descclassname"><span class="pre">app.utils.commit_message.</span></span><span class="sig-name descname"><span class="pre">generate_general_prompt</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/utils/commit_message.html#generate_general_prompt"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.utils.commit_message.generate_general_prompt" title="Link to this definition"></a></dt>
+<dd><p>Since there’s prompts of Generation task and Improvement task have a lot in common. This function generate part in common to avoid duplicate</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="app.utils.commit_message.generate_CM">
+<span class="sig-prename descclassname"><span class="pre">app.utils.commit_message.</span></span><span class="sig-name descname"><span class="pre">generate_CM</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">code_diff</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/utils/commit_message.html#generate_CM"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.utils.commit_message.generate_CM" title="Link to this definition"></a></dt>
+<dd><p>Generate CM from code diff.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="app.utils.commit_message.improve_CM">
+<span class="sig-prename descclassname"><span class="pre">app.utils.commit_message.</span></span><span class="sig-name descname"><span class="pre">improve_CM</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">code_diff</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">commit_message</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/utils/commit_message.html#improve_CM"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.utils.commit_message.improve_CM" title="Link to this definition"></a></dt>
+<dd><p>Generate CM from code diff and original CM.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="app.utils.commit_message.extract_result">
+<span class="sig-prename descclassname"><span class="pre">app.utils.commit_message.</span></span><span class="sig-name descname"><span class="pre">extract_result</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">raw_result</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/utils/commit_message.html#extract_result"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.utils.commit_message.extract_result" title="Link to this definition"></a></dt>
+<dd><p>There’s useless information in refined CM, e.g. “Here is the commit message…”
+To avoid this, regex is used.</p>
+</dd></dl>
+
+</section>
+<section id="module-app.utils.creation">
+<span id="app-utils-creation"></span><h3>app.utils.creation<a class="headerlink" href="#module-app.utils.creation" title="Link to this heading"></a></h3>
+<p>Focuses on creating documentation content. Loads prompts from YAML (<cite>creation_prompt.yaml</cite>). <cite>create_part</cite> generates specific documentation sections (like description, usage, etc.) using an LLM based on provided info and file tree context. <cite>create_feature</cite> generates feature descriptions, potentially ensuring uniqueness against existing features. <cite>structure_markdown</cite> likely reorganizes generated markdown sections into a final document structure.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="app.utils.creation.convert_repo_to_txt">
+<span class="sig-prename descclassname"><span class="pre">app.utils.creation.</span></span><span class="sig-name descname"><span class="pre">convert_repo_to_txt</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/utils/creation.html#convert_repo_to_txt"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.utils.creation.convert_repo_to_txt" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="app.utils.creation.create_part">
+<span class="sig-prename descclassname"><span class="pre">app.utils.creation.</span></span><span class="sig-name descname"><span class="pre">create_part</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">part_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">info</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_tree</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/utils/creation.html#create_part"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.utils.creation.create_part" title="Link to this definition"></a></dt>
+<dd><p>Create the given section by gemini.
+:param: part_name: name of section
+:param: content: content of section
+btw, it seems that parameter can be improved. This will be done once UI is designed.
+:return: improved section</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="app.utils.creation.create_feature">
+<span class="sig-prename descclassname"><span class="pre">app.utils.creation.</span></span><span class="sig-name descname"><span class="pre">create_feature</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">existed_feature</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_tree</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/utils/creation.html#create_feature"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.utils.creation.create_feature" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="app.utils.creation.structure_markdown">
+<span class="sig-prename descclassname"><span class="pre">app.utils.creation.</span></span><span class="sig-name descname"><span class="pre">structure_markdown</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ordered_text</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/utils/creation.html#structure_markdown"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.utils.creation.structure_markdown" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-app.utils.file_tree">
+<span id="app-utils-file-tree"></span><h3>app.utils.file_tree<a class="headerlink" href="#module-app.utils.file_tree" title="Link to this heading"></a></h3>
+<p>Contains <cite>generate_file_tree</cite>, a function to create a string representation of the repository’s directory structure, controllable by depth and whether to show files.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="app.utils.file_tree.detect_max_depth">
+<span class="sig-prename descclassname"><span class="pre">app.utils.file_tree.</span></span><span class="sig-name descname"><span class="pre">detect_max_depth</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/utils/file_tree.html#detect_max_depth"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.utils.file_tree.detect_max_depth" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="app.utils.file_tree.generate_file_tree">
+<span class="sig-prename descclassname"><span class="pre">app.utils.file_tree.</span></span><span class="sig-name descname"><span class="pre">generate_file_tree</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">root_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_depth</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show_files</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></span><a class="reference internal" href="../_modules/app/utils/file_tree.html#generate_file_tree"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.utils.file_tree.generate_file_tree" title="Link to this definition"></a></dt>
+<dd><p>Generate a file tree in string format.
+This can help LLM to understand the structure of repo, which decrease the potential of lowering LLM’s attention on other important information.
+This function can be used on ReadME.
+:param root_path: selected root path of the repo
+# TODO: Open a window to let user select root path. (Must)
+:param max_depth: Max depth of the file tree. Control the size of file tree.
+# TODO: Automatically generate the max depth of file tree. (Should)
+:param show_files: Only show folders’ name or detailed files’ name.
+:param prefix: a parameter to bring blank space for sub tree.
+:return: a file tree in string format.</p>
+</dd></dl>
+
+</section>
+<section id="module-app.utils.help_popup">
+<span id="app-utils-help-popup"></span><h3>app.utils.help_popup<a class="headerlink" href="#module-app.utils.help_popup" title="Link to this heading"></a></h3>
+<p>Provides a <cite>HelpPopup</cite> class using Tkinter to display an image (likely a guide or screenshot) in a separate window, useful for GUI help buttons.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="app.utils.help_popup.HelpPopup">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">app.utils.help_popup.</span></span><span class="sig-name descname"><span class="pre">HelpPopup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/utils/help_popup.html#HelpPopup"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.utils.help_popup.HelpPopup" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+</dd></dl>
+
+</section>
+<section id="module-app.utils.llm_api">
+<span id="app-utils-llm-api"></span><h3>app.utils.llm_api<a class="headerlink" href="#module-app.utils.llm_api" title="Link to this heading"></a></h3>
+<p>Contains functions for interacting with different LLM APIs. Includes <cite>gemini_api</cite> for calls to Google Gemini (with rate-limiting sleep) and <cite>together_api</cite> for calls to the Together AI platform.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="app.utils.llm_api.gemini_api">
+<span class="sig-prename descclassname"><span class="pre">app.utils.llm_api.</span></span><span class="sig-name descname"><span class="pre">gemini_api</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prompt</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></span><a class="reference internal" href="../_modules/app/utils/llm_api.html#gemini_api"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.utils.llm_api.gemini_api" title="Link to this definition"></a></dt>
+<dd><p>Get answer via API of gemini.
+NOTICE: time.sleep(5) is to avoid reach rate limit per minutes, this can be deleted if there’s a pro account.
+:param prompt: the given prompt to LLM-gemini.
+:return: the answer from LLM.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="app.utils.llm_api.together_api">
+<span class="sig-prename descclassname"><span class="pre">app.utils.llm_api.</span></span><span class="sig-name descname"><span class="pre">together_api</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prompt</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></span><a class="reference internal" href="../_modules/app/utils/llm_api.html#together_api"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.utils.llm_api.together_api" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-app.utils.repo_structure">
+<span id="app-utils-repo-structure"></span><h3>app.utils.repo_structure<a class="headerlink" href="#module-app.utils.repo_structure" title="Link to this heading"></a></h3>
+<p>Seems to combine functions also found elsewhere. Contains <cite>generate_file_tree</cite> (like <cite>app.utils.file_tree</cite>) and <cite>get_repo_path</cite>, <cite>convert_repo_to_txt</cite> (like <cite>app.utils.utils</cite>).</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="app.utils.repo_structure.generate_file_tree">
+<span class="sig-prename descclassname"><span class="pre">app.utils.repo_structure.</span></span><span class="sig-name descname"><span class="pre">generate_file_tree</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">root_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_depth</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show_files</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></span><a class="reference internal" href="../_modules/app/utils/repo_structure.html#generate_file_tree"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.utils.repo_structure.generate_file_tree" title="Link to this definition"></a></dt>
+<dd><p>Generate a file tree in string format.
+This can help LLM to understand the structure of repo, which decrease the potential of lowering LLM’s attention on other important information.
+This function can be used on ReadME.
+:param root_path: selected root path of the repo
+# TODO: Open a window to let user select root path. (Must)
+:param max_depth: Max depth of the file tree. Control the size of file tree.
+# TODO: Automatically generate the max depth of file tree. (Should)
+:param show_files: Only show folders’ name or detailed files’ name.
+:param prefix: a parameter to bring blank space for sub tree.
+:return: a file tree in string format.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="app.utils.repo_structure.get_repo_path">
+<span class="sig-prename descclassname"><span class="pre">app.utils.repo_structure.</span></span><span class="sig-name descname"><span class="pre">get_repo_path</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.13)"><span class="pre">Path</span></a></span></span><a class="reference internal" href="../_modules/app/utils/repo_structure.html#get_repo_path"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.utils.repo_structure.get_repo_path" title="Link to this definition"></a></dt>
+<dd><p>Prompts the user to input the repository folder path.
+Validates that the path exists and is a directory.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="app.utils.repo_structure.convert_repo_to_txt">
+<span class="sig-prename descclassname"><span class="pre">app.utils.repo_structure.</span></span><span class="sig-name descname"><span class="pre">convert_repo_to_txt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">repo_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.13)"><span class="pre">Path</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_txt_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.13)"><span class="pre">Path</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/utils/repo_structure.html#convert_repo_to_txt"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.utils.repo_structure.convert_repo_to_txt" title="Link to this definition"></a></dt>
+<dd><p>Walks through the repository directory, captures the file tree,
+file names, and file contents, and writes them to a single .txt file.</p>
+</dd></dl>
+
+</section>
+<section id="module-app.utils.toolkit">
+<span id="app-utils-toolkit"></span><h3>app.utils.toolkit<a class="headerlink" href="#module-app.utils.toolkit" title="Link to this heading"></a></h3>
+<p>Provides GUI helper functions using Tkinter’s <cite>filedialog</cite>, likely intended for use within the main GUI application. Includes <cite>select_folder</cite>, <cite>select_file</cite>, and <cite>export_markdown</cite> to save generated content.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="app.utils.toolkit.select_folder">
+<span class="sig-prename descclassname"><span class="pre">app.utils.toolkit.</span></span><span class="sig-name descname"><span class="pre">select_folder</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/utils/toolkit.html#select_folder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.utils.toolkit.select_folder" title="Link to this definition"></a></dt>
+<dd><p>Get the directory of a repo by opening a window to select.
+:return: the directory of a repo.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="app.utils.toolkit.select_file">
+<span class="sig-prename descclassname"><span class="pre">app.utils.toolkit.</span></span><span class="sig-name descname"><span class="pre">select_file</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/utils/toolkit.html#select_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.utils.toolkit.select_file" title="Link to this definition"></a></dt>
+<dd><p>Get the directory of a file (readme.md) by opening a window to select.
+:return: the directory of a file.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="app.utils.toolkit.export_markdown">
+<span class="sig-prename descclassname"><span class="pre">app.utils.toolkit.</span></span><span class="sig-name descname"><span class="pre">export_markdown</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">content</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/utils/toolkit.html#export_markdown"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.utils.toolkit.export_markdown" title="Link to this definition"></a></dt>
+<dd><p>Export ReadMe.md to selected position
+:param: content: content of readme</p>
+</dd></dl>
+
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="API Reference" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../development/index.html" class="btn btn-neutral float-right" title="Development" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, TUM.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
