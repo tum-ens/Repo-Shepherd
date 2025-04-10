@@ -1,12 +1,10 @@
-# IDP Software Builder
-
-> TODO: Add the project description
+# repo Sheperd
 
 ## Overview
 
-IDP aims to bridge the gap between research and practical application by automating the process of transforming a research-oriented tool into a professional-grade product. This automation is achieved by leveraging the power of Large Language Models (LLMs) like Ollama, along with task management systems like Celery.
+repo Sheperd aims to bridge the gap between research and practical application by automating the process of transforming a research-oriented tool into a professional-grade product. This automation is achieved by leveraging the power of Large Language Models (LLMs) like Ollama, along with task management systems like Celery.
 
-The core idea behind IDP is to **reduce the manual effort required to bring a research tool to a professional level**. It focuses on automating tasks such as:
+The core idea behind repo Sheperd is to **reduce the manual effort required to bring a research tool to a professional level**. It focuses on automating tasks such as:
 
 * **Documentation:** Generating comprehensive documentation, including a README file, CONTRIBUTING guidelines, a CHANGELOG, LICENSE details, and SECURITY information.
 * **Project Structure:** Establishing a well-defined and modular project structure with logical folder hierarchies and standard naming conventions.
@@ -15,9 +13,9 @@ The core idea behind IDP is to **reduce the manual effort required to bring a re
 * **Code Quality:** Enforcing code style guidelines and utilising linters to maintain consistency and readability.
 * **Security:** Implementing measures to protect sensitive information and ensure the secure handling of credentials.
 
-## How IDP Works
+## How repo Sheperd Works
 
-IDP employs a streamlined workflow that utilises LLMs and Celery to automate the process of analysing code and generating documentation. The typical workflow involves:
+repo Sheperd employs a streamlined workflow that utilises LLMs and Celery to automate the process of analysing code and generating documentation. The typical workflow involves:
 
 1. **User Request:** A user initiates a request to analyse a Python code repository related to energy system modelling.
 2. **API Handling:** The request is received by an API, which acts as the central point for managing interactions.
@@ -29,7 +27,7 @@ IDP employs a streamlined workflow that utilises LLMs and Celery to automate the
 
 ## Architecture
 
-IDP's architecture consists of several key components:
+repo Sheperd's architecture consists of several key components:
 
 * **User Interface:** Enables users to interact with the system and initiate analysis requests.
 * **LLM Control Manager:** Oversees the interaction with the LLM (Ollama).
@@ -41,7 +39,7 @@ IDP's architecture consists of several key components:
 
 ## Key Features
 
-* **Automated Documentation:** IDP automates the generation of essential documentation, including README, CONTRIBUTING, CHANGELOG, LICENSE, and SECURITY files, reducing manual effort. [1]
+* **Automated Documentation:** repo Sheperd automates the generation of essential documentation, including README, CONTRIBUTING, CHANGELOG, LICENSE, and SECURITY files, reducing manual effort. [1]
 * **LLM-Powered Analysis:** Leveraging the power of LLMs to understand and analyse Python code related to energy system modelling. [2, 3]
 * **Celery-Based Task Management:** Ensures efficient and asynchronous processing of tasks, enhancing performance and responsiveness. [3]
 * **Modular Architecture:** A well-defined architecture with distinct components allows for flexibility and scalability. [4]

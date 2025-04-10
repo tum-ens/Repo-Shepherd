@@ -11,7 +11,7 @@ class GettingStartedTab(ttk.Frame):
         self.grid(row=0, column=0, sticky='nsew')
 
         # Header Label
-        header = ttk.Label(self, text="Welcome to IDP!", font=("Helvetica", 16, "bold"))
+        header = ttk.Label(self, text="Welcome to repo Sheperd!", font=("Helvetica", 16, "bold"))
         header.grid(row=0, column=0, padx=10, pady=(10, 5), sticky='ew')
 
         # Separator
@@ -42,7 +42,7 @@ class GettingStartedTab(ttk.Frame):
         repo_button = ttk.Button(button_frame, text="Project Repository", command=lambda: self.open_link("https://github.com/carloslme/tum-idp"), width=button_width)
         repo_button.grid(row=0, column=0, padx=(0, 5), pady=5, sticky='ew')
 
-        docs_button = ttk.Button(button_frame, text="Read the Docs (Coming Soon)", command=lambda: self.open_link("https://example.com/docs"), width=button_width)
+        docs_button = ttk.Button(button_frame, text="Read the Docs", command=lambda: self.open_link("https://tum-idp.readthedocs.io/en/latest/"), width=button_width)
         docs_button.grid(row=0, column=1, padx=(5, 0), pady=5, sticky='ew')
 
         # Button to switch to Setup tab
@@ -57,9 +57,9 @@ class GettingStartedTab(ttk.Frame):
     def insert_styled_content(self, text_widget):
         content = [
             ("Your Repository Professionalization Tool\n\n", "title"),
-            ("What is IDP?\n", "bold"),
-            ("IDP uses AI language models (LLMs) to analyze and enhance Python repositories. Whether you're a researcher or developer, IDP simplifies improving your code projects.\n\n", "text"),
-            ("What can you do with IDP?\n", "bold"),
+            ("What is repo Sheperd?\n", "bold"),
+            ("repo Sheperd uses AI language models (LLMs) to analyze and enhance Python repositories. Whether you're a researcher or developer, repo Sheperd simplifies improving your code projects.\n\n", "text"),
+            ("What can you do with repo Sheperd?\n", "bold"),
             ("- Generate READMEs automatically from your code.\n"
              "- Improve existing READMEs with better structure.\n"
              "- Analyze commit history and suggest messages.\n"

@@ -21,7 +21,7 @@ def show_frame(frame):
     frame.tkraise()
 
 root = tk.Tk()
-root.title("IDP")
+root.title("repo Sheperd")
 # root.geometry("800x600")  # Adjust the window size if needed
 root.resizable(True, True)
 sv_ttk.use_light_theme()
