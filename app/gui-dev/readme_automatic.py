@@ -23,7 +23,7 @@ class ReadmeAutomaticTab(tk.Frame):
         # Centering the grid content
         self.grid_columnconfigure(0, weight=1)
         
-        label = ttk.Label(self, text="This is the Automatic Readme Generator. This will help you to generate your readme file automatically.")
+        label = ttk.Label(self, text="This is the Automatic Readme Generator. This will help you to generate your readme file automatically.", font=("Arial", 14))
         label.grid(row=0, column=0, pady=(10, 10))  
 
         # Entry to display the saved api_key
