@@ -12,7 +12,6 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..',
 
 import app.utils.utils as utils
 
-
 def open_url(url):
     webbrowser.open(url, new=2)
 
@@ -59,39 +58,20 @@ def install_ollama_model(model, progress_var, progress_label, callback):
     threading.Thread(target=run_install).start()
 
 class ConfigTab(tk.Frame):
-    def __init__(self, parent, shared_vars):        
+    def __init__(self, parent, shared_vars):
         super().__init__(parent)
         self.shared_vars = shared_vars
         self.parent = parent
         self.grid(row=0, column=0, sticky="nsew")
-
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(0, weight=1)
 
-        # Top toggle frame for API vs. Local
-        self.toggle_frame = ttk.Frame(self, height=10)
-        self.toggle_frame.grid(row=0, column=0, pady=5, padx=10, sticky="ew")
+        # Removed toggle frame since only API mode is needed
 
         self.api_frame = ttk.Frame(self)
-        self.local_frame = ttk.Frame(self)
-        self.api_frame.grid(row=1, column=0, sticky="nsew")
-        self.local_frame.grid(row=1, column=0, sticky="nsew")
-
-        self.model_type = tk.StringVar(value="API")
-        self.api_radio = ttk.Radiobutton(
-            self.toggle_frame, text="API-Based Models (Recommended)",
-            variable=self.model_type, value="API", command=self.switch_model
-        )
-        self.local_radio = ttk.Radiobutton(
-            self.toggle_frame, text="Local-Based Models",
-            variable=self.model_type, value="Local", command=self.switch_model
-        )
-        self.api_radio.grid(row=0, column=0, padx=5)
-        self.local_radio.grid(row=0, column=1, padx=5)
+        self.api_frame.grid(row=0, column=0, sticky="nsew")
 
         self.create_api_frame()
-        self.create_local_frame()
-        self.local_frame.grid_remove()  # Show API frame by default
 
         self.api_key_validated = False
         self.api_gemini_key = None
@@ -102,7 +82,7 @@ class ConfigTab(tk.Frame):
 
         # --- Repository Selection Section ---
         self.repo_frame = ttk.LabelFrame(self, text="Repository Selection", padding=(10, 10))
-        self.repo_frame.grid(row=2, column=0, padx=10, pady=10, sticky="ew")
+        self.repo_frame.grid(row=1, column=0, padx=10, pady=10, sticky="ew")
 
         repo_path_label = ttk.Label(self.repo_frame, text="Repository Path/URL:")
         repo_path_label.grid(row=0, column=0, padx=5, pady=5, sticky="w")
@@ -113,7 +93,7 @@ class ConfigTab(tk.Frame):
         self.browse_button = ttk.Button(self.repo_frame, text="Browse", command=self.browse_local_repo)
         self.browse_button.grid(row=0, column=2, padx=5, pady=5)
 
-        # Status label for repo path check (like API key status)
+        # Status label for repo path check
         self.repo_path_status = ttk.Label(self.repo_frame, text="")
         self.repo_path_status.grid(row=1, column=0, sticky='w', padx=5, pady=5)
 
@@ -123,9 +103,6 @@ class ConfigTab(tk.Frame):
         )
         self.save_repo_button.grid(row=1, column=1, padx=5, pady=5, sticky="ew")
 
-    # -----------------------------
-    # Repository path logic (similar to API key logic)
-    # -----------------------------
     def browse_local_repo(self):
         repo_path = filedialog.askdirectory()
         if repo_path:
@@ -143,12 +120,12 @@ class ConfigTab(tk.Frame):
             self.data_queue.put(("repo_button", "disabled"))
             try:
                 time.sleep(1)  # Simulate validation delay
-                # If "github.com" appears anywhere in the repo input, consider it remote.
+                # Determine if the repository is remote or local based on input
                 if "github.com" in repo_input:
                     new_type = "remote"
                 else:
                     new_type = "local"
-                valid = True  # In a more complete implementation, add actual checks here.
+                valid = True  # In a complete implementation, add actual checks here.
                 if valid:
                     self.data_queue.put(("repo_status", "✔️", "green"))
                     self.data_queue.put(("repo_path_var", repo_input))
@@ -161,17 +138,6 @@ class ConfigTab(tk.Frame):
                 self.data_queue.put(("error", f"An error occurred: {e}"))
             self.data_queue.put(("repo_button", "normal"))
         threading.Thread(target=validate_repo).start()
-
-    # -----------------------------
-    # Switch between API/Local frames
-    # -----------------------------
-    def switch_model(self):
-        if self.model_type.get() == "API":
-            self.local_frame.grid_remove()
-            self.api_frame.grid(row=1, column=0, sticky="nsew")
-        else:
-            self.api_frame.grid_remove()
-            self.local_frame.grid(row=1, column=0, sticky="nsew")
 
     # -----------------------------
     # API frames logic
@@ -226,15 +192,18 @@ class ConfigTab(tk.Frame):
         gemini_model_label = ttk.Label(self.api_frame, text="Select Gemini Model:")
         gemini_model_label.grid(row=6, column=0, sticky='w', padx=20, pady=(10, 0))
 
-        # Set the default value to "auto" and include "auto" in options
+        # The default value is set to "auto". If "Custom" is chosen, allow user input.
         self.gemini_model = tk.StringVar(value="auto")
         self.gemini_model_dropdown = ttk.Combobox(
             self.api_frame, textvariable=self.gemini_model, state="readonly"
         )
-        self.gemini_model_dropdown['values'] = ["auto", "gemini-2.0-flash-lite","gemini-1.5-flash", "gemini-2.0-flash","gemini-2.0-flash-thinking-exp-01-21","gemini-1.5-pro","gemini-2.5-pro-exp-03-25","Custom"]
+        self.gemini_model_dropdown['values'] = [
+            "auto", "gemini-2.0-flash-lite", "gemini-1.5-flash", 
+            "gemini-2.0-flash", "gemini-2.0-flash-thinking-exp-01-21",
+            "gemini-1.5-pro", "gemini-2.5-pro-exp-03-25", "Custom"
+        ]
         self.gemini_model_dropdown.current(0)
         self.gemini_model_dropdown.grid(row=7, column=0, sticky='ew', padx=20, pady=5)
-        # Bind the event so the StringVar is updated when a new option is selected
         self.gemini_model_dropdown.bind("<<ComboboxSelected>>", self.on_gemini_model_selected)
         
         self.api_save_button = ttk.Button(
@@ -248,11 +217,9 @@ class ConfigTab(tk.Frame):
             # Allow the user to type a custom model name
             self.gemini_model_dropdown.config(state="normal")
         else:
-            # Revert back to readonly to prevent editing if a predefined option is selected
             self.gemini_model_dropdown.config(state="readonly")
         self.gemini_model.set(current_value)
         print(f"DEBUG [ConfigTab]: Gemini model updated to -> {current_value}")
-
 
     def check_api_key(self):
         api_gemini_key = self.api_key_entry.get().strip()
@@ -262,7 +229,6 @@ class ConfigTab(tk.Frame):
             messagebox.showerror("Error", "Gemini API Key is required.")
             return
 
-        # Retrieve the tkinter variable value in the main thread
         selected_model = self.gemini_model.get()
 
         def validate_key(model):
@@ -305,125 +271,10 @@ class ConfigTab(tk.Frame):
             final_model = self.gemini_model.get()
         print(f"API Key saved: {self.api_gemini_key}")
         print(f"DEBUG [ConfigTab]: Final Gemini model set to -> {final_model}")
-        selected_model = self.gemini_model.get()
         self.shared_vars['default_gemini_model'].set(final_model)
 
         messagebox.showinfo("Saved", f"API Configuration saved.\nModel: {final_model}")
-        
 
-    def save_gemini_model(self):
-        # If the selected model is "Custom", use the combobox's text (the user-typed value)
-        if self.gemini_model.get() == "Custom":
-            final_model = self.gemini_model_dropdown.get()
-        else:
-            final_model = self.gemini_model.get()
-        print(f"DEBUG [ConfigTab]: Final Gemini model set to -> {final_model}")
-        self.shared_vars['default_gemini_model'].set(final_model)
-        messagebox.showinfo("Saved", f"Default Gemini Model saved: {final_model}")
-
-
-    # -----------------------------
-    # Local frames logic
-    # -----------------------------
-    def create_local_frame(self):
-        self.local_frame.grid_rowconfigure(0, weight=1)
-        self.local_frame.grid_columnconfigure(0, weight=1)
-
-        local_label = ttk.Label(
-            self.local_frame, text="Local-Based Models Configuration",
-            font=("Helvetica", 14, "bold")
-        )
-        local_label.grid(row=0, column=0, columnspan=2, pady=10)
-        
-        local_model_label = ttk.Label(self.local_frame, text="Select Local Model Framework:")
-        local_model_label.grid(row=1, column=0, sticky='w', padx=20, pady=(10, 0))
-
-        self.local_framework = tk.StringVar()
-        self.local_framework_dropdown = ttk.Combobox(
-            self.local_frame, textvariable=self.local_framework, state="readonly"
-        )
-        self.local_framework_dropdown['values'] = ["Ollama", "LMStudio", "Llama.cpp"]
-        self.local_framework_dropdown.current(0)
-        self.local_framework_dropdown.grid(row=2, column=0, columnspan=2, sticky='ew', padx=20, pady=5)
-        self.local_framework_dropdown.bind("<<ComboboxSelected>>", self.on_local_framework_selected)
-        
-        self.ollama_frame = ttk.LabelFrame(self.local_frame, text="Ollama Configuration")
-        self.ollama_frame.grid(row=3, column=0, columnspan=2, sticky='ew', padx=20, pady=10)
-        
-        self.ollama_status = tk.StringVar(value="Checking installation...")
-        self.ollama_status_label = ttk.Label(self.ollama_frame, textvariable=self.ollama_status)
-        self.ollama_status_label.grid(row=0, column=0, sticky='w', padx=10, pady=5)
-        
-        self.install_button = ttk.Button(
-            self.ollama_frame, text="Install Ollama",
-            command=lambda: open_url("https://ollama.com")
-        )
-        self.install_button.grid(row=1, column=0, sticky='w', padx=10, pady=5)
-        
-        self.ollama_models_label = ttk.Label(self.ollama_frame, text="Select Ollama Model:")
-        self.ollama_models_label.grid(row=2, column=0, sticky='w', padx=10, pady=(10, 0))
-        self.ollama_models = tk.StringVar()
-        self.ollama_models_dropdown = ttk.Combobox(self.ollama_frame, textvariable=self.ollama_models, state="readonly")
-        self.ollama_models_dropdown.grid(row=3, column=0, columnspan=2, sticky='ew', padx=10, pady=5)
-        
-        self.progress_var = tk.IntVar()
-        self.progress_bar = ttk.Progressbar(
-            self.ollama_frame, orient='horizontal', length=400,
-            mode='determinate', variable=self.progress_var
-        )
-        self.progress_bar.grid(row=4, column=0, columnspan=2, sticky='ew', padx=10, pady=10)
-        self.progress_label = ttk.Label(self.ollama_frame, text="")
-        self.progress_label.grid(row=5, column=0, columnspan=2, sticky='ew', padx=10, pady=5)
-
-    def on_local_framework_selected(self, event):
-        selected = self.local_framework.get()
-        if selected == "Ollama":
-            self.ollama_frame.pack(fill='both', expand=True, padx=20, pady=10)
-            self.check_ollama_installation()
-        else:
-            self.ollama_frame.pack_forget()
-    
-    def check_ollama_installation(self):
-        if self.local_framework.get() != "Ollama":
-            return
-        installed = is_ollama_installed()
-        if installed:
-            self.ollama_status.set("Ollama is Installed.")
-            self.install_button.pack_forget()
-            models = get_ollama_models()
-            predefined_models = [
-                "llama3.1:8b (Not Installed) [Recommended for Most Systems]",
-                "llama3.2:3b (Not Installed) [Recommended for Low-End Systems]"
-            ]
-            models_display = models + predefined_models
-            self.ollama_models_dropdown['values'] = models_display
-            if models_display:
-                self.ollama_models_dropdown.current(0)
-            self.ollama_models_dropdown.bind("<<ComboboxSelected>>", self.on_ollama_model_selected)
-        else:
-            self.ollama_status.set("Ollama is not installed.")
-            self.install_button.pack(anchor='w', padx=10, pady=5)
-            self.ollama_models_dropdown.set('')
-            self.ollama_models_dropdown['values'] = []
-
-    def on_ollama_model_selected(self, event):
-        selected_model = self.ollama_models_dropdown.get()
-        if "(Not Installed)" in selected_model:
-            response = messagebox.askyesno(
-                "Model Not Installed",
-                f"The selected model '{selected_model}' is not installed. Do you want to install it?"
-            )
-            if response:
-                model_name = selected_model.split(" ")[0]
-                self.progress_var.set(0)
-                self.progress_label.config(text=f"Installing {model_name}: 0%")
-                self.progress_bar.pack(padx=10, pady=5)
-                self.progress_label.pack(anchor='w', padx=10)
-                install_ollama_model(model_name, self.progress_var, self.progress_label, self.on_install_complete)
-
-    # -----------------------------
-    # Background queue logic
-    # -----------------------------
     def process_queue(self):
         try:
             while True:
@@ -450,11 +301,6 @@ class ConfigTab(tk.Frame):
         except queue.Empty:
             pass
         self.after(100, self.process_queue)
-
-    def on_install_complete(self):
-        self.progress_bar.pack_forget()
-        self.progress_label.config(text="")
-        self.check_ollama_installation()
 
 if __name__ == "__main__":
     root = tk.Tk()
