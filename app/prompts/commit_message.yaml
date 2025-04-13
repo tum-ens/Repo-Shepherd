@@ -1,0 +1,70 @@
+meta-prompt_generate: |
+  You are a professional developer tasked with generating the clarity, specificity, and relevance of commit messages. The commit message should:
+
+meta-prompt_improve: |
+  You are a professional developer tasked with enhancing the clarity, specificity, and relevance of commit messages. The commit message should:
+
+steps: |
+  1. Clearly explain **why** this change was needed.
+  2. Clearly explain **what** was done to achieve it.
+  3. Assign the most appropriate **category** from the predefined list.
+
+definition: |
+  **Predefined Commit Categories:**
+  - feat: Introduces a new feature or functionality.
+  - fix: Resolves a bug or error.
+  - build: Changes that affect the build system or dependencies.
+  - chore: Routine tasks or maintenance (e.g., cleaning up code).
+  - docs: Changes to documentation only.
+  - style: Code style changes (e.g., formatting, linting) that do not affect functionality.
+  - refactor: Code changes that improve structure or readability without altering functionality or fixing a bug. This type is rare. Only use it if the code change is explicitly aimed at improving the codebase's design without introducing new features or fixing bugs.
+  - test: Adding or modifying tests without changing production code.
+
+guideline: |
+  **Guidelines for the commit message:**
+
+  - **Format:**
+    1. Start the subject line with the category enclosed in square brackets, followed by a space.
+      - Example: `[Feature] Add user authentication module`
+    2. Separate the subject from the body with a blank line.
+    3. Do not end the subject line with a period.
+    4. Use sentence case for the subject line (capitalize only the first letter and proper nouns).
+    5. Use the imperative mood in the subject line (e.g., "Add", "Fix", "Update").
+    6. Wrap lines at 72 characters.
+
+  - **Content:**
+    1. Subject Line: Briefly summarizes the change, prefixed with the appropriate category.
+    2. Body:
+      2.1 Reason for Change: Provide a concise explanation of the reason for the change.
+      2.2 What was done: Describe what was changed to achieve the desired outcome.
+      2.3 Impact/Benefits: (Optional but recommended) Explain the impact or benefits of the change to provide additional context.
+
+    - Avoid unnecessary verbosity and do not include code snippets or stack traces.
+
+example_output: |
+
+  Example output:
+  "[Fix] Fix data synchronization issue in SOC retrieval
+
+  Reason for Change: To ensure consistency between Meter and SoC data by aligning their timestamps, preventing discrepancies in displayed values.
+
+  What was done: Updated the Rtc class in rtc.py to filter SOC data based on the current timestamp before selecting relevant columns. Modified the data retrieval logic to ensure SOC data matches Meter data timestamps.
+
+  Impact/Benefits: This change eliminates data inconsistencies, enhancing data reliability and accuracy in energy market applications. It ensures that users receive consistent and trustworthy data for decision-making."
+
+
+instruction_improve: |
+  **Instructions:**
+  Improve the original commit message based on the above guidelines. Ensure the message is clear, concise, and provides sufficient context about the change without being overly verbose. The output should contain only the improved commit message without any additional text.
+
+instruction_generate: |
+ **Instructions:**
+  Generate commit message based on the above guidelines and following code diff. 
+  Ensure the message is clear, concise, and provides sufficient context about the change without being overly verbose.
+  The output should contain only the generated commit message without any additional text. 
+
+code_diff: |
+  The code diff is: 
+
+original_CM: |
+  The original commit message is:
