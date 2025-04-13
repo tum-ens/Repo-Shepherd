@@ -17,6 +17,7 @@ This is a test
    usage/index
    api/index
    development/index
+   troubleshooting
 
 
 Indices and tables

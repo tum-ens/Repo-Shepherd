@@ -41,7 +41,7 @@ intersphinx_mapping = {'python': ('https://docs.python.org/3', None)}
 # html_theme = 'alabaster'
 html_theme = 'sphinx_rtd_theme' # A popular theme, requires 'pip install sphinx-rtd-theme'
 
-html_static_path = ['_static']
+html_static_path = []
 
 # Add any custom static files (css, js) here if needed
 # html_css_files = [
