@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>app.utils.file_tree &mdash; repo Shepherd 0.1.0 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
 
   
@@ -73,19 +73,19 @@
            <div itemprop="articleBody">
              
   <h1>Source code for app.utils.file_tree</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">os</span>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 
 
 
 <div class="viewcode-block" id="detect_max_depth">
 <a class="viewcode-back" href="../../../api/app.utils.html#app.utils.file_tree.detect_max_depth">[docs]</a>
-<span class="k">def</span> <span class="nf">detect_max_depth</span><span class="p">():</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">detect_max_depth</span><span class="p">():</span>
     <span class="k">pass</span></div>
 
 
 <div class="viewcode-block" id="generate_file_tree">
 <a class="viewcode-back" href="../../../api/app.utils.html#app.utils.file_tree.generate_file_tree">[docs]</a>
-<span class="k">def</span> <span class="nf">generate_file_tree</span><span class="p">(</span><span class="n">root_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">max_depth</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">show_files</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">generate_file_tree</span><span class="p">(</span><span class="n">root_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">max_depth</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">show_files</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Generate a file tree in string format. </span>
 <span class="sd">    This can help LLM to understand the structure of repo, which decrease the potential of lowering LLM&#39;s attention on other important information.</span>

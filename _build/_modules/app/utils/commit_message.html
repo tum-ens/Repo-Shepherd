@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>app.utils.commit_message &mdash; repo Shepherd 0.1.0 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
 
   
@@ -73,13 +73,13 @@
            <div itemprop="articleBody">
              
   <h1>Source code for app.utils.commit_message</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">yaml</span>
-<span class="kn">import</span> <span class="nn">re</span>
-<span class="kn">import</span> <span class="nn">utils.llm_api</span> <span class="k">as</span> <span class="nn">llm_api</span>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">yaml</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">utils.llm_api</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">llm_api</span>
 
 <div class="viewcode-block" id="generate_general_prompt">
 <a class="viewcode-back" href="../../../api/app.utils.html#app.utils.commit_message.generate_general_prompt">[docs]</a>
-<span class="k">def</span> <span class="nf">generate_general_prompt</span><span class="p">():</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">generate_general_prompt</span><span class="p">():</span>
 <span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Since there&#39;s prompts of Generation task and Improvement task have a lot in common. This function generate part in common to avoid duplicate</span>
 <span class="sd">    &#39;&#39;&#39;</span>
@@ -101,7 +101,7 @@
 
 <div class="viewcode-block" id="generate_CM">
 <a class="viewcode-back" href="../../../api/app.utils.html#app.utils.commit_message.generate_CM">[docs]</a>
-<span class="k">def</span> <span class="nf">generate_CM</span><span class="p">(</span><span class="n">code_diff</span><span class="p">,</span> <span class="n">model</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">generate_CM</span><span class="p">(</span><span class="n">code_diff</span><span class="p">,</span> <span class="n">model</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Generate CM from code diff.</span>
 <span class="sd">    &#39;&#39;&#39;</span>
@@ -127,7 +127,7 @@
 
 <div class="viewcode-block" id="improve_CM">
 <a class="viewcode-back" href="../../../api/app.utils.html#app.utils.commit_message.improve_CM">[docs]</a>
-<span class="k">def</span> <span class="nf">improve_CM</span><span class="p">(</span><span class="n">code_diff</span><span class="p">,</span> <span class="n">commit_message</span><span class="p">,</span> <span class="n">model</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">improve_CM</span><span class="p">(</span><span class="n">code_diff</span><span class="p">,</span> <span class="n">commit_message</span><span class="p">,</span> <span class="n">model</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Generate CM from code diff and original CM.</span>
 <span class="sd">    &#39;&#39;&#39;</span>
@@ -154,7 +154,7 @@
 
 <div class="viewcode-block" id="extract_result">
 <a class="viewcode-back" href="../../../api/app.utils.html#app.utils.commit_message.extract_result">[docs]</a>
-<span class="k">def</span> <span class="nf">extract_result</span><span class="p">(</span><span class="n">raw_result</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">extract_result</span><span class="p">(</span><span class="n">raw_result</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    There&#39;s useless information in refined CM, e.g. &quot;Here is the commit message...&quot;</span>
 <span class="sd">    To avoid this, regex is used.</span>

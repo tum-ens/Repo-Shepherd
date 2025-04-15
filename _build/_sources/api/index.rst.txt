@@ -10,4 +10,3 @@ This section provides detailed API documentation for the project's modules and f
 
    app
    app.utils
-   # Add other modules like app.gui-dev, app.proj, config etc. as needed
