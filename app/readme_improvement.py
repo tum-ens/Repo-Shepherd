@@ -600,7 +600,7 @@ class ExportWindow:
                 ordered_text = ''.join(
                     self.master.saved_text[key] for key in self.section_order if key in self.master.saved_text and self.master.saved_text[key]
                     )
-                structured_text = structure_markdown(ordered_text)
+                structured_text = structure_markdown(ordered_text, self.master.model)
                 file.write(structured_text)
             messagebox.showinfo(f"File saved at: {file_path}")
 
