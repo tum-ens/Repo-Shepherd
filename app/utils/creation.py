@@ -62,13 +62,13 @@ def create_feature(existed_feature, file_tree, model):
     return result
 
 
-def structure_markdown(ordered_text):
+def structure_markdown(ordered_text, model):
     with open("app/prompts/creation_prompt.yaml", 'r') as file:
         prompts_repo = yaml.safe_load(file)
 
     instruction = prompts_repo["structure"]
     prompt = instruction + "\n\n" + ordered_text
 
-    result = llm_api.together_api(prompt)
+    result = llm_api.gemini_api(prompt, model)
     return result
     
