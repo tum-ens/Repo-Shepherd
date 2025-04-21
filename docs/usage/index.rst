@@ -4,7 +4,7 @@ Usage Guide
 This section provides detailed information on how to use the different parts of the application.
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
 
    gui
    configuration
@@ -14,4 +14,8 @@ This section provides detailed information on how to use the different parts of 
    readme_creation
    current_cm
    history_cm
+   Project Structure Improver
+   security scanner
+   gemini chat
+   Security Policy
    # Add other usage topics as needed
