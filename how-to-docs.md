@@ -68,7 +68,3 @@ Let's say you added a new setting to `config/settings.py` called `NEW_SETTING` a
 
 3.  **Build Locally (Optional):** Run `sphinx-build -b html docs _build` from the project root and open `_build/html/usage/configuration.html` to check formatting.
 4.  **Commit & Push:** Commit the changes to `docs/usage/configuration.rst` and push. Read the Docs will rebuild the live site.
-
----
-
-By following these steps, developers can keep the documentation accurate and up-to-date as the project evolves.

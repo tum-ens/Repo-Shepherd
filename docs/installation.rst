@@ -4,7 +4,7 @@ Installation
 Prerequisites
 -------------
 
-* Python 3.x (specify exact version if necessary)
+* Python 3.9+
 * `pip` (Python package installer)
 * `git` (for cloning, if applicable)
 
@@ -16,8 +16,8 @@ Steps
 
     .. code-block:: bash
 
-       git clone <your-repository-url>
-       cd <repository-directory>
+       git clone https://github.com/carloslme/tum-idp.git
+       cd tum-idp
 
 2.  **Set up a Virtual Environment (Recommended):**
 
@@ -32,6 +32,3 @@ Steps
     .. code-block:: bash
 
        pip install -r requirements.txt
-
-4.  **(Optional) Configuration:**
-    Explain if any environment variables need to be set or configuration files (`config/settings.py`[cite: 4613], `config/celeryconfig.py` [cite: 4612]) need to be modified. *Content needed from user based on config files.*

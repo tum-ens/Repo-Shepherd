@@ -15,7 +15,7 @@ from improve_structure_tab import ImproveStructureTab
 import os
 import sys
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../gui-dev')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../gui')))
 
 def show_frame(frame):
     frame.tkraise()

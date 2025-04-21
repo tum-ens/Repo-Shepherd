@@ -9,6 +9,6 @@ REM Step 3: Install requirements
 pip install -r requirements.txt
 
 REM Step 4: Run the Python file
-python app\gui-dev\main.py
+python app\gui\main.py
 
 pause

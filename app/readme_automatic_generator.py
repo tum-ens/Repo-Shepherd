@@ -3,7 +3,7 @@ import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import re
 import yaml
-from utils import toolkit, file_tree
+from utils import toolkit
 import utils.llm_api as llm_api
 
 class ReadmeAutomaticGenerator:

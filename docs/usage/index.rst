@@ -18,4 +18,4 @@ This section provides detailed information on how to use the different parts of 
    security scanner
    gemini chat
    Security Policy
-   # Add other usage topics as needed
+   troubleshooting

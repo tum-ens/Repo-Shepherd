@@ -211,7 +211,7 @@ class Current_CM(tk.Frame):
         result = subprocess.run(["git", "status", "--short"], capture_output=True, text=True, encoding="utf-8", cwd=self.repo)
         files = result.stdout.splitlines() if result.stdout else []
 
-        # Extract the file names (remove the first two characters e.g. 'M app/gui-dev/readme_automatic.py', '?? app/prompts/commit_message.yaml')
+        # Extract the file names (remove the first two characters e.g. 'M app/gui/readme_automatic.py', '?? app/prompts/commit_message.yaml')
         file_names = [file[3:] for file in files]
 
         # Print the cleaned-up file names
