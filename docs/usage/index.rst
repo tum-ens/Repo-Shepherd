@@ -12,4 +12,6 @@ This section provides detailed information on how to use the different parts of 
    readme_automatic
    readme_improvement
    readme_creation
+   current_cm
+   history_cm
    # Add other usage topics as needed

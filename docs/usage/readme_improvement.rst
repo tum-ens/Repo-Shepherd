@@ -4,7 +4,7 @@ Readme Improvement
 Introduction
 ------------
 
-This section introduces the **Readme Improvement** tab.
+This section introduces the Readme Improvement function **Readme Improvement** tab.
 
 .. image:: ../image/usage/Readme_improvement.png
 

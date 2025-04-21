@@ -4,18 +4,46 @@ Readme Creation
 Introduction
 ------------
 
-This section introduces the **Readme Creation** tab.
+This section introduces the Readme Creation function in **Readme Improvement** tab.
 
 .. image:: ../image/usage/Readme_creation.png
 
 Left Frame: Sections Button
 ---------------------------
 
-You can choose which sections you want to create.
+You can choose which sections you want to include in your README.
 
-Here only provide template sections: "Title", "Description", "Feature", "Requirement", "Installation", "Usage", "Contact", and "License"
+This tool provides templates for the following sections: **Title**, **Description**, **Feature**, **Requirement**, **Installation**, **Usage**, **Contact**, and **License**.
 
-**Section Name**: Click to view the text of that section in the "Original" panel.
+**Title**:  
+Enter the name of your repository.
+
+**Description**:  
+Provide a brief description of the repository. You can also enter a few words or phrases to describe its purpose.
+
+**Feature**:  
+List the key features of your repository.  
+If you're unsure what to write, click **Generate** to let the LLM create a draft for you.  
+You can also add or remove fields in this popup.
+
+**Requirement**:  
+List the required software or dependencies (e.g., `gurobi`).
+
+**Installation**:  
+Specify the required IDE, package manager, Git address, and any other installation instructions.
+
+**Usage**:  
+Explain how to run or use the program.
+
+**Contact**:  
+Provide your name, email address, and personal website (if applicable).
+
+**License**:  
+Choose one license from the following options:
+- MIT License  
+- GNU License  
+- Apache License
+
 
 Left Frame: File Management Buttons
 -----------------------------------

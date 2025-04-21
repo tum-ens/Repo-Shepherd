@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>&lt;no title&gt; &mdash; repo Shepherd 0.1.0 documentation</title>
+  <title>Current Commit Message Generation &mdash; repo Shepherd 0.1.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
 
@@ -63,7 +63,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">&lt;no title&gt;</li>
+      <li class="breadcrumb-item active">Current Commit Message Generation</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/usage/current_cm.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -73,7 +73,33 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  
+  <section id="current-commit-message-generation">
+<h1>Current Commit Message Generation<a class="headerlink" href="#current-commit-message-generation" title="Link to this heading"></a></h1>
+<section id="introduction">
+<h2>Introduction<a class="headerlink" href="#introduction" title="Link to this heading"></a></h2>
+<p>This section introduces the <strong>Current Commit Message Refinement</strong> feature in the <strong>Commit Analyzer</strong> tab.</p>
+<img alt="../_images/CM_current.png" src="../_images/CM_current.png" />
+</section>
+<section id="left-frame-changed-files">
+<h2>Left Frame: Changed Files<a class="headerlink" href="#left-frame-changed-files" title="Link to this heading"></a></h2>
+<p>A list of changed files will be displayed here.
+You can select which files you want to include in the commit.</p>
+<p><strong>Help</strong>: Display basic instructions for using this tab.</p>
+<p><strong>Generate</strong>: Generates a commit message based on the code diff of the selected files.
+The generated message will be displayed above, and you can edit it as needed.</p>
+<p><strong>Commit</strong>: Commit the selected files with the generated commit message.</p>
+<p><strong>Push</strong>: Push the committed changes to the remote repository.</p>
+</section>
+<section id="right-frame-code-diff">
+<h2>Right Frame: Code Diff<a class="headerlink" href="#right-frame-code-diff" title="Link to this heading"></a></h2>
+<p>This frame displays the code differences (diff) for the selected files.</p>
+<ul class="simple">
+<li><p><strong>Green text</strong> indicates lines of code that have been added.</p></li>
+<li><p><strong>Red text</strong> indicates lines of code that have been removed.</p></li>
+</ul>
+</section>
+</section>
+
 
            </div>
           </div>
