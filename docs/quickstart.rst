@@ -10,11 +10,13 @@ This guide provides a basic example of how to run the main application.
     The primary entry point is `app/gui/main.py`. But you can use the provided bash script to run the application directly. This script will automatically set up the environment and run the application in case you missed something.
 
     Linux or MacOS:
+    
     .. code-block:: bash
 
        ./linux_mac_run.sh
     
     Windows:
+    
     .. code-block:: bash
 
        ./windows_run.bat
