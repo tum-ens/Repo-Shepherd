@@ -1,7 +1,6 @@
 import os
 
 
-
 def detect_max_depth():
     pass
 

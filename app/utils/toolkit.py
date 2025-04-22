@@ -1,6 +1,5 @@
 import tkinter as tk
 from tkinter import filedialog
-import sv_ttk
 
 root = tk.Tk()
 root.withdraw()

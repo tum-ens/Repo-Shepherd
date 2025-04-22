@@ -20,5 +20,3 @@ Pull Requests
 6.  **Commit your changes** with a clear and descriptive commit message.
 7.  **Push your branch** to your fork (`git push origin feature/your-feature-name`).
 8.  **Submit a pull request** to the main repository.
-
-*(Add any specific setup instructions for development environment if necessary).*

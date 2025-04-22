@@ -1,11 +1,9 @@
-import json
 import os
 import shutil
 import tempfile
 import google.generativeai as genai
 import logging
 from pathlib import Path
-import sys
 
 class DocumentationGenerator:
     def __init__(self, model_name: str, output_dir: str = None, repo_path: str = None,  llm_response: str = None, api_key: str = None):
