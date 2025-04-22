@@ -1,11 +1,7 @@
 import os
 import sys
-import json
-import time
 import logging
 from pathlib import Path
-import shutil
-import tempfile
 
 def generate_file_tree(root_path: str, max_depth: int = None, show_files: bool = True, prefix: str = "") -> str:
     """

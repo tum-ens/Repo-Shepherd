@@ -1,9 +1,6 @@
 import os
 import glob
 
-import os 
-
-
 class RepositoryReader:
     def __init__(self, repository_path):
         self.repository_path = repository_path

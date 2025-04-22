@@ -8,4 +8,3 @@ Information for contributors and developers working on this project.
 
    contributing
    testing
-   # Add architecture.rst if you create it

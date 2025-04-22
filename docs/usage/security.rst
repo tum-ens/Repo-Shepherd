@@ -18,7 +18,7 @@ The core logic resides in `app/security_scanner_gemini_all_code_withsecondpass.p
 SECURITY.md Generator
 ---------------------
 
-The `app/gui-dev/security_generator.py` module provides a GUI tab to create a `SECURITY.md` file.
+The `app/gui/security_generator.py` module provides a GUI tab to create a `SECURITY.md` file.
 
 * It prompts the user for policy details like reporting methods, disclosure timelines, preferred languages, and contact information.
 * It uses a template prompt and potentially information from the `README.md` and `LICENSE` files to generate the content using an LLM.

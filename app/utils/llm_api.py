@@ -1,5 +1,3 @@
-import google.generativeai as genai
-from together import Together
 import time
 
 def gemini_api(prompt: str, model) -> str:

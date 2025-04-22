@@ -9,7 +9,7 @@ source venv/bin/activate
 pip install -r requirements.txt
 
 # Step 4: Run the Python file
-python app/gui-dev/main.py
+python app/gui/main.py
 
 # Optional: Pause the script until the user presses a key
 read -p "Press any key to continue... " -n1 -s

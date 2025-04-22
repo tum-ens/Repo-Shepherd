@@ -1,0 +1,219 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Troubleshooting &mdash; repo Shepherd 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="API Reference" href="../api/index.html" />
+    <link rel="prev" title="Security Policy (SECURITY.md) Generator" href="Security%20Policy.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            repo Shepherd
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Quickstart</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Usage Guide</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="gui.html">GUI Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="configuration.html">Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="security.html">Security Features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="readme_automatic.html">Readme Automatic</a></li>
+<li class="toctree-l2"><a class="reference internal" href="readme_improvement.html">Readme Improvement</a></li>
+<li class="toctree-l2"><a class="reference internal" href="readme_creation.html">Readme Creation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="current_cm.html">Current Commit Message Generation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="history_cm.html">History Commit Message Refinement</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Project%20Structure%20Improver.html">Improve Project Structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="security%20scanner.html">Security Scanner</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gemini%20chat.html">Gemini Chat</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Security%20Policy.html">Security Policy (<cite>SECURITY.md</cite>) Generator</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Troubleshooting</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../api/index.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development/index.html">Development</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">repo Shepherd</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Usage Guide</a></li>
+      <li class="breadcrumb-item active">Troubleshooting</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/usage/troubleshooting.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="troubleshooting">
+<h1>Troubleshooting<a class="headerlink" href="#troubleshooting" title="Link to this heading"></a></h1>
+<ol class="arabic simple">
+<li><p>Readme Improvement:</p></li>
+</ol>
+<p><strong>Error: “Please select a valid Markdown file (.md or .markdown)”</strong></p>
+<p>Cause: You haven’t select a valid Markdown file.</p>
+<p>Solution: Ensure that your repo has a valid README markdown.</p>
+<p>Reference image:</p>
+<img alt="../_images/no_md.png" src="../_images/no_md.png" />
+<ol class="arabic simple" start="2">
+<li><p>Readme Improvement &amp; Creation:</p></li>
+</ol>
+<p><strong>Error: “Please select a valid Markdown file (.md or .markdown)”</strong></p>
+<p>Cause: Depth should be positive!.</p>
+<p>Solution: Enter positive depth. If depth you enter is bigger than the max depth of your repo. The program will automatically use max depth instead.</p>
+<p>Reference image:</p>
+<img alt="../_images/depth_negative.png" src="../_images/depth_negative.png" />
+<ol class="arabic simple" start="3">
+<li><p>Commit Analyzer - Current</p></li>
+</ol>
+<p><strong>Error: “No files selected for commit!”</strong></p>
+<p>Cause: Commit message is based on code diff. You should first select changed files with code diff.</p>
+<p>Solution: Select change files.</p>
+<p>Reference image:</p>
+<img alt="../_images/no_select.png" src="../_images/no_select.png" />
+<ol class="arabic simple" start="4">
+<li><p>Commit Analyzer - Current</p></li>
+</ol>
+<p><strong>Error: “Commit message is empty”</strong></p>
+<p>Cause: You cannot commit an empty message.</p>
+<p>Solution: Generate commit message by clicking ‘Generate’. Or write commit message manually.</p>
+<p>Reference image:</p>
+<img alt="../_images/no_CM.png" src="../_images/no_CM.png" />
+<ol class="arabic simple" start="5">
+<li><p>Commit Analyzer - Current</p></li>
+</ol>
+<p><strong>Error: “You should commit first!”</strong></p>
+<p>Cause: No commited file detected.</p>
+<p>Solution: Click ‘Commit’.</p>
+<p>Reference image:</p>
+<img alt="../_images/have_not_commit.png" src="../_images/have_not_commit.png" />
+<ol class="arabic simple" start="6">
+<li><p>Commit Analyzer - Histroy</p></li>
+</ol>
+<p><strong>Error: “No commits fetched.”</strong></p>
+<p>Cause: You haven’t fetched commit. Fetch first.</p>
+<p>Solution: Click ‘fetch’.</p>
+<p>Reference image:</p>
+<ol class="arabic simple" start="7">
+<li><p>Commit Analyzer - History</p></li>
+</ol>
+<p><strong>Error: “No edited commits to process”</strong></p>
+<p>Cause: You haven’t refined any commit message.</p>
+<p>Solution: Click ‘Refine all’ or click single commit message on right frame to refine.</p>
+<ol class="arabic simple" start="8">
+<li><p>Commit Analyzer - History</p></li>
+</ol>
+<p><strong>Error: “No branch selected. Please select a branch first.”</strong></p>
+<p>Cause: You haven’t selected branch.</p>
+<p>Solution: Click ‘Branch’ to select one.</p>
+<ol class="arabic simple" start="9">
+<li><p>Commit Analyzer - History</p></li>
+</ol>
+<p><strong>Error: “Invalid commit selection”</strong></p>
+<p>Cause: Commit selection parameter is wrong. Ensure the number is a digit.</p>
+<p>Solution: Edit the number to a correct one.</p>
+<ol class="arabic simple" start="10">
+<li><p>Commit Analyzer - History</p></li>
+</ol>
+<p><strong>Error: “ usage: git filter-branch [–setup ] [–subdirectory-filter ] [–env-filter ]</strong></p>
+<p>[–tree-filter ] [–index-filter ]</p>
+<p>[–parent-filter ] [–msg-filter ]</p>
+<p>[–commit-filter ] [–tag-name-filter ]</p>
+<p>[–original ]</p>
+<p>[-d ] [-f | –force] [–state-branch ]</p>
+<p>[–] […]</p>
+<p>bash: if [ “$GIT_COMMIT” = “f8e4a335625b2c6e7300837f6f2cffda299a4a5a” ];</p>
+<p>then</p>
+<p>echo “[feat] Introduce new mathematical functions for Hamlet TEST”</p>
+<p>echo “”</p>
+<p>echo “Reason for Change: To enhance the functionality of Hamlet by adding new mathematical functions, enabling users to perform more complex calculations and analyses.”</p>
+<p>echo “”</p>
+<p>echo “What was done: Introduced the get_one_plus_one function in the functions.py file, replacing the previously unused get_two_plus_two function. Removed the unused get_OK function and updated the constants.py file to remove the unused K_TEST constant.”</p>
+<p>echo “”</p>
+<p>echo “Impact/Benefits: This change expands Hamlets capabilities, allowing users to perform more advanced calculations and analyses, ultimately enhancing the tools utility and value.”</p>
+<p>else cat</p>
+<p>fi: No such file or directory”</p>
+<p>Cause: Git Bash path is wrong.</p>
+<p>Solution: Edit the number to a correct one.</p>
+<p>Reference image:</p>
+<img alt="../_images/git_bash.png" src="../_images/git_bash.png" />
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="Security%20Policy.html" class="btn btn-neutral float-left" title="Security Policy (SECURITY.md) Generator" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../api/index.html" class="btn btn-neutral float-right" title="API Reference" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, TUM.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
