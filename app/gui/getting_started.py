@@ -11,7 +11,7 @@ class GettingStartedTab(ttk.Frame):
         self.grid(row=0, column=0, sticky='nsew')
 
         # Header Label
-        header = ttk.Label(self, text="Welcome to repo Sheperd!", font=("Helvetica", 16, "bold"))
+        header = ttk.Label(self, text="Welcome to Repo Shepherd!", font=("Helvetica", 16, "bold"))
         header.grid(row=0, column=0, padx=10, pady=(10, 5), sticky='ew')
 
         # Separator
@@ -57,9 +57,9 @@ class GettingStartedTab(ttk.Frame):
     def insert_styled_content(self, text_widget):
         content = [
             ("Your Repository Professionalization Tool\n\n", "title"),
-            ("What is repo Sheperd?\n", "bold"),
-            ("repo Sheperd uses AI language models (LLMs) to analyze and enhance Python repositories. Whether you're a researcher or developer, repo Sheperd simplifies improving your code projects.\n\n", "text"),
-            ("What can you do with repo Sheperd?\n", "bold"),
+            ("What is Repo Shepherd?\n", "bold"),
+            ("Repo Shepherd uses AI language models (LLMs) to analyze and enhance Python repositories. Whether you're a researcher or developer, Repo Shepherd simplifies improving your code projects.\n\n", "text"),
+            ("What can you do with Repo Shepherd?\n", "bold"),
             ("- Generate READMEs automatically from your code.\n"
              "- Improve existing READMEs with better structure.\n"
              "- Analyze commit history and suggest messages.\n"

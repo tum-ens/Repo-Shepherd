@@ -12,7 +12,7 @@ sys.path.insert(0, os.path.abspath('..')) # To find config etc. if needed
 
 
 # -- Project information -----------------------------------------------------
-project = 'repo Shepherd'
+project = 'Repo Shepherd'
 copyright = '2024, TUM'
 author = 'TUM'
 
