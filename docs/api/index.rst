@@ -8,5 +8,4 @@ This section provides detailed API documentation for the project's modules and f
 .. toctree::
    :maxdepth: 1
 
-   app
-   app.utils
+   app.utils.rst

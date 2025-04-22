@@ -4,8 +4,6 @@ import sys
 import json
 import logging
 import re
-import shutil
-import tempfile
 import time
 from pathlib import Path
 from tqdm import tqdm
